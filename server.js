@@ -4,7 +4,7 @@ const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Use the PORT from Render or fallback to 3000 locally
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,7 +28,7 @@ async function main() {
 
     // Start server
     app.listen(port, () => {
-      console.log(`🚀 Server running at http://localhost:${port}`);
+      console.log(`🚀 Server running at http://localhost:${port}`); // You may want to adjust this message during deployment to Render
     });
   } catch (err) {
     console.error("❌ MongoDB connection failed", err);
