@@ -13,7 +13,9 @@ app.set('view engine', 'ejs');
 
 // Routes
 const indexRoute = require('./routes/index');
+const usersRoute = require('./routes/users');   // ✅ Import users.js
 app.use('/', indexRoute);
+app.use('/users', usersRoute);                  // ✅ Mount at /users
 
 // MongoDB Setup
 const uri = process.env.MONGODB_URI;   // ✅ Match with .env
