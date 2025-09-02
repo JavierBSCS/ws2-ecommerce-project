@@ -4,7 +4,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 // MongoDB setup
-const uri = process.env.MONGODB_URI;   // ✅ use the same name as in .env
+const uri = process.env.MONGODB_URI;  // ✅ use the same name as in .env
 const client = new MongoClient(uri);
 const dbName = "ecommerceDB";
 

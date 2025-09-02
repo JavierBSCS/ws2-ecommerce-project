@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
@@ -20,14 +19,12 @@ app.use('/users', usersRoute);                  // ✅ Mount at /users
 // MongoDB Setup
 const uri = process.env.MONGODB_URI;   // ✅ Match with .env
 const client = new MongoClient(uri);
+const dbName = "ecommerceDB";
 
 async function main() {
   try {
     await client.connect();
     console.log("✅ Connected to MongoDB Atlas");
-
-    // Select database
-    const database = client.db("ecommerceDB");
 
     // Start server
     app.listen(port, () => {
