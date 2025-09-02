@@ -13,7 +13,7 @@ router.get('/register', (req, res) => {
   res.render('register', { title: "Register" });
 });
 
-// Handle form submission
+// Handle form submission (Create)
 router.post('/register', async (req, res) => {
   try {
     await client.connect();
@@ -34,7 +34,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Show all registered users
+// Show all registered users (Read)
 router.get('/list', async (req, res) => {
   try {
     await client.connect();
@@ -49,7 +49,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
-// Show edit form
+// Show edit form (Update - GET)
 router.get('/edit/:id', async (req, res) => {
   try {
     await client.connect();
@@ -60,6 +60,7 @@ router.get('/edit/:id', async (req, res) => {
     if (!user) {
       return res.send("User not found.");
     }
+
     res.render('edit-user', { title: "Edit User", user: user });
   } catch (err) {
     console.error("❌ Error loading user:", err);
@@ -67,7 +68,7 @@ router.get('/edit/:id', async (req, res) => {
   }
 });
 
-// Handle update form
+// Handle update form (Update - POST)
 router.post('/edit/:id', async (req, res) => {
   try {
     await client.connect();
@@ -86,7 +87,7 @@ router.post('/edit/:id', async (req, res) => {
   }
 });
 
-// Delete user
+// Delete user (Delete)
 router.post('/delete/:id', async (req, res) => {
   try {
     await client.connect();
