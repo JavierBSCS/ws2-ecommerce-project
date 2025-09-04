@@ -50,37 +50,41 @@ router.post('/register', async (req, res) => {
 });
 
 // ================== LOGIN ==================
+// Show login form
 router.get('/login', (req, res) => {
-  res.render('login', { title: "Login" });
+res.render('login', { title: "Login" });
 });
-
+// Handle login form submission
 router.post('/login', async (req, res) => {
-  try {
-    const db = req.app.locals.client.db(req.app.locals.dbName);
-    const usersCollection = db.collection('users');
+try {
+const db = req.app.locals.client.db(req.app.locals.dbName);
+const usersCollection = db.collection('users');
+// Find user by email
+const user = await usersCollection.findOne({ email: req.body.email });
+if (!user) return res.send("User not found.");
+// Check if account is active
+if (user.accountStatus !== 'active') return res.send("Account is not active.");
 
-    const user = await usersCollection.findOne({ email: req.body.email });
-    if (!user) return res.send("❌ Invalid email or password.");
-
-    const match = await bcrypt.compare(req.body.password, user.passwordHash);
-    if (!match) return res.send("❌ Invalid email or password.");
-
-    // Save session
-    req.session.user = {
-      id: user.userId,
-      email: user.email,
-      role: user.role,
-    };
-
-    res.send(`
-      <h2>✅ Login Successful!</h2>
-      <p>Welcome back, ${user.firstName}!</p>
-      <a href="/users/list">View Users</a>
-    `);
-  } catch (err) {
-    console.error("❌ Error logging in:", err);
-    res.send("Something went wrong.");
-  }
+// Compare hashed password
+const isPasswordValid = await bcrypt.compare(req.body.password,
+user.passwordHash);
+if (isPasswordValid) {
+// Store session
+req.session.user = {
+userId: user.userId,
+firstName: user.firstName,
+lastName: user.lastName,
+email: user.email,
+role: user.role
+};
+res.redirect('/users/dashboard');
+} else {
+res.send("Invalid password.");
+}
+} catch (err) {
+console.error("Error during login:", err);
+res.send("Something went wrong.");
+}
 });
 
 // ================== LIST USERS ==================
@@ -103,5 +107,33 @@ router.get('/logout', (req, res) => {
     res.redirect('/users/login');
   });
 });
+
+// Dashboard route
+router.get('/dashboard', (req, res) => {
+  if (!req.session.user) return res.redirect('/users/login');
+  res.render('dashboard', { title: "User Dashboard", user: req.session.user });
+  });
+
+  
+  // Admin view
+router.get('/admin', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+  return res.status(403).send("Access denied.");
+  }
+  const db = req.app.locals.client.db(req.app.locals.dbName);
+  const users = await db.collection('users').find().toArray();
+  res.render('admin', {
+  title: "Admin Dashboard",
+  users,
+  currentUser: req.session.user
+  });
+  });
+  
+  // Logout
+  router.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/users/login');
+  });
+
 
 module.exports = router;
