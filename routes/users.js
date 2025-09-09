@@ -184,10 +184,14 @@ router.get('/admin', async (req, res) => {
 });
 
 // ================== LOGOUT ==================
+// Logout route
 router.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/users/login');
+  req.session.destroy((err) => {
+  if (err) {
+  console.error("Error destroying session:", err);
+  return res.send("Something went wrong during logout.");
+  }
+  res.redirect('/users/login');
   });
-});
-
+  });
 module.exports = router;

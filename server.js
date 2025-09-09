@@ -21,7 +21,9 @@ app.use(
     secret: process.env.SESSION_SECRET || 'dev-secret', // keep secret in .env
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // ✅ set true only in production with HTTPS
+    cookie: { secure: false 
+      , maxAge: 15 * 60 * 1000
+    }, // ✅ set true only in production with HTTPS
   })
 );
 
