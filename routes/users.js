@@ -110,17 +110,19 @@ router.post('/login', async (req, res) => {
 
     // Compare hashed password
     const isPasswordValid = await bcrypt.compare(req.body.password, user.passwordHash);
-    if (isPasswordValid) {
-      // Store session
-      req.session.user = {
-        userId: user.userId,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role
-      };
-      res.redirect('/users/dashboard');
-    } else {
+if (isPasswordValid) {
+  // Store session with isEmailVerified included
+  req.session.user = {
+    userId: user.userId,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+    isEmailVerified: user.isEmailVerified   // ✅ add this
+  };
+  res.redirect('/users/dashboard');
+}
+ else {
       res.send("❌ Invalid password.");
     }
   } catch (err) {
