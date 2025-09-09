@@ -3,6 +3,8 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ================== REGISTER ==================
 router.get('/register', (req, res) => {
@@ -23,6 +25,10 @@ router.post('/register', async (req, res) => {
     const currentDate = new Date();
     const token = uuidv4();
 
+    // Build dynamic verification URL
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const verificationUrl = `${baseUrl}/users/verify/${token}`;
+
     // Build new user object
     const newUser = {
       userId: uuidv4(),
@@ -41,10 +47,25 @@ router.post('/register', async (req, res) => {
 
     await usersCollection.insertOne(newUser);
 
+    // Send verification email
+ const result = await resend.emails.send({
+  from: process.env.RESEND_FROM_EMAIL,
+  to: newUser.email,
+  subject: "Verify your account",
+  html: `
+    <h2>Hello ${newUser.firstName},</h2>
+    <p>Thank you for registering! Please verify your email by clicking the link below:</p>
+    <a href="${verificationUrl}">${verificationUrl}</a>
+    <p>This link will expire in 1 hour.</p>
+  `,
+});
+
+console.log("📧 Resend response:", result);
+
+
     res.send(`
       <h2>✅ Registration Successful!</h2>
-      <p>Please verify your account before logging in.</p>
-      <p><a href="/users/verify/${token}">Click here to verify</a></p>
+      <p>Please check your email (${newUser.email}) to verify your account.</p>
     `);
   } catch (err) {
     console.error("❌ Error saving user:", err);
@@ -85,12 +106,10 @@ router.get('/verify/:token', async (req, res) => {
 });
 
 // ================== LOGIN ==================
-// Show login form
 router.get('/login', (req, res) => {
   res.render('login', { title: "Login" });
 });
 
-// Handle login form submission
 router.post('/login', async (req, res) => {
   try {
     const db = req.app.locals.client.db(req.app.locals.dbName);
@@ -110,19 +129,18 @@ router.post('/login', async (req, res) => {
 
     // Compare hashed password
     const isPasswordValid = await bcrypt.compare(req.body.password, user.passwordHash);
-if (isPasswordValid) {
-  // Store session with isEmailVerified included
-  req.session.user = {
-    userId: user.userId,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    role: user.role,
-    isEmailVerified: user.isEmailVerified   // ✅ add this
-  };
-  res.redirect('/users/dashboard');
-}
- else {
+    if (isPasswordValid) {
+      // Store session with isEmailVerified included
+      req.session.user = {
+        userId: user.userId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      };
+      res.redirect('/users/dashboard');
+    } else {
       res.send("❌ Invalid password.");
     }
   } catch (err) {
