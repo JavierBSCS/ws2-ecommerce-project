@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const session = require('express-session'); // ✅ Added for user sessions
 require('dotenv').config();
+const passwordRoute = require('./routes/password');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +24,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false 
-      , maxAge: 1 * 60 * 1000
+      , maxAge: 15 * 60 * 1000
     }, // ✅ set true only in production with HTTPS
   })
 );
@@ -54,5 +56,7 @@ async function main() {
     console.error('❌ MongoDB connection failed:', err);
   }
 }
+
+app.use('/password', passwordRoute);
 
 main();

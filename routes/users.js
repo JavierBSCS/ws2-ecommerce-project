@@ -63,10 +63,8 @@ router.post('/register', async (req, res) => {
 
     console.log("📧 Resend response:", result);
 
-    res.send(`
-      <h2>✅ Registration Successful!</h2>
-      <p>Please check your email (${newUser.email}) to verify your account.</p>
-    `);
+    // ✅ Redirect to login with message
+    res.redirect('/users/login?registered=1');
   } catch (err) {
     console.error("❌ Error saving user:", err);
     res.send("Something went wrong.");
@@ -94,11 +92,8 @@ router.get('/verify/:token', async (req, res) => {
       { $set: { isEmailVerified: true }, $unset: { verificationToken: "", tokenExpiry: "" } }
     );
 
-    res.send(`
-      <h2>✅ Email Verified!</h2>
-      <p>Your account has been verified successfully.</p>
-      <a href="/users/login">Proceed to Login</a>
-    `);
+    // ✅ Redirect to login with success
+    res.redirect('/users/login?verified=1');
   } catch (err) {
     console.error("❌ Error verifying user:", err);
     res.send("Something went wrong during verification.");
@@ -107,16 +102,22 @@ router.get('/verify/:token', async (req, res) => {
 
 // ================== LOGIN ==================
 router.get('/login', (req, res) => {
-  const expired = req.query.expired === '1'; // ✅ detect expired session
-  const logout = req.query.logout === '1';   // ✅ detect logout
+  const expired   = req.query.expired === '1';
+  const logout    = req.query.logout === '1';
+  const reset     = req.query.reset === '1';
+  const verified  = req.query.verified === '1';
+  const registered = req.query.registered === '1';
+
   res.render('login', { 
     title: "Login", 
-    expired: expired, 
-    logout: logout, 
+    expired, 
+    logout, 
+    reset,
+    verified,
+    registered,
     error: null 
   }); 
 });
-
 
 router.post('/login', async (req, res) => {
   try {
@@ -201,6 +202,5 @@ router.get('/logout', (req, res) => {
     res.redirect('/users/login?logout=1');
   });
 });
-
 
 module.exports = router;

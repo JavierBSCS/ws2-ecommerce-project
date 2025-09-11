@@ -16,6 +16,9 @@
     .logout {
       color: green;
     }
+    .reset {
+      color: blue;
+    }
   </style>
 </head>
 <body>
@@ -29,11 +32,16 @@
     <div class="message logout">✅ You have been logged out successfully.</div>
   <% } %>
 
+  <% if (reset) { %>
+    <div class="message reset">🔑 Your password has been reset. Please log in with your new password.</div>
+  <% } %>
+
   <form action="/users/login" method="POST">
     <label>Email:</label>
     <input type="email" name="email" required><br>
     <label>Password:</label>
     <input type="password" name="password" required><br>
+    <p><a href="/password/forgot">Forgot Password?</a></p>
     <button type="submit">Login</button>
   </form>
 </body>
