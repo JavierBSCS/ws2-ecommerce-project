@@ -22,7 +22,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false 
-      , maxAge: 15 * 60 * 1000
+      , maxAge: 1 * 60 * 1000
     }, // ✅ set true only in production with HTTPS
   })
 );

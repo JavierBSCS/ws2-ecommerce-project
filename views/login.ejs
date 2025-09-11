@@ -1,8 +1,40 @@
-<form action="/users/login" method="POST">
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <style>
+    .message {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .expired {
+      color: red;
+    }
+    .logout {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Login</h1>
+
+  <% if (expired) { %>
+    <div class="message expired">⚠️ Your session has expired. Please login again.</div>
+  <% } %>
+
+  <% if (logout) { %>
+    <div class="message logout">✅ You have been logged out successfully.</div>
+  <% } %>
+
+  <form action="/users/login" method="POST">
+    <label>Email:</label>
+    <input type="email" name="email" required><br>
+    <label>Password:</label>
+    <input type="password" name="password" required><br>
     <button type="submit">Login</button>
-    </form>
-    <p>Don’t have an account? <a href="/users/register">Register here</a></p>
+  </form>
+</body>
+</html>

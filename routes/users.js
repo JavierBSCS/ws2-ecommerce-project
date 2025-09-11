@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12;
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
+const requireLogin = require('../middleware/auth');
 
 // ================== REGISTER ==================
 router.get('/register', (req, res) => {
@@ -48,20 +49,19 @@ router.post('/register', async (req, res) => {
     await usersCollection.insertOne(newUser);
 
     // Send verification email
- const result = await resend.emails.send({
-  from: process.env.RESEND_FROM_EMAIL,
-  to: newUser.email,
-  subject: "Verify your account",
-  html: `
-    <h2>Hello ${newUser.firstName},</h2>
-    <p>Thank you for registering! Please verify your email by clicking the link below:</p>
-    <a href="${verificationUrl}">${verificationUrl}</a>
-    <p>This link will expire in 1 hour.</p>
-  `,
-});
+    const result = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: newUser.email,
+      subject: "Verify your account",
+      html: `
+        <h2>Hello ${newUser.firstName},</h2>
+        <p>Thank you for registering! Please verify your email by clicking the link below:</p>
+        <a href="${verificationUrl}">${verificationUrl}</a>
+        <p>This link will expire in 1 hour.</p>
+      `,
+    });
 
-console.log("📧 Resend response:", result);
-
+    console.log("📧 Resend response:", result);
 
     res.send(`
       <h2>✅ Registration Successful!</h2>
@@ -107,8 +107,16 @@ router.get('/verify/:token', async (req, res) => {
 
 // ================== LOGIN ==================
 router.get('/login', (req, res) => {
-  res.render('login', { title: "Login" });
+  const expired = req.query.expired === '1'; // ✅ detect expired session
+  const logout = req.query.logout === '1';   // ✅ detect logout
+  res.render('login', { 
+    title: "Login", 
+    expired: expired, 
+    logout: logout, 
+    error: null 
+  }); 
 });
+
 
 router.post('/login', async (req, res) => {
   try {
@@ -164,14 +172,13 @@ router.get('/list', async (req, res) => {
 });
 
 // ================== DASHBOARD ==================
-router.get('/dashboard', (req, res) => {
-  if (!req.session.user) return res.redirect('/users/login');
+router.get('/dashboard', requireLogin, (req, res) => {
   res.render('dashboard', { title: "User Dashboard", user: req.session.user });
 });
 
 // ================== ADMIN VIEW ==================
-router.get('/admin', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') {
+router.get('/admin', requireLogin, async (req, res) => {
+  if (req.session.user.role !== 'admin') {
     return res.status(403).send("Access denied.");
   }
   const db = req.app.locals.client.db(req.app.locals.dbName);
@@ -184,14 +191,16 @@ router.get('/admin', async (req, res) => {
 });
 
 // ================== LOGOUT ==================
-// Logout route
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
-  if (err) {
-  console.error("Error destroying session:", err);
-  return res.send("Something went wrong during logout.");
-  }
-  res.redirect('/users/login');
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.send("Something went wrong during logout.");
+    }
+    // redirect with logout=1
+    res.redirect('/users/login?logout=1');
   });
-  });
+});
+
+
 module.exports = router;
