@@ -29,7 +29,7 @@ app.use(
     saveUninitialized: false,
     rolling: true,
     cookie: { secure: false 
-      , maxAge: 1 * 60 * 1000
+      , maxAge: 15 * 60 * 1000
     }, // ✅ set true only in production with HTTPS
   })
 );
