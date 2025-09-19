@@ -7,15 +7,19 @@ require('dotenv').config();
 const passwordRoute = require('./routes/password');
 
 
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Serve static files (CSS, JS, images, etc.)
+app.use(express.static('public'));
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
-// Serve static files (CSS, JS, images, etc.)
-app.use(express.static('public'));
+
 
 // Session setup
 app.use(
@@ -23,8 +27,9 @@ app.use(
     secret: process.env.SESSION_SECRET || 'dev-secret', // keep secret in .env
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: { secure: false 
-      , maxAge: 15 * 60 * 1000
+      , maxAge: 1 * 60 * 1000
     }, // ✅ set true only in production with HTTPS
   })
 );
@@ -58,5 +63,10 @@ async function main() {
 }
 
 app.use('/password', passwordRoute);
+
+const path = require('path');
+console.log("Serving static files from:", path.join(__dirname, 'public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 main();

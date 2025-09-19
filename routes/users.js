@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12;
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
+const { ObjectId } = require('mongodb');
 const requireLogin = require('../middleware/auth');
 
 // ================== REGISTER ==================
@@ -100,6 +101,68 @@ router.get('/verify/:token', async (req, res) => {
   }
 });
 
+// ================== EDIT USER ==================
+router.get('/edit-user/:userId', requireLogin, async (req, res) => {
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const usersCollection = db.collection('users');
+
+    // Only allow editing your own profile
+    if (req.session.user.userId !== req.params.userId) {
+      return res.status(403).send("❌ You can only edit your own profile.");
+    }
+
+    const user = await usersCollection.findOne({ userId: req.params.userId });
+    if (!user) return res.send("❌ User not found.");
+
+    res.render('edit-user', { title: "Edit Profile", user });
+  } catch (err) {
+    console.error("❌ Error fetching user:", err);
+    res.send("Something went wrong.");
+  }
+});
+
+//POST
+router.post('/edit-user/:userId', requireLogin, async (req, res) => {
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const usersCollection = db.collection('users');
+
+    // Only allow editing your own profile
+    if (req.session.user.userId !== req.params.userId) {
+      return res.status(403).send("❌ You can only edit your own profile.");
+    }
+
+    const { firstName, lastName, email } = req.body;
+
+    // Check if the new email is already taken by another user
+    const existingUser = await usersCollection.findOne({ email: email });
+    if (existingUser && existingUser.userId !== req.params.userId) {
+      return res.send("❌ This email is already associated with another account.");
+    }
+
+    // Update user in DB
+    await usersCollection.updateOne(
+      { userId: req.params.userId },
+      { 
+        $set: { 
+          firstName, 
+          lastName, 
+          email,
+          updatedAt: new Date()
+        } 
+      }
+    );
+
+
+    res.redirect('/users/dashboard');
+  } catch (err) {
+    console.error("❌ Error updating user:", err);
+    res.send("Something went wrong while updating profile.");
+  }
+});
+
+
 // ================== LOGIN ==================
 router.get('/login', (req, res) => {
   const expired   = req.query.expired === '1';
@@ -157,6 +220,9 @@ router.post('/login', async (req, res) => {
     res.send("Something went wrong.");
   }
 });
+
+
+
 
 // ================== LIST USERS ==================
 router.get('/list', async (req, res) => {

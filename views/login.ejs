@@ -3,46 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title><%= title %></title>
-  <style>
-    .message {
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-    .expired {
-      color: red;
-    }
-    .logout {
-      color: green;
-    }
-    .reset {
-      color: blue;
-    }
-  </style>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1>Login</h1>
+  <div class="login-container">
+    <h1 class="title">Login</h1>
 
-  <% if (expired) { %>
-    <div class="message expired">⚠️ Your session has expired. Please login again.</div>
-  <% } %>
+    <% if (expired) { %>
+      <div class="message expired">⚠️ Your session has expired. Please login again.</div>
+    <% } %>
 
-  <% if (logout) { %>
-    <div class="message logout">✅ You have been logged out successfully.</div>
-  <% } %>
+    <% if (logout) { %>
+      <div class="message logout">✅ You have been logged out successfully.</div>
+    <% } %>
 
-  <% if (reset) { %>
-    <div class="message reset">🔑 Your password has been reset. Please log in with your new password.</div>
-  <% } %>
+    <% if (reset) { %>
+      <div class="message reset">🔑 Your password has been reset. Please log in with your new password.</div>
+    <% } %>
 
-  <form action="/users/login" method="POST">
-    <label>Email:</label>
-    <input type="email" name="email" required><br>
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
-    <p><a href="/password/forgot">Forgot Password?</a></p>
-    <button type="submit">Login</button>
-  </form>
+    <form action="/users/login" method="POST" class="login-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter your password" required>
+      </div>
+
+      <p class="forgot-link"><a href="/password/forgot">Forgot Password?</a></p>
+
+      <button type="submit" class="btn">Login</button>
+    </form>
+
+    <!-- 🔗 Link back to index.ejs -->
+    <p class="home-link">
+      <a href="/">🏠 Back to Home</a>
+    </p>
+
+    <!-- ✅ New Register Link -->
+    <p class="register-link">
+      Don't have an account? <a href="/users/register">Register here</a>
+    </p>
+  </div>
 </body>
 </html>

@@ -1,25 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Password criteria feedback */
+    .password-criteria {
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .password-criteria p {
+      margin: 2px 0;
+      color: red;
+    }
+    .password-criteria p.valid {
+      color: green;
+    }
+  </style>
 </head>
 <body>
-    <h1><%= title %></h1>
-    <form action="/users/register" method="POST">
-        <label for="firstName">First Name:</label>
+  <div class="form-container">
+    <h1 class="form-title"><%= title %></h1>
+
+    <form id="registerForm" action="/users/register" method="POST" class="form-card">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
         <input type="text" id="firstName" name="firstName" required>
-        <label for="lastName">Last Name:</label>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
         <input type="text" id="lastName" name="lastName" required>
-        <label for="email">Email:</label>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
         <input type="email" id="email" name="email" required>
-        <label for="password">Password:</label>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
-        <button type="submit">Register</button>
-        </form>
+        <div class="password-criteria">
+          <p id="length">● At least 8 characters</p>
+          <p id="uppercase">● Uppercase letter</p>
+          <p id="lowercase">● Lowercase letter</p>
+          <p id="number">● Number</p>
+          <p id="special">● Special character (!@#$%^&*)</p>
+        </div>
+      </div>
+
+      <button type="submit" class="btn primary">Register</button>
+    </form>
+
+    <p class="switch-link">
+      Already have an account? <a href="/users/login">Login here</a>
+    </p>
+  </div>
+
+  <script>
+    const passwordInput = document.getElementById('password');
+    const length = document.getElementById('length');
+    const uppercase = document.getElementById('uppercase');
+    const lowercase = document.getElementById('lowercase');
+    const number = document.getElementById('number');
+    const special = document.getElementById('special');
+    const form = document.getElementById('registerForm');
+
+    passwordInput.addEventListener('input', () => {
+      const value = passwordInput.value;
+
+      // Length
+      length.classList.toggle('valid', value.length >= 8);
+
+      // Uppercase
+      uppercase.classList.toggle('valid', /[A-Z]/.test(value));
+
+      // Lowercase
+      lowercase.classList.toggle('valid', /[a-z]/.test(value));
+
+      // Number
+      number.classList.toggle('valid', /[0-9]/.test(value));
+
+      // Special character
+      special.classList.toggle('valid', /[!@#$%^&*(),.?":{}|<>]/.test(value));
+    });
+
+    form.addEventListener('submit', (e) => {
+      const value = passwordInput.value;
+      const isValid = value.length >= 8 &&
+                      /[A-Z]/.test(value) &&
+                      /[a-z]/.test(value) &&
+                      /[0-9]/.test(value) &&
+                      /[!@#$%^&*(),.?":{}|<>]/.test(value);
+
+      if (!isValid) {
+        e.preventDefault();
+        alert('Password does not meet the required criteria.');
+      }
+    });
+  </script>
 </body>
-<p>Already have an account? <a href="/users/login">Login here</a></p>
 </html>

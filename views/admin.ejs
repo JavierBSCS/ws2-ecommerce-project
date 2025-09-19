@@ -1,29 +1,46 @@
-<h1>Admin Dashboard</h1>
-<p>Welcome, <%= currentUser.firstName %> (<%= currentUser.role %>)</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="admin-container">
+    <h1 class="admin-title">🛠 Admin Dashboard</h1>
+    <p class="admin-welcome">Welcome, <strong><%= currentUser.firstName %></strong> (<%= currentUser.role %>)</p>
 
-<table>
-  <thead>
-    <tr>
-      <th>User ID</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Role</th>
-      <th>Status</th>
-      <th>Created</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% users.forEach(user => { %>
-      <tr>
-        <td><%= user.userId %></td>
-        <td><%= user.firstName %> <%= user.lastName %></td>
-        <td><%= user.email %></td>
-        <td><%= user.role %></td>
-        <td><%= user.accountStatus %></td>
-        <td><%= user.createdAt instanceof Date ? user.createdAt.toLocaleDateString() : 'N/A' %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(user => { %>
+            <tr>
+              <td data-label="User ID">
+                <a href="/users/<%= user.userId %>" class="user-link"><%= user.userId %></a>
+              </td>
+              <td data-label="Name"><%= user.firstName %> <%= user.lastName %></td>
+              <td data-label="Email"><%= user.email %></td>
+              <td data-label="Role"><%= user.role %></td>
+              <td data-label="Status"><%= user.accountStatus %></td>
+              <td data-label="Created"><%= user.createdAt instanceof Date ? user.createdAt.toLocaleDateString() : 'N/A' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
 
-<p><a href="/users/dashboard">Back to Dashboard</a></p>
+    <a href="/users/dashboard" class="btn btn-back">⬅ Back to Dashboard</a>
+  </div>
+</body>
+</html>
