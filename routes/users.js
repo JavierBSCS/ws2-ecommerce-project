@@ -269,4 +269,9 @@ router.get('/logout', (req, res) => {
   });
 });
 
+// inside routes/users.js (at the end)
+router.use((req, res) => {
+res.status(404).render('404', { title: 'Page Not Found' })
+})
+
 module.exports = router;
