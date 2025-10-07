@@ -64,6 +64,11 @@ async function main() {
   }
 }
 
+app.get('/crash', () => {
+throw new Error('Test crash');
+});
+
+
 // 404 handler (must be the last route)
 app.use((req, res, next) => {
 if (req.path.startsWith('/api/')) {
@@ -73,10 +78,16 @@ res.status(404).render('404', { title: 'Page Not Found' })
 
 })
 
-// Error handler (after the 404 is fine; Express will skip 404 for thrown errors)
+// 500 handler (last)
 app.use((err, req, res, next) => {
-console.error(err)
-res.status(500).render('500', { title: 'Server Error' })
-})
+  console.error(err.stack);
+  if (res.headersSent) return next(err);
+  res.status(500).render('500', {
+    title: 'Server Error',
+    user: res.locals.user || null
+  });
+});
+
+
 
 main();
