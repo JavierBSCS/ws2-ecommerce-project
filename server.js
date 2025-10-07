@@ -64,9 +64,6 @@ async function main() {
   }
 }
 
-app.get('/crash', () => {
-throw new Error('Test crash');
-});
 
 
 // 404 handler (must be the last route)
