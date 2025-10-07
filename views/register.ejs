@@ -53,6 +53,9 @@
         </div>
       </div>
 
+      <!-- 🧠 Cloudflare Turnstile widget -->
+      <div class="cf-turnstile" data-sitekey="<%= process.env.TURNSTILE_SITEKEY %>"></div>
+
       <button type="submit" class="btn primary">Register</button>
     </form>
 
@@ -60,6 +63,9 @@
       Already have an account? <a href="/users/login">Login here</a>
     </p>
   </div>
+
+  <!-- ✅ Cloudflare Turnstile Script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script>
     const passwordInput = document.getElementById('password');

@@ -21,6 +21,10 @@
       <div class="message reset">🔑 Your password has been reset. Please log in with your new password.</div>
     <% } %>
 
+    <% if (error) { %>
+      <div class="message error">❌ <%= error %></div>
+    <% } %>
+
     <form action="/users/login" method="POST" class="login-form">
       <div class="form-group">
         <label>Email</label>
@@ -34,18 +38,24 @@
 
       <p class="forgot-link"><a href="/password/forgot">Forgot Password?</a></p>
 
+      <!-- 🧠 Cloudflare Turnstile Widget -->
+      <div class="cf-turnstile" data-sitekey="<%= process.env.TURNSTILE_SITEKEY %>"></div>
+
       <button type="submit" class="btn">Login</button>
     </form>
 
-    <!-- 🔗 Link back to index.ejs -->
+    <!-- 🔗 Back to Home -->
     <p class="home-link">
       <a href="/">🏠 Back to Home</a>
     </p>
 
-    <!-- ✅ New Register Link -->
+    <!-- 📝 Register Link -->
     <p class="register-link">
       Don't have an account? <a href="/users/register">Register here</a>
     </p>
   </div>
+
+  <!-- ⚙️ Turnstile Script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>
