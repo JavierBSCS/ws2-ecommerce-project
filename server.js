@@ -64,17 +64,6 @@ async function main() {
   }
 }
 
-app.get('/crash', () => {
-  throw new Error('Test crash');
-  });
-
-  app.get('/crash-async', async (req, res, next) => {
-    try {
-    throw new Error('Async crash');
-    } catch (err) {
-    next(err);
-    }
-    });
 
 
 // 404 handler (must be the last route)
