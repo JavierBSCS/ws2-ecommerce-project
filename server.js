@@ -64,6 +64,18 @@ async function main() {
   }
 }
 
+// Serve sitemap.xml explicitly
+app.get('/sitemap.xml', (req, res) => {
+  const filePath = path.join(__dirname, 'sitemap.xml');
+  res.type('application/xml'); // set proper Content-Type
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error sending sitemap.xml:', err);
+      res.status(500).send('Error loading sitemap');
+    }
+  });
+});
+
 
 
 // 404 handler (must be the last route)
