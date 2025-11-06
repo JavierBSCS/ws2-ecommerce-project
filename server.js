@@ -12,6 +12,13 @@ const usersRoute = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const indexRoutes = require('./routes/index');
+app.use('/', indexRoutes);
+
+// view engine (ensure this exists)
+app.set('view engine', 'ejs');
+// serve /public as static
+app.use('/public', express.static('public'));
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
