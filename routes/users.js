@@ -140,6 +140,7 @@ router.post('/edit-user/:userId', requireLogin, async (req, res) => {
       return res.send("❌ This email is already associated with another account.");
     }
 
+    // Update user in DB
     await usersCollection.updateOne(
       { userId: req.params.userId },
       {
@@ -152,7 +153,25 @@ router.post('/edit-user/:userId', requireLogin, async (req, res) => {
       }
     );
 
-    res.redirect('/users/dashboard');
+    // 🧠 Fetch updated user and refresh session
+    const updatedUser = await usersCollection.findOne({ userId: req.params.userId });
+    req.session.user = {
+      userId: updatedUser.userId,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      isEmailVerified: updatedUser.isEmailVerified
+    };
+
+    // Save session before redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error("❌ Error saving session:", err);
+      }
+      res.redirect('/users/dashboard');
+    });
+
   } catch (err) {
     console.error("❌ Error updating user:", err);
     res.send("Something went wrong while updating profile.");

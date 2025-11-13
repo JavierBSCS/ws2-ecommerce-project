@@ -214,11 +214,19 @@
 
     .product-card img {
       width: 100%;
-      height: 180px;
-      object-fit: cover;
+      height: auto; /* Keep natural image ratio */
+      max-height: 220px; /* Prevent giant images */
+      object-fit: contain; /* Prevent cropping and pixelation */
       border-radius: 8px;
       margin-bottom: 15px;
+      image-rendering: auto; /* Smooth scaling */
+      transition: transform 0.3s ease;
     }
+
+    .product-card img:hover {
+      transform: scale(1.03); /* Nice hover zoom */
+    }
+
 
     .product-card h3 {
       font-size: 1.2rem;

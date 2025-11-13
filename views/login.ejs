@@ -21,10 +21,6 @@
       <div class="message reset">🔑 Your password has been reset. Please log in with your new password.</div>
     <% } %>
 
-    <% if (error) { %>
-      <div class="message error">❌ <%= error %></div>
-    <% } %>
-
     <form action="/users/login" method="POST" class="login-form">
       <div class="form-group">
         <label>Email</label>
