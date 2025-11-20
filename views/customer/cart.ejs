@@ -1,25 +1,349 @@
-<h1>Your Cart</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart</title>
+  <style>
+    /* ================================
+       MODERN GLASS NEON DASHBOARD THEME
+       ================================ */
 
-<% if (cart.length === 0) { %>
-  <p>Your cart is empty.</p>
-<% } else { %>
+    :root {
+      --sidebar-width: 250px;
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-light: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --accent-purple: #9d4edd;
+      --text-light: #e5e9f0;
+      --text-muted: #9aa3b2;
+      --card-bg: rgba(255, 255, 255, 0.06);
+    }
 
-  <table border="1" cellpadding="8">
-    <tr>
-      <th>Product</th>
-      <th>Price</th>
-      <th>Qty</th>
-    </tr>
+    * {
+      box-sizing: border-box;
+    }
 
-    <% cart.forEach(item => { %>
-      <tr>
-        <td><%= item.name %></td>
-        <td>$<%= item.price %></td>
-        <td><%= item.qty %></td>
-      </tr>
-    <% }) %>
-  </table>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg-gradient);
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
 
-  <a href="/cart/checkout">Proceed to Checkout</a>
+    body {
+      overflow-y: auto;
+    }
 
-<% } %>
+    /* ================================
+       CUSTOM SCROLLBAR
+       ================================ */
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      margin: 4px 0;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* ================================
+       PROFILE CONTAINER
+       ================================ */
+
+    .profile-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    /* ================================
+       CART CONTAINER
+       ================================ */
+
+    .cart-container {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cart-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--accent-blue);
+      text-shadow: 0 0 15px #4cc9f0aa;
+      text-align: center;
+    }
+
+    /* ================================
+       EMPTY CART
+       ================================ */
+
+    .empty-cart {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    /* ================================
+       TABLE STYLES
+       ================================ */
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 500px;
+    }
+
+    th, td {
+      padding: 20px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    th {
+      background: rgba(76, 201, 240, 0.15);
+      color: var(--accent-blue);
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    td {
+      font-size: 1rem;
+    }
+
+    /* ================================
+       BUTTONS
+       ================================ */
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+    }
+
+    .btn-success {
+      background: rgba(79, 232, 176, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-green);
+      box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+      font-size: 1.1rem;
+      padding: 14px 32px;
+    }
+
+    .btn-success:hover {
+      background: rgba(79, 232, 176, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+    }
+
+    .checkout-section {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* ================================
+       CART ITEM STYLES
+       ================================ */
+
+    .product-name {
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    .product-price {
+      color: var(--accent-green);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .product-qty {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-block;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    /* ================================
+       RESPONSIVE
+       ================================ */
+
+    @media (max-width: 768px) {
+      .profile-container {
+        padding: 60px 15px 20px;
+      }
+      
+      .cart-container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      th, td {
+        padding: 15px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .btn-success {
+        padding: 12px 24px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-container {
+        padding: 60px 10px 15px;
+      }
+      
+      .cart-container {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      th, td {
+        padding: 12px 8px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="profile-container">
+  <!-- Home button outside container - positioned exactly like profile page -->
+  <div class="back-btn">
+    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+  </div>
+
+  <div class="cart-container">
+    <h1>🛒 Your Cart</h1>
+
+    <% if (cart.length === 0) { %>
+      <div class="empty-cart">
+        <p>Your cart is empty.</p>
+        <a href="/users/dashboard" class="btn btn-primary" style="margin-top: 20px;">Continue Shopping</a>
+      </div>
+    <% } else { %>
+
+      <div class="table-container">
+        <table>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+
+          <% cart.forEach(item => { %>
+            <tr>
+              <td class="product-name"><%= item.name %></td>
+              <td class="product-price">₱<%= item.price %></td>
+              <td>
+                <span class="product-qty"><%= item.qty %></span>
+              </td>
+            </tr>
+          <% }) %>
+        </table>
+      </div>
+
+      <div class="checkout-section">
+        <a href="/cart/checkout" class="btn btn-success">🚀 Proceed to Checkout</a>
+      </div>
+
+    <% } %>
+  </div>
+</div>
+
+</body>
+</html>
