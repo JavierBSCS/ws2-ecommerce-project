@@ -4,14 +4,270 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* ================================
+       MODERN GLASS NEON DASHBOARD THEME
+       ================================ */
+
+    :root {
+      --sidebar-width: 250px;
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-light: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --accent-purple: #9d4edd;
+      --text-light: #e5e9f0;
+      --text-muted: #9aa3b2;
+      --card-bg: rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg-gradient);
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    body {
+      overflow-y: auto;
+    }
+
+    /* ================================
+       CUSTOM SCROLLBAR
+       ================================ */
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      margin: 4px 0;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* ================================
+       PROFILE CONTAINER
+       ================================ */
+
+    .profile-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    /* ================================
+       PROFILE CARD
+       ================================ */
+
+    .profile-card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
+    }
+
+    .title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--accent-blue);
+      text-shadow: 0 0 15px #4cc9f0aa;
+      text-align: center;
+    }
+
+    /* ================================
+       BACK LINK
+       ================================ */
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-bottom: 25px;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-blue);
+      transform: translateX(-3px);
+    }
+
+    /* ================================
+       FORM STYLES
+       ================================ */
+
+    .profile-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+
+    .input-box {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-light);
+      font-size: 1rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .input-box:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.4);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .input-box:read-only {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    /* ================================
+       BUTTONS
+       ================================ */
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(157, 78, 221, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+    }
+
+    /* ================================
+       RESPONSIVE
+       ================================ */
+
+    @media (max-width: 600px) {
+      .profile-container {
+        padding: 60px 15px 20px;
+      }
+      
+      .profile-card {
+        padding: 30px 20px;
+      }
+      
+      .title {
+        font-size: 1.8rem;
+      }
+      
+      .input-box {
+        padding: 12px 14px;
+      }
+    }
+  </style>
 </head>
 <body class="profile-body">
   <div class="profile-container">
+    <!-- Home button outside profile card -->
+    <div class="back-btn">
+      <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+    </div>
+
     <div class="profile-card">
       <h1 class="title">✏️ Edit Profile</h1>
 
-      <!-- Back to Dashboard Link -->
+      <!-- Back to Profile Link -->
       <a href="/users/profile" class="btn btn-secondary back-link">
         ← Back to Profile
       </a>
@@ -33,7 +289,6 @@
         </div>
 
         <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Update Profile</button>
-
       </form>
     </div>
   </div>

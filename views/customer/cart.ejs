@@ -97,7 +97,7 @@
       border-radius: 20px;
       padding: 40px;
       width: 100%;
-      max-width: 800px;
+      max-width: 900px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -144,7 +144,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 500px;
+      min-width: 600px;
     }
 
     th, td {
@@ -173,6 +173,66 @@
     }
 
     /* ================================
+       QUANTITY CONTROLS
+       ================================ */
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qty-btn {
+      background: rgba(76, 201, 240, 0.2);
+      border: 1px solid var(--accent-blue);
+      color: var(--text-light);
+      width: 35px;
+      height: 35px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .qty-btn:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: scale(1.1);
+    }
+
+    .qty-btn.decrease {
+      background: rgba(157, 78, 221, 0.2);
+      border-color: var(--accent-purple);
+    }
+
+    .qty-btn.decrease:hover {
+      background: rgba(157, 78, 221, 0.3);
+    }
+
+    .qty-btn.remove {
+      background: rgba(231, 76, 60, 0.2);
+      border-color: #e74c3c;
+      margin-left: 10px;
+    }
+
+    .qty-btn.remove:hover {
+      background: rgba(231, 76, 60, 0.3);
+    }
+
+    .product-qty {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-block;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    /* ================================
        BUTTONS
        ================================ */
 
@@ -189,6 +249,7 @@
       border: 1px solid transparent;
       backdrop-filter: blur(10px);
       text-align: center;
+      cursor: pointer;
     }
 
     .btn-primary {
@@ -219,6 +280,39 @@
       box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
     }
 
+    /* ================================
+       TOTALS SECTION
+       ================================ */
+
+    .totals-section {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 25px 0;
+      border: 1px solid var(--glass-border);
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .total-row:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: var(--accent-green);
+    }
+
+    .total-row.grand-total {
+      border-top: 2px solid var(--accent-green);
+      margin-top: 10px;
+      padding-top: 15px;
+    }
+
     .checkout-section {
       text-align: center;
       margin-top: 30px;
@@ -241,14 +335,10 @@
       font-size: 1.1rem;
     }
 
-    .product-qty {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: inline-block;
-      min-width: 60px;
-      text-align: center;
+    .item-total {
+      color: var(--accent-blue);
+      font-weight: 700;
+      font-size: 1.1rem;
     }
 
     /* ================================
@@ -277,6 +367,16 @@
         padding: 12px 24px;
         font-size: 1rem;
       }
+
+      .quantity-controls {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .qty-btn.remove {
+        margin-left: 0;
+        margin-top: 5px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -296,6 +396,12 @@
         padding: 12px 8px;
         font-size: 0.85rem;
       }
+    }
+
+    /* Form styles for quantity controls */
+    .qty-form {
+      display: inline;
+      margin: 0;
     }
   </style>
 </head>
@@ -323,6 +429,8 @@
             <th>Product</th>
             <th>Price</th>
             <th>Quantity</th>
+            <th>Total</th>
+            <th>Actions</th>
           </tr>
 
           <% cart.forEach(item => { %>
@@ -330,11 +438,45 @@
               <td class="product-name"><%= item.name %></td>
               <td class="product-price">₱<%= item.price %></td>
               <td>
-                <span class="product-qty"><%= item.qty %></span>
+                <div class="quantity-controls">
+                  <form method="POST" action="/cart/decrease/<%= item.productId %>" class="qty-form">
+                    <button type="submit" class="qty-btn decrease" title="Decrease Quantity">−</button>
+                  </form>
+                  
+                  <span class="product-qty"><%= item.qty %></span>
+                  
+                  <form method="POST" action="/cart/increase/<%= item.productId %>" class="qty-form">
+                    <button type="submit" class="qty-btn" title="Increase Quantity">+</button>
+                  </form>
+                  
+                  
+                </div>
+              </td>
+              <td class="item-total">₱<%= (item.price * item.qty).toFixed(2) %></td>
+              <td>
+                <form method="POST" action="/cart/remove/<%= item.productId %>" class="qty-form">
+                    <button type="submit" class="qty-btn remove" title="Remove Item">🗑️</button>
+                  </form>
               </td>
             </tr>
           <% }) %>
         </table>
+      </div>
+
+      <!-- Totals Section -->
+      <div class="totals-section">
+        <div class="total-row">
+          <span>Subtotal:</span>
+          <span>₱<%= subtotal %></span>
+        </div>
+        <div class="total-row">
+          <span>Tax (12%):</span>
+          <span>₱<%= tax %></span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total:</span>
+          <span>₱<%= total %></span>
+        </div>
       </div>
 
       <div class="checkout-section">

@@ -4,82 +4,337 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Product</title>
-
   <style>
-    body { background: #f2f6fc; font-family: Arial; padding: 40px; }
+    /* ================================
+       MODERN GLASS NEON DASHBOARD THEME
+       ================================ */
+
+    :root {
+      --sidebar-width: 250px;
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-light: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --accent-purple: #9d4edd;
+      --text-light: #e5e9f0;
+      --text-muted: #9aa3b2;
+      --card-bg: rgba(255, 255, 255, 0.06);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg-gradient);
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    /* ================================
+       CUSTOM SCROLLBAR
+       ================================ */
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+    }
+
+    /* ================================
+       PROFILE CONTAINER
+       ================================ */
+
+    .profile-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    /* ================================
+       CONTAINER
+       ================================ */
+
     .container {
-      width: 500px; margin: auto; background: white; padding: 25px;
-      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--accent-blue);
+      text-shadow: 0 0 15px #4cc9f0aa;
+      text-align: center;
+    }
+
+    /* ================================
+       FORM STYLES
+       ================================ */
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--accent-green);
+      font-size: 1rem;
+    }
+
     input, textarea, select {
-      width: 100%; padding: 12px; margin: 10px 0;
-      border: 1px solid #dcdde1; border-radius: 6px; font-size: 1rem;
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-light);
+      font-size: 1rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      margin-bottom: 20px;
     }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.4);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    input[type="file"] {
+      padding: 12px;
+    }
+
+    /* ================================
+       CURRENT IMAGES
+       ================================ */
+
+    .current-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .current-images img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid var(--glass-border);
+      transition: transform 0.3s ease;
+    }
+
+    .current-images img:hover {
+      transform: scale(1.05);
+      border-color: var(--accent-blue);
+    }
+
+    /* ================================
+       BUTTONS
+       ================================ */
+
     button {
-      width: 100%; background: #00b894; border: none; padding: 12px;
-      color: white; border-radius: 6px; cursor: pointer; font-weight: bold;
+      width: 100%;
+      background: rgba(79, 232, 176, 0.2);
+      border: 1px solid var(--accent-green);
+      padding: 14px;
+      color: var(--text-light);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+      margin-top: 10px;
     }
-    button:hover { background: #55efc4; }
+
+    button:hover {
+      background: rgba(79, 232, 176, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+      margin-top: 20px;
+      width: auto;
+      align-self: center;
+    }
+
+    .back:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+    }
+
+    /* ================================
+       RESPONSIVE
+       ================================ */
+
+    @media (max-width: 768px) {
+      .profile-container {
+        padding: 60px 15px 20px;
+      }
+      
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h2 {
+        font-size: 1.8rem;
+      }
+      
+      .current-images img {
+        width: 100px;
+        height: 100px;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h2>✏️ Edit Product</h2>
+<div class="profile-container">
+  <!-- Home button outside container -->
+  <div class="back-btn">
+    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+  </div>
 
-  <form action="/users/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
+  <div class="container">
+    <h2>✏️ Edit Product</h2>
 
-    <label>Name</label>
-    <input type="text" name="name" value="<%= product.name %>" required>
+    <form action="/users/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
+      <label>Name</label>
+      <input type="text" name="name" value="<%= product.name %>" required>
 
-    <label>Price</label>
-    <input type="number" step="0.01" name="price" value="<%= product.price %>" required>
+      <label>Price</label>
+      <input type="number" step="0.01" name="price" value="<%= product.price %>" required>
 
-    <label>Category</label>
-    <select name="category" required>
-      <option value="Food" <%= product.category === "Food" ? "selected" : "" %>>Food</option>
-      <option value="Cars" <%= product.category === "Cars" ? "selected" : "" %>>Cars</option>
-      <option value="Electronics" <%= product.category === "Electronics" ? "selected" : "" %>>Electronics</option>
-      <option value="Clothes" <%= product.category === "Clothes" ? "selected" : "" %>>Clothes</option>
-      <option value="Home" <%= product.category === "Home" ? "selected" : "" %>>Home</option>
-    </select>
+      <label>Category</label>
+      <select name="category" required>
+        <option value="Food" <%= product.category === "Food" ? "selected" : "" %>>Food</option>
+        <option value="Cars" <%= product.category === "Cars" ? "selected" : "" %>>Cars</option>
+        <option value="Electronics" <%= product.category === "Electronics" ? "selected" : "" %>>Electronics</option>
+        <option value="Clothes" <%= product.category === "Clothes" ? "selected" : "" %>>Clothes</option>
+        <option value="Home" <%= product.category === "Home" ? "selected" : "" %>>Home</option>
+      </select>
 
-    <label>Description</label>
-    <textarea name="description" rows="4"><%= product.description %></textarea>
-<label>Status</label>
-<select name="status" required>
-  <option value="available" <%= product.status === "available" ? "selected" : "" %>>Available</option>
-  <option value="unavailable" <%= product.status === "unavailable" ? "selected" : "" %>>Unavailable</option>
-  <option value="maintenance" <%= product.status === "maintenance" ? "selected" : "" %>>Under Maintenance</option>
-</select>
+      <label>Description</label>
+      <textarea name="description" rows="4"><%= product.description %></textarea>
 
-<label>Stock</label>
-<input type="number" name="stock" value="<%= product.stock %>" min="0">
+      <label>Status</label>
+      <select name="status" required>
+        <option value="available" <%= product.status === "available" ? "selected" : "" %>>Available</option>
+        <option value="unavailable" <%= product.status === "unavailable" ? "selected" : "" %>>Unavailable</option>
+        <option value="maintenance" <%= product.status === "maintenance" ? "selected" : "" %>>Under Maintenance</option>
+      </select>
 
+      <label>Stock</label>
+      <input type="number" name="stock" value="<%= product.stock %>" min="0">
 
+      <label>Current Images</label>
+      <div class="current-images">
+        <% 
+          let imgs = product.images && product.images.length ? product.images : 
+                    (product.imageUrl ? [product.imageUrl] : []);
+        %>
+        <% imgs.forEach(img => { %>
+          <img src="<%= img %>">
+        <% }) %>
+      </div>
 
-    <label>Current Images</label><br>
+      <label>Upload New Image (optional)</label>
+      <input type="file" name="image" accept="image/*">
 
-    <% 
-      let imgs = product.images && product.images.length ? product.images : 
-                (product.imageUrl ? [product.imageUrl] : []);
-    %>
+      <label>OR Edit Image URLs (CSV)</label>
+      <input type="text" name="images" value="<%= product.imagesCsv %>">
 
-    <% imgs.forEach(img => { %>
-      <img src="<%= img %>" style="width:120px; height:120px; object-fit:cover; border-radius:8px; margin:10px;">
-    <% }) %>
+      <button type="submit">Save Changes</button>
+    </form>
 
-    <label>Upload New Image (optional)</label>
-    <input type="file" name="image" accept="image/*">
-
-    <label>OR Edit Image URLs (CSV)</label>
-    <input type="text" name="images" value="<%= product.imagesCsv %>">
-
-    <button type="submit">Save Changes</button>
-  </form>
-
-  <a href="/users/admin/products" class="back">⬅ Back to Products</a>
+    <a href="/users/admin/products" class="back">⬅ Back to Products</a>
+  </div>
 </div>
 
 </body>

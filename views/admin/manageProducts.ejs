@@ -4,108 +4,427 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Products</title>
-
   <style>
-    body { background: #f2f6fc; font-family: Arial; padding: 40px; }
+    /* ================================
+       MODERN GLASS NEON DASHBOARD THEME
+       ================================ */
+
+    :root {
+      --sidebar-width: 250px;
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-light: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --accent-purple: #9d4edd;
+      --text-light: #e5e9f0;
+      --text-muted: #9aa3b2;
+      --card-bg: rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg-gradient);
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    body {
+      padding: 20px;
+      overflow-y: auto; /* Enable main page scroll */
+    }
+
+    /* ================================
+       CUSTOM SCROLLBAR - RIGHT EDGE
+       ================================ */
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      margin: 4px 0;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* ================================
+       PROFILE CONTAINER
+       ================================ */
+
+    .profile-container {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+    }
+
+    /* ================================
+       CONTAINER
+       ================================ */
+
     .container {
-      width: 900px; margin: auto; background: white; padding: 25px;
-      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      overflow: hidden; /* Prevent container scroll */
     }
-    table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
+
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: var(--accent-blue);
+      text-shadow: 0 0 15px #4cc9f0aa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    th, td {
-      padding: 12px; border-bottom: 1px solid #ddd;
+
+    /* ================================
+       BUTTONS
+       ================================ */
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      text-align: center;
     }
-    th { background: #0984e3; color: white; }
-    img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
-    .actions a {
-      padding: 6px 12px; border-radius: 6px; text-decoration: none;
-      color: white; font-size: .9rem;
+
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
     }
-    .edit-btn { background: #74b9ff; }
-    .delete-btn { background: #d63031; }
+
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+    }
+
     .add-btn {
-      background: #00b894; padding: 10px 16px; color: white;
-      border-radius: 6px; text-decoration: none; font-weight: bold;
+      background: rgba(79, 232, 176, 0.2);
+      border: 1px solid var(--accent-green);
+      padding: 12px 24px;
+      color: var(--text-light);
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+    }
+
+    .add-btn:hover {
+      background: rgba(79, 232, 176, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+      margin-top: 20px;
+    }
+
+    .back:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+    }
+
+    /* ================================
+       TABLE STYLES
+       ================================ */
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px; /* Ensure table has minimum width */
+    }
+
+    th, td {
+      padding: 16px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    th {
+      background: rgba(76, 201, 240, 0.15);
+      color: var(--accent-blue);
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* ================================
+       TABLE CONTENT
+       ================================ */
+
+    img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--glass-border);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .actions a {
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: white;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      white-space: nowrap;
+    }
+
+    .edit-btn {
+      background: rgba(108, 92, 231, 0.3);
+      border: 1px solid #6c5ce7;
+      box-shadow: 0 0 10px rgba(108, 92, 231, 0.3);
+    }
+
+    .edit-btn:hover {
+      background: rgba(108, 92, 231, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(108, 92, 231, 0.5);
+    }
+
+    .delete-btn {
+      background: rgba(214, 48, 49, 0.3);
+      border: 1px solid #d63031;
+      box-shadow: 0 0 10px rgba(214, 48, 49, 0.3);
+    }
+
+    .delete-btn:hover {
+      background: rgba(214, 48, 49, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(214, 48, 49, 0.5);
+    }
+
+    /* Status badges */
+    .status-available { color: var(--accent-green); font-weight: bold; }
+    .status-unavailable { color: #e74c3c; font-weight: bold; }
+    .status-maintenance { color: #f1c40f; font-weight: bold; }
+
+    /* ================================
+       RESPONSIVE
+       ================================ */
+
+    @media (max-width: 1024px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h2 {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      th, td {
+        padding: 12px 8px;
+        font-size: 0.85rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .actions a {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+      
+      img {
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+      
+      .container {
+        padding: 10px;
+      }
+      
+      h2 {
+        font-size: 1.8rem;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="profile-container">
+  <!-- Home button outside container -->
+  <div class="back-btn">
+    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+  </div>
 
-  <h2>📦 Manage Products</h2>
+  <div class="container">
+    <h2>
+      📦 Manage Products
+      <a href="/users/admin/products/add" class="add-btn">+ Add New Product</a>
+    </h2>
 
-  <a href="/users/admin/products/add" class="add-btn">+ Add New Product</a>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
 
-<table>
-  <tr>
-    <th>Image</th>
-    <th>Name</th>
-    <th>Category</th>
-    <th>Price</th>
-    <th>Stock</th>
-    <th>Status</th>
-    <th>Description</th>
-    <th>Actions</th>
-  </tr>
+        <% products.forEach(p => { %>
+          <tr>
+            <!-- Image -->
+            <td>
+              <% 
+                let img = (p.images && p.images.length > 0)
+                  ? p.images[0]
+                  : (p.imageUrl || "/placeholder.jpg");
+              %>
+              <img src="<%= img %>">
+            </td>
 
-  <% products.forEach(p => { %>
-    <tr>
+            <!-- Name -->
+            <td><%= p.name %></td>
 
-      <!-- Image -->
-      <td>
-        <% 
-          let img = (p.images && p.images.length > 0)
-            ? p.images[0]
-            : (p.imageUrl || "/placeholder.jpg");
-        %>
-        <img src="<%= img %>">
-      </td>
+            <!-- Category -->
+            <td><%= p.category || "General" %></td>
 
-      <!-- Name -->
-      <td><%= p.name %></td>
+            <!-- Price -->
+            <td>₱<%= p.price %></td>
 
-      <!-- Category -->
-      <td><%= p.category || "General" %></td>
+            <!-- Stock -->
+            <td><%= typeof p.stock === "number" ? p.stock : 0 %></td>
 
-      <!-- Price -->
-      <td>₱<%= p.price %></td>
+            <!-- Status -->
+            <td>
+              <% if (p.status === "available") { %>
+                <span class="status-available">Available</span>
+              <% } else if (p.status === "unavailable") { %>
+                <span class="status-unavailable">Unavailable</span>
+              <% } else { %>
+                <span class="status-maintenance">Maintenance</span>
+              <% } %>
+            </td>
 
-      <!-- Stock -->
-      <td><%= typeof p.stock === "number" ? p.stock : 0 %></td>
+            <!-- Description -->
+            <td style="max-width: 220px;">
+              <%= p.description.length > 60 ? p.description.substring(0, 60) + "..." : p.description %>
+            </td>
 
-      <!-- Status with color -->
-      <td>
-        <% if (p.status === "available") { %>
-          <span style="color: green; font-weight: bold;">Available</span>
-        <% } else if (p.status === "unavailable") { %>
-          <span style="color: red; font-weight: bold;">Unavailable</span>
-        <% } else { %>
-          <span style="color: orange; font-weight: bold;">Maintenance</span>
-        <% } %>
-      </td>
+            <!-- Actions -->
+            <td class="actions">
+              <a href="/users/admin/products/edit/<%= p._id %>" class="edit-btn">Edit</a>
+              <a href="/users/admin/products/delete/<%= p._id %>" class="delete-btn" onclick="return confirm('Delete this product?')">Delete</a>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
 
-      <!-- Description -->
-      <td style="max-width: 220px;">
-        <%= p.description.length > 60 ? p.description.substring(0, 60) + "..." : p.description %>
-      </td>
-
-      <!-- Actions -->
-      <td class="actions">
-        <a href="/users/admin/products/edit/<%= p._id %>" class="edit-btn">Edit</a>
-        <a href="/users/admin/products/delete/<%= p._id %>" class="delete-btn" onclick="return confirm('Delete this product?')">Delete</a>
-      </td>
-
-    </tr>
-  <% }) %>
-</table>
-
-
-  <a href="/users/dashboard" class="back">⬅ Back to Dashboard</a>
-
+    <a href="/users/dashboard" class="back">⬅ Back to Dashboard</a>
+  </div>
 </div>
 
 </body>
