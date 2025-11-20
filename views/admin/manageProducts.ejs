@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Products</title>
+
+  <style>
+    body { background: #f2f6fc; font-family: Arial; padding: 40px; }
+    .container {
+      width: 900px; margin: auto; background: white; padding: 25px;
+      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 20px;
+    }
+    th, td {
+      padding: 12px; border-bottom: 1px solid #ddd;
+    }
+    th { background: #0984e3; color: white; }
+    img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+    .actions a {
+      padding: 6px 12px; border-radius: 6px; text-decoration: none;
+      color: white; font-size: .9rem;
+    }
+    .edit-btn { background: #74b9ff; }
+    .delete-btn { background: #d63031; }
+    .add-btn {
+      background: #00b894; padding: 10px 16px; color: white;
+      border-radius: 6px; text-decoration: none; font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>📦 Manage Products</h2>
+
+  <a href="/users/admin/products/add" class="add-btn">+ Add New Product</a>
+
+<table>
+  <tr>
+    <th>Image</th>
+    <th>Name</th>
+    <th>Category</th>
+    <th>Price</th>
+    <th>Stock</th>
+    <th>Status</th>
+    <th>Description</th>
+    <th>Actions</th>
+  </tr>
+
+  <% products.forEach(p => { %>
+    <tr>
+
+      <!-- Image -->
+      <td>
+        <% 
+          let img = (p.images && p.images.length > 0)
+            ? p.images[0]
+            : (p.imageUrl || "/placeholder.jpg");
+        %>
+        <img src="<%= img %>">
+      </td>
+
+      <!-- Name -->
+      <td><%= p.name %></td>
+
+      <!-- Category -->
+      <td><%= p.category || "General" %></td>
+
+      <!-- Price -->
+      <td>₱<%= p.price %></td>
+
+      <!-- Stock -->
+      <td><%= typeof p.stock === "number" ? p.stock : 0 %></td>
+
+      <!-- Status with color -->
+      <td>
+        <% if (p.status === "available") { %>
+          <span style="color: green; font-weight: bold;">Available</span>
+        <% } else if (p.status === "unavailable") { %>
+          <span style="color: red; font-weight: bold;">Unavailable</span>
+        <% } else { %>
+          <span style="color: orange; font-weight: bold;">Maintenance</span>
+        <% } %>
+      </td>
+
+      <!-- Description -->
+      <td style="max-width: 220px;">
+        <%= p.description.length > 60 ? p.description.substring(0, 60) + "..." : p.description %>
+      </td>
+
+      <!-- Actions -->
+      <td class="actions">
+        <a href="/users/admin/products/edit/<%= p._id %>" class="edit-btn">Edit</a>
+        <a href="/users/admin/products/delete/<%= p._id %>" class="delete-btn" onclick="return confirm('Delete this product?')">Delete</a>
+      </td>
+
+    </tr>
+  <% }) %>
+</table>
+
+
+  <a href="/users/dashboard" class="back">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

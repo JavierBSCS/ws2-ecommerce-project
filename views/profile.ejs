@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="profile-body">
+
+  <div class="profile-container">
+    <!-- Home button outside profile card -->
+    <div class="back-btn">
+      <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+    </div>
+
+    <div class="profile-card">
+      <h1 class="title">👤 Welcome, <%= user.firstName %> <%= user.lastName %>!</h1>
+
+      <div class="profile-details">
+        <p><strong>User ID:</strong> <%= user.userId %></p>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Role:</strong> <%= user.role %></p>
+        <p><strong>Status:</strong> ✅ Active</p>
+        <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
+      </div>
+
+      <div class="profile-actions">
+        <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
+
+        <% if (user.role === 'admin') { %>
+          <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
+        <% } %>
+
+        <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

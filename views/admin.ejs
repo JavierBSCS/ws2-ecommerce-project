@@ -5,7 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="/style.css">
+
+  <style>
+    /* --- FIX SCROLLING --- */
+    body {
+      height: auto !important;
+      min-height: 100vh !important;
+      display: block !important;       /* overrides login flex layout */
+      overflow-y: auto !important;     /* enables scrolling */
+      overflow-x: hidden;
+      padding: 20px;
+      background: linear-gradient(135deg, #4e73df, #1cc88a);
+    }
+
+    /* Ensure admin container doesn't get forced to center */
+    .admin-container {
+      margin-top: 20px;
+    }
+  </style>
 </head>
+
 <body>
   <div class="admin-container">
     <h1 class="admin-title">🛠 Admin Dashboard</h1>
@@ -27,7 +46,7 @@
           <% users.forEach(user => { %>
             <tr>
               <td data-label="User ID">
-                <a href="/users/<%= user.userId %>" class="user-link"><%= user.userId %></a>
+                <a href="/users/edit-user/<%= user.userId %>" class="user-link"><%= user.userId %></a>
               </td>
               <td data-label="Name"><%= user.firstName %> <%= user.lastName %></td>
               <td data-label="Email"><%= user.email %></td>
@@ -40,7 +59,7 @@
       </table>
     </div>
 
-    <a href="/users/dashboard" class="btn btn-back">⬅ Back to Dashboard</a>
+    <a href="/users/profile" class="btn btn-back">⬅ Back to Profile</a>
   </div>
 </body>
 </html>

@@ -2,108 +2,134 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
-const session = require('express-session'); 
+const session = require('express-session');
 const path = require('path');
 require('dotenv').config();
+const mongoose = require("mongoose");
 
+
+
+
+// ROUTES
 const passwordRoute = require('./routes/password');
 const indexRoute = require('./routes/index');
 const usersRoute = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const indexRoutes = require('./routes/index');
-app.use('/', indexRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// view engine (ensure this exists)
+
+// ================================
+// VIEW ENGINE & STATIC FILES
+// ================================
 app.set('view engine', 'ejs');
-// serve /public as static
-app.use('/public', express.static('public'));
-
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set('view engine', 'ejs');
-
-// Serve static files (CSS, JS, images, etc.)
-console.log("Serving static files from:", path.join(__dirname, 'public'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session setup (must come before res.locals)
+
+// ================================
+// SESSION CONFIG
+// ================================
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'dev-secret',
+    secret: process.env.SESSION_SECRET || "dev-secret",
     resave: false,
     saveUninitialized: false,
     rolling: true,
-    cookie: { secure: false, maxAge: 15 * 60 * 1000 }, 
+    cookie: {
+      secure: false,               // required for local development
+      maxAge: 15 * 60 * 1000       // 15 minutes
+    }
   })
 );
 
-// Make session user available in all views
+// Make logged-in user available in templates
 app.use((req, res, next) => {
   res.locals.user = req.session?.user || null;
   next();
 });
 
-// Routes
+
+// ================================
+// ROUTES
+// ================================
 app.use('/', indexRoute);
 app.use('/users', usersRoute);
 app.use('/password', passwordRoute);
 
-// MongoDB Setup
-const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
-const client = new MongoClient(uri);
 
-// Expose client & dbName to routes
-app.locals.client = client;
-app.locals.dbName = process.env.DB_NAME || 'ecommerceDB';
-
-async function main() {
-  try {
-    await client.connect();
-    console.log('✅ Connected to MongoDB Atlas');
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error('❌ MongoDB connection failed:', err);
-  }
-}
-
-// Serve sitemap.xml explicitly
+// ================================
+// SITEMAP
+// ================================
 app.get('/sitemap.xml', (req, res) => {
   const filePath = path.join(__dirname, 'sitemap.xml');
-  res.type('application/xml'); // set proper Content-Type
-  res.sendFile(filePath, (err) => {
+  res.type('application/xml');
+
+  res.sendFile(filePath, err => {
     if (err) {
-      console.error('Error sending sitemap.xml:', err);
-      res.status(500).send('Error loading sitemap');
+      console.error("Error sending sitemap.xml:", err);
+      res.status(500).send("Error loading sitemap");
     }
   });
 });
 
 
+// ================================
+// MONGO SETUP
+// ================================
+const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+const client = new MongoClient(uri);
 
-// 404 handler (must be the last route)
-app.use((req, res, next) => {
-if (req.path.startsWith('/api/')) {
-return res.status(404).json({ error: 'Not Found', path: req.path })
-}
-res.status(404).render('404', { title: 'Page Not Found' })
+// Make Mongo available inside route files
+app.locals.client = client;
+app.locals.dbName = process.env.DB_NAME || "ecommerceDB";
 
-})
 
-// 500 handler (last)
+app.use("/cart", require("./routes/cart"));
+
+
+// ================================
+// 500 (SERVER ERROR)
+// ================================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("SERVER ERROR:", err.stack);
+
   if (res.headersSent) return next(err);
+
   res.status(500).render('500', {
-    title: 'Server Error',
+    title: "Server Error",
     user: res.locals.user || null
   });
 });
 
+// ================================
+// MONGOOSE SETUP
+// ================================
+mongoose.connect(uri, {
+  dbName: process.env.DB_NAME || "ecommerceDB"
+})
+.then(() => console.log("✅ Mongoose connected"))
+.catch(err => console.error("❌ Mongoose error:", err));
+
+
+
+// ================================
+// START SERVER
+// ================================
+async function main() {
+  try {
+    await client.connect();
+    console.log("✅ Connected to MongoDB Atlas");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
+    });
+
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err);
+  }
+}
 
 
 main();
