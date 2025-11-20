@@ -4,330 +4,359 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard</title>
-  <link rel="stylesheet" href="/style.css" />
-
   <style>
-/* ================================
-   MODERN GLASS NEON DASHBOARD THEME
-   ================================ */
+    /* ================================
+       MODERN GLASS NEON DASHBOARD THEME
+       ================================ */
 
-:root {
-  --sidebar-width: 250px;
-  --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
-  --glass-light: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.22);
-  --accent-blue: #4cc9f0;
-  --accent-green: #4fe8b0;
-  --accent-purple: #9d4edd;
-  --text-light: #e5e9f0;
-  --text-muted: #9aa3b2;
-  --card-bg: rgba(255, 255, 255, 0.06);
-}
+    :root {
+      --sidebar-width: 250px;
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-light: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --accent-purple: #9d4edd;
+      --text-light: #e5e9f0;
+      --text-muted: #9aa3b2;
+      --card-bg: rgba(255, 255, 255, 0.06);
+    }
 
-html, body {
-  margin: 0;
-  height: 100%;
-  background: var(--bg-gradient);
-  font-family: "Inter", Arial, sans-serif;
-  color: var(--text-light);
-  overflow: hidden;
-}
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg-gradient);
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
 
-/* ================================
-   LAYOUT
-   ================================ */
+    /* ================================
+       LAYOUT
+       ================================ */
 
-.app {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
+    .app {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
 
-/* ================================
-   SIDEBAR (Glassmorphism + Neon)
-   ================================ */
-.sidebar {
-  width: var(--sidebar-width);
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(18px) saturate(180%);
-  border-right: 1px solid var(--glass-border);
-  padding: 24px;
-  position: fixed;
-  inset: 0 auto 0 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  z-index: 30;
-  transition: transform 0.3s ease;
-  box-shadow: 4px 0 22px rgba(0, 0, 0, 0.45);
-}
-.sidebar.hidden {
-  transform: translateX(-260px);
-}
+    /* ================================
+       SIDEBAR
+       ================================ */
 
-.sidebar h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: var(--accent-blue);
-  text-shadow: 0 0 12px #4cc9f0aa;
-}
+    .sidebar {
+      width: 220px;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(18px) saturate(180%);
+      border-right: 1px solid var(--glass-border);
+      padding: 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 30;
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 22px rgba(0, 0, 0, 0.45);
+    }
 
-.sidebar a {
-  display: block;
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  color: var(--text-light);
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.23s ease;
-  backdrop-filter: blur(3px);
-}
+    .sidebar.hidden {
+      transform: translateX(-290px);
+    }
 
-.sidebar a:hover {
-  background: rgba(76, 201, 240, 0.18);
-  border-color: var(--accent-blue);
-  color: #fff;
-  transform: translateY(-2px);
-}
+    .sidebar h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--accent-blue);
+      text-shadow: 0 0 12px #4cc9f0aa;
+    }
 
-/* ================================
-   MENU TOGGLE BUTTON
-   ================================ */
-.menu-toggle {
-  position: fixed;
-  top: 14px;
-  left: calc(var(--sidebar-width) + 20px);
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  transition: 0.3s ease;
-  z-index: 50;
-}
-.menu-toggle:hover {
-  transform: scale(1.08);
-  background: rgba(255, 255, 255, 0.10);
-}
-.menu-toggle.shift-left {
-  left: 20px;
-}
+    .sidebar a {
+      display: block;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.23s ease;
+      backdrop-filter: blur(3px);
+    }
 
-/* ================================
-   MAIN SECTION
-   ================================ */
-.main {
-  margin-left: var(--sidebar-width);
-  padding: 32px;
-  width: calc(100% - var(--sidebar-width));
-  overflow-y: auto;
-  height: 100vh;
-  transition: margin-left 0.3s ease, width 0.3s ease;
-}
-.sidebar.hidden + .main {
-  margin-left: 0;
-  width: 100%;
-}
+    .sidebar a:hover {
+      background: rgba(76, 201, 240, 0.18);
+      border-color: var(--accent-blue);
+      color: #fff;
+      transform: translateY(-2px);
+    }
 
-h1 {
-  font-size: 2.2rem;
-  margin-bottom: 4px;
-  color: #ffffff;
-}
-p.lead {
-  margin-top: 0;
-  color: var(--text-muted);
-  font-size: 1.1rem;
-}
+    /* ================================
+       MENU TOGGLE BUTTON
+       ================================ */
 
-/* ================================
-   PRODUCT GRID (Modern tiles)
-   ================================ */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr) !important; /* FIXED 5 per row */
-  gap: 26px; /* more breathing room */
-  margin-top: 26px;
-  padding-bottom: 40px;
-}
+    .menu-toggle {
+      position: fixed;
+      top: 14px;
+      left: calc(var(--sidebar-width) + 20px);
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      color: white;
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: 0.3s ease;
+      z-index: 50;
+    }
 
-.price {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #4fe8b0;
-  text-shadow: 0 0 8px rgba(79,232,176,0.6);
-}
+    .menu-toggle:hover {
+      transform: scale(1.08);
+      background: rgba(255, 255, 255, 0.10);
+    }
 
+    .menu-toggle.shift-left {
+      left: 20px;
+    }
 
-/* ================================
-   PRODUCT CARD (GLASS + EDGE NEON)
-   ================================ */
-.product-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(18px) saturate(160%);
-  border-radius: 18px;
-  padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  transition: 0.25s ease;
-  box-shadow: 0 0 18px rgba(0, 0, 0, 0.45);
-  display: flex;
-  flex-direction: column;
-  height: 550px;               /* bigger card */
-  overflow: hidden;  
-  width: 310px;          /* prevent overflow bugs */
-}
+    /* ================================
+       MAIN SECTION
+       ================================ */
 
-.product-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: #4cc9f0;
-  box-shadow: 0 0 24px rgba(76, 201, 240, 0.35);
-}
+    .main {
+      margin-left: var(--sidebar-width);
+      padding: 70px 32px 32px;
+      width: calc(100% - var(--sidebar-width));
+      min-height: 100vh;
+      overflow: visible;
+      position: relative;
+    }
 
-.product-card img {
-  width: 100%;
-  height: 200px;               /* bigger preview */
-  object-fit: cover;
-  border-radius: 14px;
-  margin-bottom: 12px;
-}
+    .sidebar.hidden + .main {
+      margin-left: 0;
+      width: 100%;
+    }
 
-/* Allow more room for name + desc */
-.product-card h3 {
-  margin: 4px 0 6px;
-  font-size: 1.15rem;
-  color: #fff;
-  min-height: 28px;
-}
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
 
-/* FIXED — product description stays visible */
-.product-card p.desc {
-  color: #d7dde7;
-  font-size: 0.9rem;
-  margin: 0 0 12px;
-  line-height: 1.35;
-  min-height: 60px;         /* instead of fixed height */
-  max-height: 140px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
+    p.lead {
+      margin-top: 0;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
 
-/* FIXED — stable button alignment */
-.product-actions {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;         /* prevents breaking into weird lines */
-  gap: 10px;
-  justify-content: flex-start; 
-  margin-top: auto;
-  padding-top: 10px;
-}
+    /* ================================
+       PRODUCT GRID — FIXED & RESPONSIVE
+       ================================ */
 
-/* Make buttons equal height + improve hover */
-.btn {
-  text-decoration: none;
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 85px;            /* consistent size */
-  transition: 0.22s ease;
-}
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* EXACTLY 5 PER ROW */
+      gap: 18px;
+      width: 100%;
+      margin-top: 25px;
+    }
 
-/* EDIT BUTTON */
-.btn.edit {
-  background: #6c5ce7;
-  box-shadow: 0 0 12px rgba(108, 92, 231, 0.45);
-}
-.btn.edit:hover {
-  transform: scale(1.05);
-  background: #7d6bff;
-  box-shadow: 0 0 18px rgba(108, 92, 231, 0.7);
-}
+    .price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #4fe8b0;
+      text-shadow: 0 0 8px rgba(79,232,176,0.6);
+    }
 
-/* DELETE BUTTON */
-.btn.delete {
-  background: #d63031;
-  box-shadow: 0 0 12px rgba(214, 48, 49, 0.45);
-}
-.btn.delete:hover {
-  transform: scale(1.05);
-  background: #ff4b4b;
-  box-shadow: 0 0 18px rgba(255, 75, 75, 0.7);
-}
+    /* ================================
+       PRODUCT CARD
+       ================================ */
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(16px);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transition: 0.25s ease;
+      box-shadow: 0 0 12px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      height: 420px;
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: #4cc9f0;
+      box-shadow: 0 0 24px rgba(76, 201, 240, 0.35);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .product-card h3 {
+      margin: 4px 0 6px;
+      font-size: 1.15rem;
+      color: #fff;
+      min-height: 28px;
+    }
+
+    .product-card p.desc {
+      font-size: 0.85rem;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .product-category {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .category-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+     .filter-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
 
 
+    /* ================================
+       CARD BUTTONS
+       ================================ */
 
+    .product-actions {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 10px;
+      margin-top: auto;
+      justify-content: center; 
+      align-items: center;
+    }
 
+    .btn {
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 85px;
+      transition: 0.22s ease;
+      font-size: 0.85rem;
+    }
 
-/* ================================
-   PRODUCT TEXT + META
-   ================================ */
-.product-card h3 {
-  margin: 12px 0 4px;
-  color: #fff;
-  font-size: 1.1rem;
-}
+    .btn.view {
+      background: #4a90e2;
+      box-shadow: 0 0 12px rgba(74, 144, 226, 0.45);
+    }
 
-.product-meta strong {
-  font-size: 1rem;
-  color: #4cc9f0;
-}
+    .btn.view:hover {
+      transform: scale(1.05);
+      background: #5a9ff2;
+      box-shadow: 0 0 18px rgba(74, 144, 226, 0.7);
+    }
 
+    .btn.cart {
+      background: #2ecc71;
+      box-shadow: 0 0 12px rgba(46, 204, 113, 0.45);
+    }
 
-/* ================================
-   BUTTONS (NEON)
-   ================================ */
-.btn {
-  text-decoration: none;
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  display: inline-block;
-  transition: 0.22s ease;
-  text-align: center;
-}
+    .btn.cart:hover {
+      transform: scale(1.05);
+      background: #3edc81;
+      box-shadow: 0 0 18px rgba(46, 204, 113, 0.7);
+    }
 
-.btn.view {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px rgba(76, 201, 240, 0.6);
-}
+    .btn.edit {
+      background: #6c5ce7;
+      box-shadow: 0 0 12px rgba(108, 92, 231, 0.45);
+    }
 
-.btn.view:hover {
-  transform: scale(1.05);
-}
+    .btn.edit:hover {
+      transform: scale(1.05);
+      background: #7d6bff;
+      box-shadow: 0 0 18px rgba(108, 92, 231, 0.7);
+    }
 
-.btn.cart {
-  background: var(--accent-green);
-  box-shadow: 0 0 12px rgba(79, 232, 176, 0.5);
-}
-.btn.cart:hover {
-  transform: scale(1.05);
-}
+    .btn.delete {
+      background: #d63031;
+      box-shadow: 0 0 12px rgba(214, 48, 49, 0.45);
+    }
 
-.btn.disabled {
-  background: #63707a;
-  opacity: 0.7;
-  cursor: not-allowed;
-}
+    .btn.delete:hover {
+      transform: scale(1.05);
+      background: #ff4b4b;
+      box-shadow: 0 0 18px rgba(255, 75, 75, 0.7);
+    }
+
+    .btn.disabled {
+      background: #7f8c8d;
+      box-shadow: 0 0 12px rgba(127, 140, 141, 0.45);
+      cursor: not-allowed;
+    }
+
+    .btn.disabled:hover {
+      transform: none;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      z-index: 10;
+      backdrop-filter: blur(6px);
+    }
+    .status-available { background: #2ecc71d8; }
+    .status-unavailable { background: #e74c3cd8; }
+    .status-maintenance { background: #f1c40fd8; }
 
 /* ================================
    SEARCH & FILTER BAR
    ================================ */
+
 .filter-bar {
   display: flex;
   gap: 16px;
   margin-top: 18px;
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .filter-bar input,
@@ -335,12 +364,14 @@ p.lead {
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.85);
   color: var(--text-light);
   backdrop-filter: blur(6px);
   font-size: 1rem;
   outline: none;
   transition: 0.25s ease;
+  width: 200px; /* FIX: Set fixed width instead of min-width */
+  box-sizing: border-box; /* FIX: Include padding in width calculation */
 }
 
 .filter-bar input::placeholder {
@@ -351,39 +382,69 @@ p.lead {
 .filter-bar select:focus {
   border-color: var(--accent-blue);
   box-shadow: 0 0 12px rgba(76,201,240,0.35);
+  background: rgba(30, 41, 59, 0.95);
 }
 
+/* Ensure dropdown options are visible */
 .filter-bar select option {
-  background: #1b263b;
+  background: #1e293b;
+  color: var(--text-light);
+  padding: 10px;
 }
 
-
-/* ================================
-   STATUS BADGES (Soft neon)
-   ================================ */
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: capitalize;
-  color: #fff;
+/* For better mobile experience */
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .filter-bar input,
+  .filter-bar select {
+    width: 100%; /* FIX: Full width on mobile */
+    max-width: 300px;
+  }
 }
 
-.status-available { background: #2ecc71d8; }
-.status-unavailable { background: #e74c3cd8; }
-.status-maintenance { background: #f1c40fd8; }
+    /* ================================
+       RESPONSIVE
+       ================================ */
 
-/* ================================
-   RESPONSIVE
-   ================================ */
-@media (max-width: 720px) {
-  .menu-toggle { left: 20px !important; }
-  .sidebar { width: 210px; }
-  .main { margin-left: 210px; }
-}
+    @media (max-width: 1400px) {
+      .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
 
+    @media (max-width: 1100px) {
+      .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
 
+    @media (max-width: 850px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .menu-toggle { left: 20px !important; }
+      .sidebar { width: 210px; }
+      .main { margin-left: 210px; }
+    }
+
+    @media (max-width: 600px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+      .filter-bar {
+        flex-direction: column;
+      }
+      .main {
+        padding: 70px 16px 16px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -411,33 +472,35 @@ p.lead {
 
     <!-- Main -->
     <div class="main" id="mainContent">
-      <h1>Welcome, <%= currentUser ? currentUser.firstName : 'Guest' %> 👋</h1>
-      <p class="lead">Browse available products below:</p>
+      <div class="center-header">
+        <h1>Welcome, <%= currentUser ? currentUser.firstName : 'Guest' %> 👋</h1>
+        <p class="lead">Browse available products below:</p>
+      </div>
+
       <div class="filter-bar">
-  <input 
-    type="text" 
-    id="searchInput" 
-    placeholder="Search product name..."
-  />
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search product name..."
+        />
 
-  <select id="categoryFilter">
-    <option value="">All Categories</option>
-    <% 
-      const categories = [...new Set(products.map(p => p.category || "General"))];
-      categories.forEach(c => { 
-    %>
-      <option value="<%= c %>"><%= c %></option>
-    <% }) %>
-  </select>
+        <select id="categoryFilter">
+          <option value="">All Categories</option>
+          <% 
+            const categories = [...new Set(products.map(p => p.category || "General"))];
+            categories.forEach(c => { 
+          %>
+            <option value="<%= c %>"><%= c %></option>
+          <% }) %>
+        </select>
 
-  <select id="statusFilter">
-    <option value="">All Status</option>
-    <option value="available">Available</option>
-    <option value="unavailable">Unavailable</option>
-    <option value="maintenance">Maintenance</option>
-  </select>
-</div>
-
+        <select id="statusFilter">
+          <option value="">All Status</option>
+          <option value="available">Available</option>
+          <option value="unavailable">Unavailable</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
+      </div>
 
       <div class="product-grid">
         <% if (products && products.length > 0) { %>
@@ -453,48 +516,44 @@ p.lead {
               />
 
               <div class="product-meta">
-                
-<div class="product-category">
-  <span class="label">Category:</span>
-  <strong class="category-text"><%= p.category || 'General' %></strong>
-
-</div>
+                <div class="product-category">
+                  <span class="label">Category:</span>
+                  <strong class="category-text"><%= p.category || 'General' %></strong>
+                </div>
 
                 <div>
                   <span class="price">₱<%= (p.price || 0).toFixed(2) %></span>
-
                 </div>
               </div>
 
               <h3><%= p.name %></h3>
               <p class="desc"><%= p.description ? (p.description.length > 140 ? p.description.substring(0,140) + '…' : p.description) : '' %></p>
 
-                <div class="product-meta" style="margin-top:6px; align-items: center;">
-                  <div class="stock">
-                    <% if (typeof p.stock === 'number') { %>
-                      Stock: <strong><%= p.stock %></strong>
-                    <% } else { %>
-                      Stock: <strong>—</strong>
-                    <% } %>
-                  </div>
-
-                  <div>
-                    <% if (p.status) { %>
-                      <span class="status-badge 
-                        <% if (p.status === 'available') { %> status-available 
-                        <% } else if (p.status === 'unavailable') { %> status-unavailable 
-                        <% } else if (p.status === 'maintenance') { %> status-maintenance 
-                        <% } %>">
-                        <%= p.status %>
-                      </span>
-                    <% } %>
-                  </div>
-
-                  <div style="font-size:0.85rem;color:#6b7280;">
-                    Added: <%= p.createdAt ? (new Date(p.createdAt)).toLocaleDateString() : '—' %>
-                  </div>
+              <div class="product-meta" style="margin-top:6px; align-items: center;">
+                <div class="stock">
+                  <% if (typeof p.stock === 'number') { %>
+                    Stock: <strong><%= p.stock %></strong>
+                  <% } else { %>
+                    Stock: <strong>—</strong>
+                  <% } %>
                 </div>
 
+                <div>
+                  <% if (p.status) { %>
+                    <span class="status-badge 
+                      <% if (p.status === 'available') { %> status-available 
+                      <% } else if (p.status === 'unavailable') { %> status-unavailable 
+                      <% } else if (p.status === 'maintenance') { %> status-maintenance 
+                      <% } %>">
+                      <%= p.status %>
+                    </span>
+                  <% } %>
+                </div>
+
+                <div style="font-size:0.85rem;color:#6b7280;">
+                  Added: <%= p.createdAt ? (new Date(p.createdAt)).toLocaleDateString() : '—' %>
+                </div>
+              </div>
 
               <div class="product-actions">
                 <a class="btn view" href="/product/<%= p._id %>">🔍 View</a>
@@ -508,15 +567,16 @@ p.lead {
                 <% } %>
 
                 <% if (currentUser && currentUser.role === 'admin') { %>
-                  <a class="btn edit" href="/users/admin/products/edit/<%= p._id %>">✏✏ Edit</a>
+                  <a class="btn edit" href="/users/admin/products/edit/<%= p._id %>">✏ Edit</a>
                   <a class="btn delete" href="/users/admin/products/delete/<%= p._id %>">🗑 Delete</a>
-
                 <% } %>
               </div>
             </div>
           <% }) %>
         <% } else { %>
-          <div style="grid-column: 1 / -1; color:#475569;">No products available.</div>
+          <div style="grid-column: 1 / -1; color:#475569; text-align: center; padding: 40px;">
+            No products available.
+          </div>
         <% } %>
       </div>
     </div>
@@ -550,27 +610,25 @@ p.lead {
   const statusFilter = document.getElementById("statusFilter");
   const cards = document.querySelectorAll(".product-card");
 
-function applyFilters() {
-  const search = searchInput.value.toLowerCase();
-  const category = categoryFilter.value;
-  const status = statusFilter.value.toLowerCase();
+  function applyFilters() {
+    const search = searchInput.value.toLowerCase();
+    const category = categoryFilter.value;
+    const status = statusFilter.value.toLowerCase();
 
-  cards.forEach(card => {
-    const name = card.querySelector("h3").innerText.toLowerCase();
-    const cat = card.querySelector(".category-text").innerText.trim();
-    const stat = card.querySelector(".status-badge")?.innerText.trim().toLowerCase();
+    cards.forEach(card => {
+      const name = card.querySelector("h3").innerText.toLowerCase();
+      const cat = card.querySelector(".category-text").innerText.trim();
+      const stat = card.querySelector(".status-badge")?.innerText.trim().toLowerCase();
 
-    let match = true;
+      let match = true;
 
-    if (search && !name.includes(search)) match = false;
-    if (category && category !== cat) match = false;
-    if (status && status !== stat) match = false;
+      if (search && !name.includes(search)) match = false;
+      if (category && category !== cat) match = false;
+      if (status && status !== stat) match = false;
 
-    card.style.display = match ? "" : "none";
-  });
-}
-
-
+      card.style.display = match ? "" : "none";
+    });
+  }
 
   searchInput.addEventListener("input", applyFilters);
   categoryFilter.addEventListener("change", applyFilters);
