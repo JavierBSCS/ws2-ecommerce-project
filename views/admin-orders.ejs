@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+</head>
+<body>
+
+<h1>Admin – Orders</h1>
+
+<% if (!orders.length) { %>
+  <p>No orders yet.</p>
+<% } else { %>
+
+<table border="1" cellspacing="0" cellpadding="10">
+  <tr>
+    <th>Order ID</th>
+    <th>Customer Email</th>
+    <th>Total Amount</th>
+    <th>Status</th>
+    <th>Date</th>
+  </tr>
+
+  <% orders.forEach(o => { %>
+    <tr>
+      <td><%= o.orderId %></td>
+      <td><%= o.userEmail %></td>
+      <td>₱<%= o.totalAmount.toFixed(2) %></td>
+      <td><%= o.orderStatus %></td>
+      <td><%= new Date(o.createdAt).toLocaleString() %></td>
+    </tr>
+  <% }) %>
+
+</table>
+
+<% } %>
+
+</body>
+</html>

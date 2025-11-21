@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= product.name %></title>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-bg: rgba(255, 255, 255, 0.10);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --text-light: #e5e9f0;
+      --text-muted: #9aa3b2;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      background: var(--bg-gradient);
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text-light);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 28px;
+      border-radius: 18px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 0 22px rgba(0,0,0,0.35);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2rem;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(76,201,240,0.45);
+    }
+
+    img {
+      width: 100%;
+      max-height: 380px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin: 18px 0;
+      box-shadow: 0 0 18px rgba(0,0,0,0.45);
+    }
+
+    .details {
+      font-size: 1.1rem;
+      line-height: 1.6rem;
+    }
+
+    .details strong {
+      color: var(--accent-blue);
+    }
+
+    .btn-back {
+      display: inline-block;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      margin-bottom: 15px;
+      backdrop-filter: blur(8px);
+      transition: 0.25s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(255,255,255,0.18);
+      transform: scale(1.05);
+    }
+
+    .actions {
+      margin-top: 25px;
+      display: flex;
+      gap: 14px;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      transition: 0.25s ease;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+    }
+
+    .btn.cart {
+      background: #2ecc71bb;
+      box-shadow: 0 0 12px rgba(46,204,113,0.45);
+    }
+
+    .btn.cart:hover {
+      transform: scale(1.07);
+      background: #3edc81;
+    }
+
+    .btn.disabled {
+      background: #7f8c8d;
+      cursor: not-allowed;
+    }
+
+    .price {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 10px 0;
+      color: var(--accent-green);
+      text-shadow: 0 0 10px rgba(79,232,176,0.55);
+    }
+  </style>
+
+</head>
+<body>
+
+  <div class="container">
+
+    <a href="/users/dashboard" class="btn-back">⬅ Back to Dashboard</a>
+
+    <h1><%= product.name %></h1>
+
+    <div class="price">₱<%= product.price %></div>
+
+    <% if (product.images && product.images.length) { %>
+      <img src="<%= product.images[0] %>" alt="Product Image">
+    <% } else { %>
+      <img src="/placeholder.png" alt="No Image">
+    <% } %>
+
+    <div class="details">
+      <p><strong>Category:</strong> <%= product.category %></p>
+      <p><strong>Description:</strong> <%= product.description %></p>
+      <p><strong>Stock:</strong> <%= product.stock %></p>
+    </div>
+
+<div class="actions">
+
+  <% if (user && user.role === "admin") { %>
+
+      <!-- Admin logged in → no add to cart -->
+      <span class="btn disabled">Admins cannot buy</span>
+
+  <% } else { %>
+
+      <% if (product.stock > 0) { %>
+          <a href="/cart/add/<%= product._id %>" class="btn cart">🛒 Add to Cart</a>
+      <% } else { %>
+          <span class="btn disabled">Out of Stock</span>
+      <% } %>
+
+  <% } %>
+
+</div>
+
+
+  </div>
+
+</body>
+</html>

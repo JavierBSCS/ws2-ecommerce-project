@@ -83,6 +83,23 @@ router.post('/register', async (req, res) => {
   }
 });
 
+//ORDER HISTORY
+router.get("/orders/history", requireLogin, async (req, res) => {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const ordersCol = db.collection("orders");
+
+    const orders = await ordersCol
+        .find({ userId: req.session.user.userId })
+        .sort({ createdAt: -1 })
+        .toArray();
+
+    res.render("orders-history", {
+        title: "My Orders",
+        orders
+    });
+});
+
+
 // ================== VERIFY EMAIL ==================
 router.get('/verify/:token', async (req, res) => {
   try {

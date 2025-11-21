@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
+const requireLogin = require("../middleware/auth");
+
 
 // Add product to cart
 router.get("/add/:id", async (req, res) => {
@@ -100,9 +102,20 @@ router.get("/", (req, res) => {
     });
 });
 
-// Checkout placeholder
-router.get("/checkout", (req, res) => {
-    res.send("Checkout coming soon!");
+//checkout
+router.get("/checkout", requireLogin, async (req, res) => {
+    const cart = req.session.cart || [];
+
+    if (cart.length === 0) {
+        return res.redirect("/cart");
+    }
+
+res.render("customer/checkout", {
+    title: "Checkout",
+    cart
 });
+
+});
+
 
 module.exports = router;

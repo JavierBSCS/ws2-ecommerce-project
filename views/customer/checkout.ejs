@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --text-light: #e5e9f0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 15px;
+    }
+
+    .checkout-container {
+      width: 100%;
+      max-width: 850px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent-blue);
+      margin-bottom: 25px;
+      font-size: 2.4rem;
+      text-shadow: 0 0 10px #4cc9f088;
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: var(--accent-green);
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 15px 10px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    th {
+      background: rgba(255,255,255,0.08);
+      text-align: left;
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+      letter-spacing: 0.5px;
+    }
+
+    .total-section {
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: right;
+      color: var(--accent-green);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      margin-top: 30px;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--accent-green);
+      background: rgba(79, 232, 176, 0.2);
+      color: var(--text-light);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: rgba(79, 232, 176, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(79, 232, 176, 0.6);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="checkout-container">
+
+  <a href="/cart" class="back-link">⬅ Back to Cart</a>
+
+  <h1>Checkout</h1>
+
+  <h2>Order Summary</h2>
+
+  <table>
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th>Qty</th>
+      <th>Subtotal</th>
+    </tr>
+
+    <% cart.forEach(item => { %>
+      <tr>
+        <td><%= item.name %></td>
+        <td>₱<%= item.price %></td>
+        <td><%= item.qty %></td>
+        <td>₱<%= (item.qty * item.price).toFixed(2) %></td>
+      </tr>
+    <% }) %>
+  </table>
+
+  <div class="total-section">
+    Total Amount: ₱<%= cart.reduce((a, i) => a + (i.price * i.qty), 0).toFixed(2) %>
+  </div>
+
+  <!-- Checkout submission form -->
+  <form id="finalCheckoutForm" method="POST" action="/orders/checkout">
+    <input type="hidden" name="items" id="itemsFinalInput">
+    <button type="submit" class="btn">✔ Place Order</button>
+  </form>
+
+</div>
+
+<script>
+  // Prepare cart for POST
+  document.getElementById("finalCheckoutForm").addEventListener("submit", function() {
+    const items = JSON.parse('<%- JSON.stringify(cart) %>');
+    const formatted = items.map(i => ({
+      productId: i.productId,
+      quantity: i.qty
+    }));
+    document.getElementById("itemsFinalInput").value = JSON.stringify(formatted);
+  });
+</script>
+
+</body>
+</html>

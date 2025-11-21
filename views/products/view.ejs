@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details</title>
+
+  <style>
+    body {
+      background: #0d1b2a;
+      color: #e5e9f0;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: auto;
+      background: rgba(255,255,255,0.08);
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      color: #4cc9f0;
+      text-shadow: 0 0 12px #4cc9f0aa;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background: rgba(255,255,255,0.05);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+
+    .label {
+      font-size: 0.9rem;
+      color: #9aa3b2;
+    }
+
+    .value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      text-align: center;
+    }
+
+    th {
+      color: #4cc9f0;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .status-box {
+      padding: 6px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .to_pay { background: #e74c3caa; }
+    .processing { background: #f1c40faa; }
+    .completed { background: #2ecc71aa; }
+    .cancelled { background: #7f8c8daa; }
+
+    .back-btn {
+      margin-top: 25px;
+      display: inline-block;
+      padding: 10px 16px;
+      background: #4a90e2;
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      background: #5aa0f2;
+      box-shadow: 0 0 12px rgba(74,144,226,0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Order Details</h1>
+
+    <div class="info-box">
+      <div class="label">Order ID</div>
+      <div class="value"><%= order.orderId %></div>
+
+      <div class="label" style="margin-top:10px;">Order Status</div>
+      <span class="status-box <%= order.orderStatus %>">
+        <%= order.orderStatus.replace("_", " ").toUpperCase() %>
+      </span>
+
+      <div class="label" style="margin-top:10px;">Order Date</div>
+      <div class="value"><%= new Date(order.createdAt).toLocaleString() %></div>
+    </div>
+
+    <h2 style="margin-top:15px;">Items</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% order.items.forEach(i => { %>
+          <tr>
+            <td><%= i.name %></td>
+            <td>₱<%= i.price.toFixed(2) %></td>
+            <td><%= i.quantity %></td>
+            <td>₱<%= i.subtotal.toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top:20px; text-align:right;">
+      Total: ₱<%= order.totalAmount.toFixed(2) %>
+    </h2>
+
+    <a href="/orders/history" class="back-btn">← Back to Order History</a>
+
+  </div>
+
+</body>
+</html>

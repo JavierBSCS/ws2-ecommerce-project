@@ -475,7 +475,7 @@
       <h2>Dashboard</h2>
 
       <a href="/users/profile">👤 Profile</a>
-      <a href="/orders">🛒 My Orders</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
 
       <% if (currentUser && currentUser.role === "admin") { %>
         <h3 style="color: #d1d5db; margin-top: 14px;">Admin Tools</h3>
@@ -576,7 +576,7 @@
               </div>
 
               <div class="product-actions">
-                <a class="btn view" href="/product/<%= p._id %>">🔍 View</a>
+               <a class="btn view" href="/products/view/<%= p._id %>">🔍 View</a>
 
                 <% if (currentUser && (currentUser.role === 'customer' || currentUser.role === 'user')) { %>
                   <% if (p.stock && p.stock > 0) { %>
@@ -654,6 +654,7 @@
   categoryFilter.addEventListener("change", applyFilters);
   statusFilter.addEventListener("change", applyFilters);
 </script>
+
 
 </body>
 </html>

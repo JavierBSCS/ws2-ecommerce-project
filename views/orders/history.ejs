@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: Arial, sans-serif;
+      background: #0d1b2a;
+      color: #e5e9f0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #4cc9f0;
+      text-shadow: 0 0 12px #4cc9f0aa;
+    }
+
+    .orders-container {
+      width: 90%;
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255,255,255,0.07);
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    th {
+      background: rgba(255,255,255,0.12);
+      color: #4cc9f0;
+      text-shadow: 0 0 8px #4cc9f0aa;
+    }
+
+    tr:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .status {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .to_pay { background: #e74c3caa; }
+    .processing { background: #f1c40faa; }
+    .completed { background: #2ecc71aa; }
+    .cancelled { background: #7f8c8daa; }
+
+    .view-btn {
+      background: #4a90e2;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.25s;
+    }
+
+    .view-btn:hover {
+      background: #5aa0f2;
+      box-shadow: 0 0 12px rgba(74,144,226,0.6);
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📦 My Order History</h1>
+
+  <div class="orders-container">
+
+    <% if (orders.length === 0) { %>
+      <p style="text-align:center; font-size:1.2rem; color:#9aa3b2;">
+        You haven't placed any orders yet.
+      </p>
+    <% } else { %>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>View</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><%= order.orderId %></td>
+
+              <td>₱<%= order.totalAmount.toFixed(2) %></td>
+
+              <td>
+                <span class="status <%= order.orderStatus %>">
+                  <%= order.orderStatus.replace("_", " ").toUpperCase() %>
+                </span>
+              </td>
+
+              <td><%= new Date(order.createdAt).toLocaleString() %></td>
+
+              <td>
+                <a class="view-btn" href="/orders/view/<%= order.orderId %>">
+                  🔍 View
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+
+      </table>
+
+    <% } %>
+  </div>
+
+</body>
+</html>

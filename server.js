@@ -7,18 +7,20 @@ const path = require('path');
 require('dotenv').config();
 const mongoose = require("mongoose");
 
-
-
+const ordersRoute = require("./routes/orders");
+const adminOrdersRoute = require("./routes/adminOrders");
 
 // ROUTES
 const passwordRoute = require('./routes/password');
 const indexRoute = require('./routes/index');
+const productsRoute = require("./routes/products");
 const usersRoute = require('./routes/users');
+const cartRoute = require("./routes/cart");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // ================================
 // VIEW ENGINE & STATIC FILES
@@ -26,7 +28,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 // ================================
 // SESSION CONFIG
@@ -38,8 +39,8 @@ app.use(
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      secure: false,               // required for local development
-      maxAge: 15 * 60 * 1000       // 15 minutes
+      secure: false,
+      maxAge: 15 * 60 * 1000
     }
   })
 );
@@ -50,14 +51,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// ================================
+// ROUTES (IMPORTANT ORDER)
+// ================================
 
-// ================================
-// ROUTES
-// ================================
-app.use('/', indexRoute);
+// 1️⃣ PUBLIC PRODUCT ROUTES FIRST
+app.use("/products", productsRoute);
+
+// 2️⃣ CART ROUTES
+app.use("/cart", cartRoute);
+
+// 3️⃣ USERS (contains its own 404 so must come later)
 app.use('/users', usersRoute);
-app.use('/password', passwordRoute);
 
+// 4️⃣ OTHER ROUTES
+app.use('/password', passwordRoute);
+app.use("/orders", ordersRoute);
+app.use("/admin", adminOrdersRoute);
+
+// 5️⃣ INDEX ROUTE
+app.use('/', indexRoute);
 
 // ================================
 // SITEMAP
@@ -65,15 +78,8 @@ app.use('/password', passwordRoute);
 app.get('/sitemap.xml', (req, res) => {
   const filePath = path.join(__dirname, 'sitemap.xml');
   res.type('application/xml');
-
-  res.sendFile(filePath, err => {
-    if (err) {
-      console.error("Error sending sitemap.xml:", err);
-      res.status(500).send("Error loading sitemap");
-    }
-  });
+  res.sendFile(filePath);
 });
-
 
 // ================================
 // MONGO SETUP
@@ -81,38 +87,23 @@ app.get('/sitemap.xml', (req, res) => {
 const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
-// Make Mongo available inside route files
 app.locals.client = client;
 app.locals.dbName = process.env.DB_NAME || "ecommerceDB";
 
-
-app.use("/cart", require("./routes/cart"));
-
-
 // ================================
-// 500 (SERVER ERROR)
+// 500 ERROR HANDLER
 // ================================
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR:", err.stack);
-
-  if (res.headersSent) return next(err);
-
-  res.status(500).render('500', {
-    title: "Server Error",
-    user: res.locals.user || null
-  });
+  res.status(500).render('500', { title: "Server Error", user: res.locals.user });
 });
 
 // ================================
-// MONGOOSE SETUP
+// MONGOOSE CONNECT
 // ================================
-mongoose.connect(uri, {
-  dbName: process.env.DB_NAME || "ecommerceDB"
-})
-.then(() => console.log("✅ Mongoose connected"))
-.catch(err => console.error("❌ Mongoose error:", err));
-
-
+mongoose.connect(uri, { dbName: process.env.DB_NAME || "ecommerceDB" })
+  .then(() => console.log("✅ Mongoose connected"))
+  .catch(err => console.error("❌ Mongoose error:", err));
 
 // ================================
 // START SERVER
@@ -130,6 +121,5 @@ async function main() {
     console.error("❌ MongoDB connection failed:", err);
   }
 }
-
 
 main();
