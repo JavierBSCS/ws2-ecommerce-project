@@ -52,6 +52,7 @@
           <th>Order ID</th>
           <th>Order Name</th>
           <th>Total</th>
+          <th>Payment Method</th>
           <th>Status</th>
           <th>Date</th>
           <th>Actions</th>
@@ -107,6 +108,17 @@
               </span>
             </td>
 
+            <!-- PAYMENT METHOD -->
+            <td>
+              <span class="payment-method <%= o.paymentMethod?.toLowerCase() || 'cash' %>">
+                <% if (o.paymentMethod === 'gcash') { %>
+                  📱 GCash
+                <% } else { %>
+                  💵 Cash on Delivery
+                <% } %>
+              </span>
+            </td>
+
             <!-- STATUS -->
             <td>
               <span class="status <%= o.orderStatus %>">
@@ -117,14 +129,18 @@
             <!-- DATE -->
             <td>
               <span class="order-date">
-                <%= new Date(o.createdAt).toLocaleString("en-US", {
-                  month: "2-digit",
-                  day: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true
-                }) %>
+                <% 
+                  const date = new Date(o.createdAt);
+                  const formattedDate = date.toLocaleString("en-US", {
+                    month: "2-digit",
+                    day: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true
+                  }).replace(",", "").replace(" AM", " AM").replace(" PM", " PM");
+                %>
+                <%= formattedDate %>
               </span>
             </td>
 
