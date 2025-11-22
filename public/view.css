@@ -1,0 +1,92 @@
+
+    body {
+      background: #0d1b2a;
+      color: #e5e9f0;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: auto;
+      background: rgba(255,255,255,0.08);
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      color: #4cc9f0;
+      text-shadow: 0 0 12px #4cc9f0aa;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background: rgba(255,255,255,0.05);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+
+    .label {
+      font-size: 0.9rem;
+      color: #9aa3b2;
+    }
+
+    .value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      text-align: center;
+    }
+
+    th {
+      color: #4cc9f0;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .status-box {
+      padding: 6px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .to_pay { background: #e74c3caa; }
+    .processing { background: #f1c40faa; }
+    .completed { background: #2ecc71aa; }
+    .cancelled { background: #7f8c8daa; }
+
+    .back-btn {
+      margin-top: 25px;
+      display: inline-block;
+      padding: 10px 16px;
+      background: #4a90e2;
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      background: #5aa0f2;
+      box-shadow: 0 0 12px rgba(74,144,226,0.6);
+    }

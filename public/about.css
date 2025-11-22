@@ -1,0 +1,190 @@
+
+    /* ===== BASE PAGE STYLE (MATCH INDEX) ===== */
+    body.about-body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      background: linear-gradient(135deg, #4e73df, #1cc88a);
+      overflow-x: hidden;
+    }
+
+    /* ===== NAVBAR (SAME AS INDEX) ===== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .navbar .brand a {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .navbar ul.nav-links {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar ul.nav-links li a {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .navbar ul.nav-links li a:hover {
+      color: #ffd700;
+    }
+
+    .nav-actions .btn {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: #fff;
+      color: #4e73df;
+      border: none;
+    }
+
+    .btn.primary:hover {
+      background: #e6e6e6;
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid #fff;
+      color: #fff;
+    }
+
+    .btn.secondary:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .about-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      padding: 60px 20px;
+    }
+
+    .about-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      padding: 40px 50px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      text-align: center;
+      max-width: 700px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .about-card h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 20px;
+      text-shadow: 0 3px 15px rgba(0,0,0,0.4);
+    }
+
+    .about-card p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+
+    .about-card .hero-buttons {
+      margin-top: 30px;
+    }
+
+    .hero-buttons .btn.primary {
+      background: #ffd700;
+      color: #1c1c1c;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .hero-buttons .btn.primary:hover {
+      background: #e6c200;
+    }
+
+    .hero-buttons .btn.secondary {
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .hero-buttons .btn.secondary:hover {
+      background: rgba(255,255,255,0.45);
+    }
+
+    /* ===== FOOTER (SAME AS INDEX) ===== */
+    footer {
+      text-align: center;
+      padding: 25px 20px;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+
+    footer ul.footer-links {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 10px 0 0 0;
+    }
+
+    footer ul.footer-links li a {
+      color: #ffd700;
+      text-decoration: none;
+    }
+
+    footer ul.footer-links li a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .about-card h1 { font-size: 2rem; }
+      .about-card { padding: 30px 25px; }
+    }
+
+    @media (max-width: 480px) {
+      .navbar { flex-direction: column; gap: 15px; }
+      .about-card h1 { font-size: 1.8rem; }
+      .about-card p { font-size: 1rem; }
+    }
