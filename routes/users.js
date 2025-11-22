@@ -62,7 +62,7 @@ router.post(
       const db = req.app.locals.client.db(req.app.locals.dbName);
       const usersCollection = db.collection("users");
 
-      const { firstName, lastName, email } = req.body;
+      const { firstName, lastName, email, address, province, city, zip, phone } = req.body;
 
       // email must be unique
       const emailCheck = await usersCollection.findOne({ email });
@@ -74,6 +74,11 @@ router.post(
       const updateObj = {
         firstName,
         lastName,
+        address: address || '',
+        province: province || '',
+        city: city || '',
+        zip: zip || '',
+        phone: phone || '',
         updatedAt: new Date(),
       };
 
@@ -186,6 +191,12 @@ router.post("/register", async (req, res) => {
       isEmailVerified: false,
       verificationToken,
       tokenExpiry: new Date(Date.now() + 3600000),
+      // Add address fields with empty defaults
+      address: '',
+      province: '',
+      city: '',
+      zip: '',
+      phone: '',
       createdAt: now,
       updatedAt: now,
     };
@@ -322,18 +333,44 @@ router.post("/login", async (req, res) => {
 //  ORDER HISTORY
 // =======================================================================
 router.get("/orders/history", requireLogin, async (req, res) => {
-  const db = req.app.locals.client.db(req.app.locals.dbName);
-  const ordersCol = db.collection("orders");
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const ordersCol = db.collection("orders");
+    const usersCol = db.collection("users");
 
-  const orders = await ordersCol
-    .find({ userId: req.session.user.userId })
-    .sort({ createdAt: -1 })
-    .toArray();
+    let orders;
 
-  res.render("orders-history", {
-    title: "My Orders",
-    orders,
-  });
+    // If user is admin, show all orders. Otherwise, show only their own orders.
+    if (req.session.user.role === "admin") {
+      orders = await ordersCol.find({}).sort({ createdAt: -1 }).toArray();
+      
+      // Get customer info for each order
+      for (let order of orders) {
+        const customer = await usersCol.findOne({ userId: order.userId });
+        if (customer) {
+          order.customerName = `${customer.firstName} ${customer.lastName}`;
+          order.customerEmail = customer.email;
+        } else {
+          order.customerName = "Unknown Customer";
+          order.customerEmail = "N/A";
+        }
+      }
+    } else {
+      orders = await ordersCol
+        .find({ userId: req.session.user.userId })
+        .sort({ createdAt: -1 })
+        .toArray();
+    }
+
+    res.render("orders-history", {
+      title: req.session.user.role === "admin" ? "All Customer Orders" : "My Orders",
+      orders,
+      currentUser: req.session.user
+    });
+  } catch (err) {
+    console.error("Order history error:", err);
+    res.status(500).send("Error loading order history");
+  }
 });
 
 

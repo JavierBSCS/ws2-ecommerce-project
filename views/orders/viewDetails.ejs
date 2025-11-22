@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order #<%= order.orderId %> - Details</title>
+  
+  <link rel="stylesheet" href="/viewDetails.css">
+
+</head>
+
+<body>
+
+<div class="profile-container">
+  <!-- Home button outside container -->
+  <div class="back-btn">
+    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+  </div>
+
+  <div class="container">
+    <a href="/users/orders/history" class="back">⬅ Back to Orders</a>
+    
+    <h1>📋 Order Details</h1>
+    
+    <% if (order) { %>
+      <div class="order-header">
+        <div>
+          <h2>Order #<%= order.orderId %></h2>
+          <p style="color: var(--text-muted); margin-top: 5px;">
+            Placed on <%= new Date(order.createdAt).toLocaleString() %>
+          </p>
+        </div>
+        <div class="order-meta">
+          <span class="status-badge status-<%= order.orderStatus %>">
+            <%= order.orderStatus.replace("_", " ").toUpperCase() %>
+          </span>
+          <p style="color: var(--text-muted); margin-top: 10px;">
+            Last updated: <%= new Date(order.updatedAt).toLocaleString() %>
+          </p>
+        </div>
+      </div>
+      
+      <h3>🛍️ Order Items (<%= order.items.length %>)</h3>
+      <ul class="items-list">
+        <% order.items.forEach((item, index) => { %>
+          <li class="item">
+            <div class="item-details">
+              <div class="item-name">
+                <%= index + 1 %>. <%= item.name %>
+              </div>
+              <div class="item-meta">
+                ₱<%= item.price.toFixed(2) %> × <%= item.quantity %> units
+              </div>
+            </div>
+            <div class="item-price">₱<%= item.subtotal.toFixed(2) %></div>
+          </li>
+        <% }) %>
+      </ul>
+
+      <div class="order-summary">
+        <h3>💰 Order Summary</h3>
+        <div class="summary-row">
+          <span class="summary-label">Subtotal (<%= order.items.length %> items)</span>
+          <span class="summary-value">₱<%= order.subtotal.toFixed(2) %></span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Tax (12% VAT)</span>
+          <span class="summary-value">₱<%= order.tax.toFixed(2) %></span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Shipping Fee</span>
+          <span class="summary-value">₱0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">Total Amount</span>
+          <span class="summary-value">₱<%= order.totalAmount.toFixed(2) %></span>
+        </div>
+      </div>
+      
+      <% if (currentUser.role === 'admin' && customer) { %>
+        <div class="customer-info">
+          <h3>👤 Customer Information</h3>
+          
+          <div class="customer-header">
+            <img src="<%= customer.profileImage || '/uploads/default-avatar.png' %>" 
+                 alt="<%= customer.firstName %> <%= customer.lastName %>" 
+                 class="customer-avatar"
+                 onerror="this.src='/uploads/default-avatar.png'">
+            <div class="customer-basic-info">
+              <h3><%= customer.firstName %> <%= customer.lastName %></h3>
+              <p>📧 <%= customer.email %></p>
+              <p>🆔 <%= customer.userId %></p>
+              <p>📅 Member since <%= new Date(customer.createdAt).toLocaleDateString() %></p>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">📞 Phone Number</div>
+              <div class="info-value"><%= customer.phone || 'Not provided' %></div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">📍 Full Address</div>
+              <div class="info-value"><%= customer.address || 'Not provided' %></div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">🏙️ City</div>
+              <div class="info-value"><%= customer.city || 'Not provided' %></div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">🏛️ Province/State</div>
+              <div class="info-value"><%= customer.province || 'Not provided' %></div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">📮 ZIP Code</div>
+              <div class="info-value"><%= customer.zip || 'Not provided' %></div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">✅ Email Verified</div>
+              <div class="info-value">
+                <% if (customer.isEmailVerified) { %>
+                  <span class="verified-badge">✓ Verified</span>
+                <% } else { %>
+                  <span class="unverified-badge">✗ Not Verified</span>
+                <% } %>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">🔐 Account Status</div>
+              <div class="info-value">
+                <span style="color: <%= customer.accountStatus === 'active' ? 'var(--accent-green)' : 'var(--danger-red)' %>; font-weight: bold;">
+                  <%= customer.accountStatus || 'active' %>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      
+    <% } else { %>
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <p style="font-size: 1.2rem;">Order not found.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+</body>
+</html>

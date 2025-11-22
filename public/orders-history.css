@@ -304,3 +304,124 @@
       transform: translateY(-2px);
       box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
     }
+
+    /* Additional styles for the view button and table enhancements */
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-view {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border: 1px solid var(--accent-blue);
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+    }
+    
+    .btn-view:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(76, 201, 240, 0.5);
+    }
+    
+    .btn-admin {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      background: rgba(157, 78, 221, 0.2);
+      color: var(--text-light);
+      border: 1px solid var(--accent-purple);
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+    }
+    
+    .btn-admin:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
+    }
+    
+    .customer-info {
+      font-size: 0.9rem;
+    }
+    
+    .customer-name {
+      font-weight: 600;
+      color: var(--accent-green);
+      margin-bottom: 4px;
+    }
+    
+    .customer-email {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    
+    .customer-id {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-family: monospace;
+    }
+    
+    .order-id {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+    }
+    
+    .order-name {
+      font-weight: 500;
+    }
+    
+    .order-total {
+      font-weight: 600;
+      color: var(--accent-green);
+      font-size: 1.1rem;
+    }
+    
+    .order-date {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    /* Ensure table is wide enough */
+    table {
+      width: 100%;
+      table-layout: fixed;
+    }
+    
+    th:nth-child(1), /* Customer */
+    th:nth-child(2), /* Order ID */
+    th:nth-child(3), /* Order Name */
+    th:nth-child(4), /* Total */
+    th:nth-child(5), /* Status */
+    th:nth-child(6), /* Date */
+    th:nth-child(7) { /* Actions */
+      width: auto;
+    }
+    
+    /* Make actions column flexible */
+    th:last-child,
+    td:last-child {
+      width: 180px;
+      min-width: 180px;
+    }
+
+    
+

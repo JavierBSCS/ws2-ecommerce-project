@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Orders</title>
+  <title><%= title %></title>
   <link rel="stylesheet" href="/orders-history.css">
-
-
 </head>
 
 <body>
@@ -18,12 +16,24 @@
 
   <div class="container">
     <a href="/users/dashboard" class="back">⬅ Back to Products</a>
-    <h1>📦 My Orders</h1>
     
+    <h1>
+      <% if (currentUser.role === 'admin') { %>
+        📦 All Customer Orders
+      <% } else { %>
+        📦 My Orders
+      <% } %>
+    </h1>
 
     <% if (!orders.length) { %>
       <div class="empty-state">
-        <p>You have not placed any orders yet.</p>
+        <p>
+          <% if (currentUser.role === 'admin') { %>
+            No orders found from customers.
+          <% } else { %>
+            You have not placed any orders yet.
+          <% } %>
+        </p>
         <a href="/users/dashboard" class="btn btn-primary">🛍️ Start Shopping</a>
       </div>
     <% } else { %>
@@ -31,6 +41,9 @@
     <table>
       <thead>
         <tr>
+          <% if (currentUser.role === 'admin') { %>
+            <th>Customer</th>
+          <% } %>
           <th>Order ID</th>
           <th>Order Name</th>
           <th>Total</th>
@@ -42,52 +55,92 @@
       <tbody>
         <% orders.forEach(o => { %>
           <tr>
-            <td><strong><%= o.orderId %></strong></td>
+            <!-- CUSTOMER COLUMN (Admin Only) -->
+            <% if (currentUser.role === 'admin') { %>
+              <td>
+                <div class="customer-info">
+                  <div class="customer-name">
+                    👤 <%= o.customerName || 'Loading...' %>
+                  </div>
+                  <% if (o.customerEmail) { %>
+                    <div class="customer-email">
+                      📧 <%= o.customerEmail %>
+                    </div>
+                  <% } %>
+                  <div class="customer-id">
+                    ID: <%= o.userId %>
+                  </div>
+                </div>
+              </td>
+            <% } %>
+
+            <!-- ORDER ID -->
+            <td>
+              <span class="order-id">
+                <%= o.orderId %>
+              </span>
+            </td>
 
             <!-- ORDER NAME -->
             <td>
-              <% 
-                const firstItem = o.items[0];
-                const extra = o.items.length - 1;
-                const orderName = extra > 0 
-                  ? `${firstItem.name} and ${extra} more`
-                  : firstItem.name;
-              %>
-              <%= orderName %>
+              <span class="order-name">
+                <% 
+                  const firstItem = o.items[0];
+                  const extra = o.items.length - 1;
+                  const orderName = extra > 0 
+                    ? `${firstItem.name} and ${extra} more`
+                    : firstItem.name;
+                %>
+                <%= orderName %>
+              </span>
             </td>
 
             <!-- TOTAL -->
-            <td><strong>₱<%= (o.totalAmount || o.subtotal || 0).toFixed(2) %></strong></td>
+            <td>
+              <span class="order-total">
+                ₱<%= (o.totalAmount || o.subtotal || 0).toFixed(2) %>
+              </span>
+            </td>
 
             <!-- STATUS -->
             <td>
               <span class="status <%= o.orderStatus %>">
-                <%= o.orderStatus %>
+                <%= o.orderStatus.replace("_", " ").toUpperCase() %>
               </span>
             </td>
 
             <!-- DATE -->
             <td>
-              <%= new Date(o.createdAt).toLocaleString("en-US", {
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-              }) %>
+              <span class="order-date">
+                <%= new Date(o.createdAt).toLocaleString("en-US", {
+                  month: "2-digit",
+                  day: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true
+                }) %>
+              </span>
             </td>
 
             <!-- ACTIONS -->
             <td>
-              <% if (o.orderStatus === "to_pay") { %>
-                <form action="/orders/cancel/<%= o.orderId %>" method="POST" style="display:inline;">
-                  <button type="submit" class="btn btn-danger">Cancel</button>
-                </form>
-              <% } else { %>
-                <span style="color: var(--text-muted);">—</span>
-              <% } %>
+              <div class="actions-cell">
+                <!-- VIEW BUTTON - Always show this for everyone -->
+                <a href="/orders/view/<%= o.orderId %>" class="btn-view">
+                  👁️ View
+                </a>
+
+                <!-- CANCEL BUTTON - Show only for customers with "to_pay" status -->
+                <% if (currentUser.role !== 'admin' && o.orderStatus === "to_pay") { %>
+                  <form action="/orders/cancel/<%= o.orderId %>" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-danger" 
+                            onclick="return confirm('Are you sure you want to cancel this order?')">
+                      Cancel
+                    </button>
+                  </form>
+                <% } %>
+              </div>
             </td>
           </tr>
         <% }) %>

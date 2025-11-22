@@ -85,14 +85,59 @@ router.get("/success", requireLogin, (req, res) => {
 
 // VIEW SINGLE ORDER
 router.get("/view/:orderId", requireLogin, async (req, res) => {
-  const db = req.app.locals.client.db(req.app.locals.dbName);
-  const ordersCol = db.collection("orders");
+  try {
+    console.log("📥 View order request received for orderId:", req.params.orderId);
+    
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const ordersCol = db.collection("orders");
+    const usersCol = db.collection("users");
 
-  const order = await ordersCol.findOne({ orderId: req.params.orderId });
+    const order = await ordersCol.findOne({ orderId: req.params.orderId });
+    console.log("📦 Order found:", order ? "Yes" : "No");
 
-  if (!order) return res.status(404).send("Order not found");
+    if (!order) {
+      console.log("❌ Order not found");
+      return res.status(404).send("Order not found");
+    }
 
-  res.render("orders/view", { order });
+    // Check if user owns the order OR is an admin
+    if (order.userId !== req.session.user.userId && req.session.user.role !== "admin") {
+      console.log("🚫 Access denied - User doesn't own order and is not admin");
+      return res.status(403).send("Access denied.");
+    }
+
+    // If admin is viewing, get customer details
+    let customer = null;
+    if (req.session.user.role === "admin") {
+      console.log("🔍 Admin viewing - fetching customer data for userId:", order.userId);
+      customer = await usersCol.findOne({ userId: order.userId });
+      console.log("👤 Customer found:", customer ? "Yes" : "No");
+      
+      if (customer) {
+        console.log("📋 Customer data:", {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          phone: customer.phone,
+          address: customer.address,
+          city: customer.city,
+          province: customer.province,
+          zip: customer.zip
+        });
+      }
+    }
+
+    console.log("✅ Rendering viewDetails template...");
+    
+    res.render("orders/viewDetails", { 
+      order, 
+      customer,
+      currentUser: req.session.user 
+    });
+    
+  } catch (err) {
+    console.error("❌ View order error:", err);
+    res.status(500).send("Error loading order");
+  }
 });
 
 // CANCEL ORDER
