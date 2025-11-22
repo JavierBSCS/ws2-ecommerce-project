@@ -1,22 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Order Successful</title>
-      <link rel="stylesheet" href="/checkout-success.css">
-
-
-
+  <meta charset="UTF-8">
+  <title>Order Successful</title>
+  <link rel="stylesheet" href="/checkout-success.css">
 </head>
-
 <body>
 
-    <div class="card">
-        <h1>🎉 Order Successful!</h1>
-        <p>Your order has been placed. Thank you for shopping with us!</p>
-
-        <a class="btn" href="/users/dashboard">Return to Dashboard</a>
+<div class="success-container">
+  <div class="success-card">
+    <!-- Animated Success Icon -->
+    <div class="success-icon">
+      <div class="checkmark">✓</div>
     </div>
+
+    <h1>🎉 Order Successful!</h1>
+    
+    <div class="order-details">
+      <div class="detail-item">
+        <span class="label">Order ID:</span>
+        <span class="value"><%= order.orderId %></span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Total Amount:</span>
+        <span class="value">₱<%= order.totalAmount.toFixed(2) %></span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Payment Method:</span>
+        <span class="value payment-method">
+          <% if (order.paymentMethod === 'cod') { %>
+            💰 Cash on Delivery
+          <% } else if (order.paymentMethod === 'gcash') { %>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="gcash-badge">GCash</div>
+              <% if (order.gcashReference) { %>
+                <span style="font-size: 0.9em; color: var(--text-muted);">
+                  Ref: <%= order.gcashReference %>
+                </span>
+              <% } %>
+            </div>
+          <% } else { %>
+            💳 Payment
+          <% } %>
+        </span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Order Date:</span>
+        <span class="value"><%= new Date(order.createdAt).toLocaleString() %></span>
+      </div>
+    </div>
+
+    <!-- Payment Instructions based on method -->
+    <% if (order.paymentMethod === 'cod') { %>
+      <div class="payment-instructions cod-instructions">
+        <h3>💰 Cash on Delivery Instructions</h3>
+        <div class="instructions-grid">
+          <div class="instruction-step">
+            <div class="step-icon">1</div>
+            <div class="step-content">
+              <strong>Wait for Delivery</strong>
+              <p>Our delivery partner will contact you for the exact delivery time</p>
+            </div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-icon">2</div>
+            <div class="step-content">
+              <strong>Prepare Exact Amount</strong>
+              <p>Have ₱<%= order.totalAmount.toFixed(2) %> ready in cash</p>
+            </div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-icon">3</div>
+            <div class="step-content">
+              <strong>Inspect & Pay</strong>
+              <p>Check your items before making payment</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } else if (order.paymentMethod === 'gcash') { %>
+      <div class="payment-instructions gcash-instructions">
+        <h3>📱 GCash Payment Instructions</h3>
+        <div class="instructions-grid">
+          <div class="instruction-step">
+            <div class="step-icon">1</div>
+            <div class="step-content">
+              <strong>Check Your GCash</strong>
+              <p>Ensure payment of ₱<%= order.totalAmount.toFixed(2) %> was successful</p>
+            </div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-icon">2</div>
+            <div class="step-content">
+              <strong>Save Reference Number</strong>
+              <p>Reference: <strong><%= order.gcashReference %></strong></p>
+            </div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-icon">3</div>
+            <div class="step-content">
+              <strong>Wait for Confirmation</strong>
+              <p>We'll verify your payment and process your order</p>
+            </div>
+          </div>
+        </div>
+        
+        <% if (order.gcashReference) { %>
+          <div class="verification-notice">
+            <div class="verification-icon">⏳</div>
+            <div>
+              <strong>Payment Verification in Progress</strong>
+              <p>Your order will be processed once payment is verified</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+
+    <!-- Order Items Summary -->
+    <div class="order-summary">
+      <h3>📦 Order Items</h3>
+      <div class="items-list">
+        <% order.items.forEach(item => { %>
+          <div class="order-item">
+            <span class="item-name"><%= item.name %></span>
+            <span class="item-quantity">×<%= item.quantity %></span>
+            <span class="item-price">₱<%= item.subtotal.toFixed(2) %></span>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="/users/dashboard" class="btn btn-primary">🏠 Continue Shopping</a>
+      <a href="/users/orders/history" class="btn btn-secondary">📋 View Order History</a>
+    </div>
+
+    <!-- Support Info -->
+    <div class="support-info">
+      <p>Need help? <a href="/contact">Contact our support team</a></p>
+      <p class="email-note">Confirmation email sent to your registered email address</p>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti Effect -->
+<div class="confetti-container"></div>
+
+<script>
+  // Simple confetti effect
+  document.addEventListener('DOMContentLoaded', function() {
+    const confettiContainer = document.querySelector('.confetti-container');
+    const colors = ['#4cc9f0', '#4fe8b0', '#9d4edd', '#ff6b6b', '#ffd166'];
+    
+    for (let i = 0; i < 50; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.animationDelay = Math.random() * 3 + 's';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confettiContainer.appendChild(confetti);
+    }
+  });
+</script>
 
 </body>
 </html>

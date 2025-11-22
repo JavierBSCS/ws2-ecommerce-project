@@ -176,47 +176,58 @@
       transform: translateX(5px);
     }
 
-    /* ================================
-       STATUS BADGES
-       ================================ */
+/* ================================
+   STATUS BADGES
+   ================================ */
 
-    .status {
-      font-weight: 600;
-      text-transform: capitalize;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
+.status {
+    font-weight: 600;
+    text-transform: capitalize;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
 
-    .status.to_pay {
-      background: rgba(79, 232, 176, 0.2);
-      color: var(--accent-green);
-      border: 1px solid var(--accent-green);
-    }
+.status.pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
 
-    .status.paid {
-      background: rgba(76, 201, 240, 0.2);
-      color: var(--accent-blue);
-      border: 1px solid var(--accent-blue);
-    }
+.status.to_pay {
+    background: rgba(79, 232, 176, 0.2);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+}
 
-    .status.shipped {
-      background: rgba(157, 78, 221, 0.2);
-      color: var(--accent-purple);
-      border: 1px solid var(--accent-purple);
-    }
+.status.paid {
+    background: rgba(76, 201, 240, 0.2);
+    color: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+}
 
-    .status.delivered {
-      background: rgba(79, 232, 176, 0.3);
-      color: var(--accent-green);
-      border: 1px solid var(--accent-green);
-    }
+.status.shipped {
+    background: rgba(157, 78, 221, 0.2);
+    color: var(--accent-purple);
+    border: 1px solid var(--accent-purple);
+}
 
-    .status.cancelled {
-      background: rgba(255, 107, 107, 0.2);
-      color: var(--danger-red);
-      border: 1px solid var(--danger-red);
-    }
+.status.delivered {
+    background: rgba(79, 232, 176, 0.3);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+}
+
+.status.cancelled {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--danger-red);
+    border: 1px solid var(--danger-red);
+}
+.status.completed {
+    background: rgba(255, 193, 7, 0.2);
+    color: #00ff62;
+    border: 1px solid #07ff30;
+}
 
     /* ================================
        EMPTY STATE

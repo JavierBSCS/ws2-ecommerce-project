@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Cart</title>
   <link rel="stylesheet" href="/cart.css">
-
- 
 </head>
 <body>
 
@@ -51,15 +49,13 @@
                   <form method="POST" action="/cart/increase/<%= item.productId %>" class="qty-form">
                     <button type="submit" class="qty-btn" title="Increase Quantity">+</button>
                   </form>
-                  
-                  
                 </div>
               </td>
               <td class="item-total">₱<%= (item.price * item.qty).toFixed(2) %></td>
               <td>
                 <form method="POST" action="/cart/remove/<%= item.productId %>" class="qty-form">
-                    <button type="submit" class="qty-btn remove" title="Remove Item">🗑️</button>
-                  </form>
+                  <button type="submit" class="qty-btn remove" title="Remove Item">🗑️</button>
+                </form>
               </td>
             </tr>
           <% }) %>
@@ -86,29 +82,14 @@
         <div class="button-group">
           <a href="/users/dashboard" class="btn btn-primary shop-more-btn">🛍️ Shop More</a>
           
-          <form id="checkoutForm" method="POST" action="/orders/checkout" class="checkout-form">
-            <input type="hidden" name="items" id="itemsInput">
-            <button type="submit" class="btn btn-success">🚀 Proceed to Checkout</button>
-          </form>
+          <!-- CHANGED: Go to checkout page instead of directly to orders -->
+          <a href="/checkout" class="btn btn-success">🚀 Proceed to Checkout</a>
         </div>
       </div>
 
     <% } %>
   </div>
 </div>
-
-<script>
-  // Convert cart items to JSON on submit
-  document.getElementById("checkoutForm").addEventListener("submit", function(e) {
-    const items = JSON.parse('<%- JSON.stringify(cart) %>');
-    const formatted = items.map(i => ({
-      productId: i.productId,
-      quantity: i.qty
-    }));
-
-    document.getElementById("itemsInput").value = JSON.stringify(formatted);
-  });
-</script>
 
 </body>
 </html>

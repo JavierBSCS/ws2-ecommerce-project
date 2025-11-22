@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/admin.css">
+    <style>
+        .qr-management-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .qr-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        .current-qr {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-image {
+            max-width: 300px;
+            max-height: 300px;
+            border: 2px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .upload-form {
+            margin: 25px 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        input[type="file"], input[type="tel"], input[type="text"] {
+            padding: 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            backdrop-filter: blur(10px);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        input[type="tel"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .phone-display {
+            background: rgba(79, 232, 176, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--accent-green);
+            font-family: monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+        .success-message {
+            background: rgba(79, 232, 176, 0.2);
+            color: var(--accent-green);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid var(--accent-green);
+            text-align: center;
+        }
+        .instructions {
+            background: rgba(76, 201, 240, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--accent-blue);
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            color: var(--accent-green);
+            transform: translateX(-5px);
+        }
+        .section-title {
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ================================
+           DELETE BUTTON HOVER EFFECTS
+        ================================ */
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--text-light);
+            border-color: #dc3545;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .btn-danger::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 53, 69, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 0 25px rgba(220, 53, 69, 0.5),
+                0 0 40px rgba(220, 53, 69, 0.3),
+                inset 0 0 15px rgba(255, 255, 255, 0.1);
+            border-color: #ff6b7a;
+        }
+
+        .btn-danger:hover::before {
+            left: 100%;
+        }
+
+        .btn-danger:active {
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 
+                0 0 15px rgba(220, 53, 69, 0.4),
+                0 0 25px rgba(220, 53, 69, 0.2);
+            transition: all 0.1s ease;
+        }
+
+        /* Pulsing glow effect */
+        @keyframes dangerPulse {
+            0% {
+                box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+            }
+        }
+
+        .btn-danger {
+            animation: dangerPulse 3s infinite;
+        }
+
+        .btn-danger:hover {
+            animation: none;
+        }
+
+        /* Save button styling */
+        .btn-save {
+            background: rgba(79, 232, 176, 0.2);
+            color: var(--text-light);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: rgba(79, 232, 176, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="back-btn">
+            <a href="/users/admin" class="btn btn-primary">🏠 Admin Dashboard</a>
+        </div>
+
+        <div class="admin-container">
+            <div class="qr-management-container">
+                <a href="/users/admin" class="back-link">← Back to Admin Dashboard</a>
+                
+                <h1 class="admin-title">📱 Manage GCash QR Codes</h1>
+                
+                <% if (req.query && req.query.success === '1') { %>
+                    <div class="success-message">
+                        ✅ QR code uploaded successfully!
+                    </div>
+                <% } %>
+                
+                <% if (req.query && req.query.deleted === '1') { %>
+                    <div class="success-message">
+                        ✅ QR code deleted successfully!
+                    </div>
+                <% } %>
+
+                <% if (req.query && req.query.saved === '1') { %>
+                    <div class="success-message">
+                        ✅ Phone number updated successfully!
+                    </div>
+                <% } %>
+
+                <div class="qr-section">
+                    <h2 class="section-title">Current QR Code</h2>
+                    
+                    <% if (qrCodeImage) { %>
+                        <div class="current-qr">
+                            <img src="<%= qrCodeImage %>" alt="Current GCash QR Code" class="qr-image">
+                            <p style="color: var(--text-muted); margin-top: 15px;">
+                                This QR code is currently displayed to customers during checkout.
+                            </p>
+                        </div>
+                        
+                        <form method="POST" action="/users/admin/qr-codes/delete" style="text-align: center;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the QR code?')">
+                                🗑️ Delete QR Code
+                            </button>
+                        </form>
+                    <% } else { %>
+                        <div class="current-qr">
+                            <p style="color: var(--text-muted); font-size: 1.1rem;">No QR code uploaded yet.</p>
+                            <p style="color: var(--text-muted);">Customers will see a placeholder until you upload a QR code.</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="qr-section">
+                    <h2 class="section-title">GCash Payment Details</h2>
+                    <form class="upload-form" method="POST" action="/users/admin/qr-codes/save-details">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="gcashNumber">GCash Phone Number:</label>
+                                <input type="tel" 
+                                       id="gcashNumber" 
+                                       name="gcashNumber" 
+                                       value="<%= gcashNumber || '0917 123 4567' %>" 
+                                       placeholder="0917 123 4567"
+                                       pattern="[0-9\s]{11,13}"
+                                       required>
+                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                    Format: 0917 123 4567 (with or without spaces)
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Current Display:</label>
+                                <div class="phone-display" id="phonePreview">
+                                    <%= gcashNumber || '0917 123 4567' %>
+                                </div>
+                                <small style="color: var(--text-muted);">
+                                    This is how it appears to customers
+                                </small>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button type="submit" class="btn btn-save">
+                                💾 Save Phone Number
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="qr-section">
+                    <h2 class="section-title">Upload New QR Code</h2>
+                    <form class="upload-form" method="POST" action="/users/admin/qr-codes/upload" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="qrCodeImage">Select QR Code Image:</label>
+                            <input type="file" id="qrCodeImage" name="qrCodeImage" accept="image/*" required>
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                Supported formats: JPG, PNG, GIF. Max size: 5MB
+                            </small>
+                        </div>
+                        
+                        <div class="instructions">
+                            <strong style="color: var(--accent-blue);">💡 Tips for QR Codes:</strong>
+                            <ul style="color: var(--text-light); margin: 10px 0 0 20px;">
+                                <li>Use a clear, high-quality image of your GCash QR code</li>
+                                <li>Ensure the QR code is square and not distorted</li>
+                                <li>Test the QR code with your phone before uploading</li>
+                                <li>Recommended size: 300x300 pixels minimum</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button type="submit" class="btn btn-primary">📤 Upload QR Code</button>
+                            <a href="/users/admin" class="btn btn-back">← Back to Admin</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real-time phone number preview
+        document.getElementById('gcashNumber').addEventListener('input', function(e) {
+            document.getElementById('phonePreview').textContent = e.target.value || '0917 123 4567';
+        });
+
+        // Format phone number as user types
+        document.getElementById('gcashNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            if (value.length > 11) value = value.substring(0, 11); // Limit to 11 digits
+            
+            // Format as 0917 123 4567
+            if (value.length > 4) {
+                value = value.substring(0, 4) + ' ' + value.substring(4);
+            }
+            if (value.length > 8) {
+                value = value.substring(0, 8) + ' ' + value.substring(8);
+            }
+            
+            e.target.value = value;
+        });
+
+        // Auto-focus on phone number field if empty
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('gcashNumber');
+            if (phoneInput.value === '0917 123 4567') {
+                phoneInput.select();
+            }
+        });
+    </script>
+</body>
+</html>

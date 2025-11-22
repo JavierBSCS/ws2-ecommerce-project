@@ -3,24 +3,94 @@ const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const requireLogin = require("../middleware/auth");
 const { ObjectId } = require("mongodb");
+const multer = require("multer"); // ADD THIS
+const path = require("path"); // ADD THIS
 
-// POST /orders/checkout → creates an order
-router.post("/checkout", requireLogin, async (req, res) => {
+// MULTER CONFIGURATION - ADD THIS SECTION
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/') // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    // Create unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'payment-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Check file type
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// POST /orders/checkout → creates an order (UPDATED FOR FILE UPLOAD)
+router.post("/checkout", requireLogin, upload.single('paymentScreenshot'), async (req, res) => {
   try {
+    console.log("Checkout request received:", {
+      paymentMethod: req.body.paymentMethod,
+      hasGcashReference: !!req.body.gcashReference,
+      hasScreenshot: !!req.file,
+      itemsCount: req.body.items ? JSON.parse(req.body.items).length : 0
+    });
+
     const db = req.app.locals.client.db(req.app.locals.dbName);
     const ordersCol = db.collection("orders");
     const productsCol = db.collection("products");
     const user = req.session.user;
 
     let items = req.body.items;
+    const paymentMethod = req.body.paymentMethod;
+    const gcashReference = req.body.gcashReference;
+    
+    // ADD SCREENSHOT HANDLING
+    let paymentScreenshot = null;
+    if (req.file) {
+      paymentScreenshot = '/uploads/' + req.file.filename;
+      console.log("📸 Screenshot uploaded:", paymentScreenshot);
+    }
+
+    // Validate payment method
+    if (!paymentMethod) {
+      console.log("❌ Payment method missing");
+      return res.status(400).send("Payment method is required.");
+    }
+
+    if (paymentMethod !== 'cod' && paymentMethod !== 'gcash') {
+      console.log("❌ Invalid payment method:", paymentMethod);
+      return res.status(400).send("Invalid payment method.");
+    }
+
+    // Validate GCash reference AND screenshot if GCash is selected
+    if (paymentMethod === 'gcash') {
+      if (!gcashReference) {
+        console.log("❌ GCash reference missing");
+        return res.status(400).send("GCash reference number is required.");
+      }
+      if (!paymentScreenshot) {
+        console.log("❌ Payment screenshot missing");
+        return res.status(400).send("Payment proof screenshot is required for GCash payments.");
+      }
+    }
 
     try {
       items = JSON.parse(items);
     } catch (err) {
+      console.log("❌ Invalid items data:", err);
       return res.status(400).send("Invalid items data.");
     }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
+      console.log("❌ No items provided");
       return res.status(400).send("No items provided.");
     }
 
@@ -41,42 +111,64 @@ router.post("/checkout", requireLogin, async (req, res) => {
       };
     });
 
-    // 🔥 NEW: Subtotal + Tax + Total
+    // Calculate totals
     const subtotal = orderItems.reduce((acc, i) => acc + i.subtotal, 0);
-    const tax = Number((subtotal * 0.12).toFixed(2));  // 12% VAT
+    const tax = Number((subtotal * 0.12).toFixed(2));
     const totalAmount = Number((subtotal + tax).toFixed(2));
 
     const now = new Date();
 
+    // UPDATED: Include paymentScreenshot in order object
     const newOrder = {
       orderId: uuidv4(),
       userId: user.userId,
       items: orderItems,
-
-      // Save full pricing details
-      subtotal,
-      tax,
-      totalAmount,
-
-      orderStatus: "to_pay",
+      paymentMethod: paymentMethod,
+      gcashReference: gcashReference || null,
+      paymentScreenshot: paymentScreenshot, // ADD THIS FIELD
+      subtotal: subtotal,
+      tax: tax,
+      totalAmount: totalAmount,
+      orderStatus: 'pending',
       createdAt: now,
       updatedAt: now
     };
 
+    console.log("📦 Creating order:", {
+      orderId: newOrder.orderId,
+      paymentMethod: newOrder.paymentMethod,
+      hasScreenshot: !!newOrder.paymentScreenshot,
+      status: newOrder.orderStatus
+    });
+
     await ordersCol.insertOne(newOrder);
 
-    // clear cart
+    // Clear cart
     req.session.cart = [];
 
-    return res.redirect("/orders/success");
+    console.log("✅ Order created successfully with screenshot, rendering success page");
+
+    // Render success page with order details
+    res.render("customer/checkout-success", {
+      title: "Order Successful",
+      order: newOrder
+    });
 
   } catch (err) {
-    console.error("Checkout error:", err);
+    console.error("❌ Checkout error:", err);
+    
+    // Handle multer errors specifically
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).send('File too large. Maximum size is 5MB.');
+      }
+    }
+    
     res.status(500).send("Error placing order.");
   }
 });
 
-// SUCCESS PAGE
+// SUCCESS PAGE (Keep this as fallback)
 router.get("/success", requireLogin, (req, res) => {
   res.render("customer/checkout-success", {
     title: "Order Successful"
@@ -127,6 +219,7 @@ router.get("/view/:orderId", requireLogin, async (req, res) => {
     }
 
     console.log("✅ Rendering viewDetails template...");
+    console.log("📸 Order screenshot:", order.paymentScreenshot || "None");
     
     res.render("orders/viewDetails", { 
       order, 
@@ -166,6 +259,45 @@ router.post("/cancel/:orderId", requireLogin, async (req, res) => {
   } catch (err) {
     console.error("Cancel order error:", err);
     res.status(500).send("Error cancelling order");
+  }
+});
+
+// UPDATE ORDER STATUS (Admin only)
+router.post("/update-status/:orderId", requireLogin, async (req, res) => {
+  try {
+    if (req.session.user.role !== "admin") {
+      return res.status(403).send("Access denied.");
+    }
+
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const ordersCol = db.collection("orders");
+
+    const { status } = req.body;
+    const orderId = req.params.orderId;
+
+    const validStatuses = ['to_pay', 'paid', 'shipped', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).send("Invalid status.");
+    }
+
+    const result = await ordersCol.updateOne(
+      { orderId },
+      { 
+        $set: { 
+          orderStatus: status, 
+          updatedAt: new Date() 
+        } 
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).send("Order not found.");
+    }
+
+    res.redirect(`/orders/view/${orderId}`);
+  } catch (err) {
+    console.error("Update order status error:", err);
+    res.status(500).send("Error updating order status");
   }
 });
 

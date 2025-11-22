@@ -657,6 +657,173 @@ router.get("/admin", requireLogin, async (req, res) => {
   });
 });
 
+// In users.js - Add these routes for QR code management
+
+// =======================================================================
+//  MANAGE QR CODES (GET) - Admin only
+// =======================================================================
+router.get("/admin/qr-codes", requireLogin, async (req, res) => {
+  try {
+    console.log("🔍 QR codes page accessed by:", req.session.user.email);
+    
+    if (req.session.user.role !== "admin") {
+      console.log("❌ Access denied - not admin");
+      return res.status(403).send("Access denied.");
+    }
+
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const settingsCol = db.collection("settings");
+    
+    // Get current QR code setting
+    const qrSetting = await settingsCol.findOne({ key: "gcash_qr_code" });
+    console.log("📱 QR code found in DB:", qrSetting ? "Yes" : "No");
+    
+    // Get current phone number setting
+    const phoneSetting = await settingsCol.findOne({ key: "gcash_phone_number" });
+    console.log("📞 Phone number found in DB:", phoneSetting ? phoneSetting.value : "Not found");
+    
+    res.render("admin/manageQRCodes", {
+      title: "Manage QR Codes",
+      currentUser: req.session.user,
+      qrCodeImage: qrSetting ? qrSetting.value : null,
+      gcashNumber: phoneSetting ? phoneSetting.value : "0917 123 4567", // Use saved number or default
+      req: req // Pass req for query parameters
+    });
+  } catch (err) {
+    console.error("❌ QR codes error:", err);
+    res.status(500).send("Error loading QR codes page: " + err.message);
+  }
+});
+
+// =======================================================================
+//  UPLOAD QR CODE (POST) - Admin only
+// =======================================================================
+const uploadQRCode = require("../middleware/uploadQRCode");
+
+router.post(
+  "/admin/qr-codes/upload",
+  requireLogin,
+  uploadQRCode.single("qrCodeImage"),
+  async (req, res) => {
+    if (req.session.user.role !== "admin")
+      return res.status(403).send("Access denied.");
+
+    try {
+      const db = req.app.locals.client.db(req.app.locals.dbName);
+      const settingsCol = db.collection("settings");
+
+      if (!req.file) {
+        return res.status(400).send("No file uploaded.");
+      }
+
+      const qrCodePath = "/uploads/qr-codes/" + req.file.filename;
+
+      // Save or update QR code path in settings
+      await settingsCol.updateOne(
+        { key: "gcash_qr_code" },
+        { 
+          $set: { 
+            value: qrCodePath,
+            updatedAt: new Date()
+          } 
+        },
+        { upsert: true }
+      );
+
+      res.redirect("/users/admin/qr-codes?success=1");
+    } catch (err) {
+      console.error("❌ QR code upload error:", err);
+      
+      // Clean up uploaded file if error occurred
+      if (req.file) {
+        const fs = require('fs');
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupErr) {
+          console.error("Error cleaning up file:", cleanupErr);
+        }
+      }
+      
+      res.send("Something went wrong.");
+    }
+  }
+);
+
+// =======================================================================
+//  DELETE QR CODE - Admin only
+// =======================================================================
+router.post("/admin/qr-codes/delete", requireLogin, async (req, res) => {
+  if (req.session.user.role !== "admin")
+    return res.status(403).send("Access denied.");
+
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const settingsCol = db.collection("settings");
+
+    // Get current QR code to delete the file
+    const currentQR = await settingsCol.findOne({ key: "gcash_qr_code" });
+    
+    if (currentQR && currentQR.value) {
+      // Delete the physical file
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(__dirname, "../public", currentQR.value);
+      
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // Remove from database
+    await settingsCol.deleteOne({ key: "gcash_qr_code" });
+
+    res.redirect("/users/admin/qr-codes?deleted=1");
+  } catch (err) {
+    console.error("❌ QR code delete error:", err);
+    res.send("Something went wrong.");
+  }
+});
+
+// =======================================================================
+//  SAVE GCASH DETAILS - Admin only
+// =======================================================================
+router.post("/admin/qr-codes/save-details", requireLogin, async (req, res) => {
+  try {
+    console.log("💾 Saving GCash details by:", req.session.user.email);
+    
+    if (req.session.user.role !== "admin") {
+      return res.status(403).send("Access denied.");
+    }
+
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const settingsCol = db.collection("settings");
+
+    const { gcashNumber } = req.body;
+
+    if (!gcashNumber) {
+      return res.status(400).send("Phone number is required.");
+    }
+
+    // Save phone number to database
+    await settingsCol.updateOne(
+      { key: "gcash_phone_number" },
+      { 
+        $set: { 
+          value: gcashNumber,
+          updatedAt: new Date()
+        } 
+      },
+      { upsert: true }
+    );
+
+    console.log("✅ GCash phone number saved:", gcashNumber);
+    res.redirect("/users/admin/qr-codes?saved=1");
+  } catch (err) {
+    console.error("❌ Save GCash details error:", err);
+    res.status(500).send("Something went wrong.");
+  }
+});
+
 
 // =======================================================================
 //  LOGOUT

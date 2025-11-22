@@ -15,7 +15,12 @@
   </div>
 
   <div class="container">
-    <a href="/users/dashboard" class="back">⬅ Back to Products</a>
+    <!-- Conditional Back Link -->
+    <% if (currentUser.role === 'admin') { %>
+      <a href="/users/admin" class="back">Go to Admin Dashboard</a>
+    <% } else { %>
+      <a href="/users/dashboard" class="back">← Back to Dashboard</a>
+    <% } %>
     
     <h1>
       <% if (currentUser.role === 'admin') { %>

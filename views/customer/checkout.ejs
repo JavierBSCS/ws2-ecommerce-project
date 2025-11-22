@@ -2,62 +2,311 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title><%= title %></title>
-      <link rel="stylesheet" href="/checkout.css">
-
-
+  <title>Checkout</title>
+  <link rel="stylesheet" href="/checkout.css">
 </head>
 <body>
 
 <div class="checkout-container">
-
   <a href="/cart" class="back-link">⬅ Back to Cart</a>
-
   <h1>Checkout</h1>
 
-  <h2>Order Summary</h2>
+  <div class="checkout-layout">
+    <!-- Left Column - Order Summary -->
+    <div class="order-summary">
+      <h2>🛍️ Order Summary</h2>
+      <div class="cart-items">
+        <% cart.forEach(item => { %>
+          <div class="cart-item">
+            <div class="item-info">
+              <h4><%= item.name %></h4>
+              <div class="item-meta">
+                ₱<%= item.price.toFixed(2) %> × <%= item.qty %>
+              </div>
+            </div>
+            <div class="item-price">
+              ₱<%= (item.qty * item.price).toFixed(2) %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
 
-  <table>
-    <tr>
-      <th>Product</th>
-      <th>Price</th>
-      <th>Qty</th>
-      <th>Subtotal</th>
-    </tr>
+      <div class="summary-total">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span>₱<%= cart.reduce((a, i) => a + (i.price * i.qty), 0).toFixed(2) %></span>
+        </div>
+        <div class="summary-row">
+          <span>Tax (12%):</span>
+          <span>₱<%= (cart.reduce((a, i) => a + (i.price * i.qty), 0) * 0.12).toFixed(2) %></span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Amount:</span>
+          <span>₱<%= (cart.reduce((a, i) => a + (i.price * i.qty), 0) * 1.12).toFixed(2) %></span>
+        </div>
+      </div>
+    </div>
 
-    <% cart.forEach(item => { %>
-      <tr>
-        <td><%= item.name %></td>
-        <td>₱<%= item.price %></td>
-        <td><%= item.qty %></td>
-        <td>₱<%= (item.qty * item.price).toFixed(2) %></td>
-      </tr>
-    <% }) %>
-  </table>
+    <!-- Right Column - Payment Methods -->
+    <!-- MOVE THE ENTIRE PAYMENT SECTION INSIDE THE FORM -->
+    <form id="finalCheckoutForm" method="POST" action="/orders/checkout" enctype="multipart/form-data">
+      <input type="hidden" name="items" id="itemsFinalInput">
+      <input type="hidden" name="paymentMethod" id="paymentMethodInput" value="">
+      <input type="hidden" name="gcashReference" id="gcashReferenceInput" value="">
+      <input type="hidden" name="requiresScreenshot" id="requiresScreenshotInput" value="false">
+      
+      <div class="payment-section">
+        <h2>💳 Payment Method</h2>
+        
+        <div class="payment-options">
+          <!-- Cash on Delivery Option -->
+          <div class="payment-option" data-method="cod">
+            <div class="payment-header">
+              <div class="payment-icon">💰</div>
+              <div>
+                <div class="payment-title">Cash on Delivery</div>
+                <div class="payment-description">Pay when you receive your order</div>
+              </div>
+            </div>
+            <div class="payment-details cod-details">
+              <div class="cod-icon">📦</div>
+              <p class="cod-info">
+                Pay with cash when your order arrives at your doorstep. 
+                No online payment required!
+              </p>
+              <div class="cod-features">
+                <div>✅ No extra fees</div>
+                <div>✅ Pay upon receipt</div>
+                <div>✅ Secure delivery</div>
+              </div>
+            </div>
+          </div>
 
-  <div class="total-section">
-    Total Amount: ₱<%= cart.reduce((a, i) => a + (i.price * i.qty), 0).toFixed(2) %>
+          <!-- GCash Option - NOW INSIDE THE FORM -->
+          <div class="payment-option" data-method="gcash">
+            <div class="payment-header">
+              <div class="payment-icon" style="background: linear-gradient(45deg, #0070BA, #00A3E0); color: white;">GC</div>
+              <div>
+                <div class="payment-title">GCash</div>
+                <div class="payment-description">Instant digital payment</div>
+              </div>
+            </div>
+            <div class="payment-details gcash-details">
+              <div class="gcash-qr">
+                <div class="qr-placeholder">
+                  <% if (qrCodeImage) { %>
+                    <img src="<%= qrCodeImage %>" alt="GCash QR Code" class="qr-image">
+                  <% } else { %>
+                    <div style="text-align: center;">
+                      <div style="font-size: 2rem; margin-bottom: 10px;">📱</div>
+                      <div>GCash QR Code</div>
+                      <small style="color: #666;">QR code not configured</small>
+                    </div>
+                  <% } %>
+                </div>
+                <p>Scan to pay with GCash</p>
+              </div>
+              
+              <div class="gcash-info">
+                <p><strong>GCash Number:</strong></p>
+                <div class="gcash-number"><%= gcashNumber || '0917 123 4567' %></div>
+                <p><small>Send exact amount to this number</small></p>
+              </div>
+
+              <div class="form-group">
+                <label for="gcashReference">GCash Reference Number *</label>
+                <input type="text" 
+                       id="gcashReference" 
+                       name="gcashReference" 
+                       class="form-control" 
+                       placeholder="Enter reference number from GCash"
+                       required>
+                <small class="form-help">Find this in your GCash transaction history</small>
+              </div>
+
+              <!-- SCREENSHOT UPLOAD SECTION - NOW INSIDE THE FORM -->
+              <div class="form-group">
+                <label for="paymentScreenshot">Payment Proof Screenshot *</label>
+                <input type="file" 
+                       id="paymentScreenshot" 
+                       name="paymentScreenshot" 
+                       class="form-control" 
+                       accept=".jpg,.jpeg,.png,.webp"
+                       required>
+                <small class="form-help">
+                  Upload screenshot of successful payment showing Reference Number and Amount
+                </small>
+                
+                <!-- Example screenshot preview -->
+                <div class="screenshot-example">
+                  <p><strong>Example of what to capture:</strong></p>
+                  <div class="example-image">
+                    <img src="https://i.imgur.com/2eTf3Np.png" alt="Example GCash Payment Proof" 
+                         style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                    <small style="color: #d9ff00;">Make sure Reference Number, Amount, and Date are visible</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn checkout-btn" id="checkoutButton" disabled>
+          <span class="btn-text">🛒 Place Order</span>
+          <span class="btn-loading" style="display: none;">Processing...</span>
+        </button>
+        
+        <p class="security-note">
+          🔒 Your payment information is secure and encrypted
+        </p>
+      </div>
+    </form>
   </div>
-
-  <!-- Checkout submission form -->
-  <form id="finalCheckoutForm" method="POST" action="/orders/checkout">
-    <input type="hidden" name="items" id="itemsFinalInput">
-    <button type="submit" class="btn">✔ Place Order</button>
-  </form>
-
 </div>
-
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+
   // Prepare cart for POST
-  document.getElementById("finalCheckoutForm").addEventListener("submit", function() {
-    const items = JSON.parse('<%- JSON.stringify(cart) %>');
-    const formatted = items.map(i => ({
-      productId: i.productId,
-      quantity: i.qty
-    }));
-    document.getElementById("itemsFinalInput").value = JSON.stringify(formatted);
+  const items = JSON.parse('<%- JSON.stringify(cart).replace(/'/g, "&#39;") %>');
+  const formatted = items.map(i => ({
+    productId: i.productId,
+    quantity: i.qty
+  }));
+  document.getElementById("itemsFinalInput").value = JSON.stringify(formatted);
+
+  // Elements
+  const paymentOptions = document.querySelectorAll('.payment-option');
+  const checkoutBtn = document.getElementById('checkoutButton');
+
+  const paymentMethodInput = document.getElementById('paymentMethodInput');
+  const gcashReferenceInput = document.getElementById('gcashReferenceInput');
+  const gcashReferenceField = document.getElementById('gcashReference');
+  const requiresScreenshotInput = document.getElementById('requiresScreenshotInput');
+  const paymentScreenshotField = document.getElementById('paymentScreenshot');
+
+  let selectedMethod = "";
+  const maxFileSize = 5 * 1024 * 1024;
+
+  // ---------------------------
+  // PAYMENT OPTION SELECTION
+  // ---------------------------
+  paymentOptions.forEach(option => {
+    option.addEventListener('click', function() {
+
+      // Unselect all
+      paymentOptions.forEach(opt => {
+        opt.classList.remove('selected');
+        const details = opt.querySelector('.payment-details');
+        if (details) details.style.display = 'none';
+      });
+
+      // Select clicked option
+      this.classList.add('selected');
+      const details = this.querySelector('.payment-details');
+      if (details) details.style.display = 'block';
+
+      selectedMethod = this.dataset.method;
+      paymentMethodInput.value = selectedMethod;
+
+      if (selectedMethod === "cod") {
+        checkoutBtn.disabled = false;
+        checkoutBtn.querySelector(".btn-text").textContent = "🛒 Place Order (COD)";
+        requiresScreenshotInput.value = "false";
+
+        // Clear & disable GCash fields
+        gcashReferenceField.value = "";
+        paymentScreenshotField.value = "";
+        gcashReferenceInput.value = "";
+
+        gcashReferenceField.removeAttribute("required");
+        paymentScreenshotField.removeAttribute("required");
+      }
+
+      if (selectedMethod === "gcash") {
+        requiresScreenshotInput.value = "true";
+
+        gcashReferenceField.setAttribute("required", "true");
+        paymentScreenshotField.setAttribute("required", "true");
+
+        checkGCashRequirements();
+      }
+    });
   });
+
+  // ---------------------------
+  // GCash Requirements Check
+  // ---------------------------
+  function checkGCashRequirements() {
+    if (selectedMethod !== "gcash") return;
+
+    const hasReference = gcashReferenceField.value.trim().length > 0;
+    const hasScreenshot = paymentScreenshotField.files.length > 0;
+
+    checkoutBtn.disabled = !(hasReference && hasScreenshot);
+
+    checkoutBtn.querySelector(".btn-text").textContent = "🛒 Place Order (GCash)";
+  }
+
+  // Reference number input
+  gcashReferenceField.addEventListener("input", function() {
+    gcashReferenceInput.value = this.value;
+    checkGCashRequirements();
+  });
+
+  // Screenshot validation
+  paymentScreenshotField.addEventListener("change", function() {
+    const file = this.files[0];
+    if (file) {
+      if (file.size > maxFileSize) {
+        alert("❌ File too large. Limit 5MB.");
+        this.value = "";
+        return;
+      }
+
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        alert("❌ Invalid file type.");
+        this.value = "";
+        return;
+      }
+    }
+    checkGCashRequirements();
+  });
+
+  // ---------------------------
+  // FORM SUBMIT
+  // ---------------------------
+  document.getElementById("finalCheckoutForm").addEventListener("submit", function(e) {
+
+    if (!selectedMethod) {
+      e.preventDefault();
+      alert("❌ Please select a payment method.");
+      return;
+    }
+
+    if (selectedMethod === "gcash") {
+      if (!gcashReferenceInput.value.trim()) {
+        e.preventDefault();
+        alert("❌ Please enter GCash reference number.");
+        return;
+      }
+
+      if (!paymentScreenshotField.files.length) {
+        e.preventDefault();
+        alert("❌ Please upload payment screenshot.");
+        return;
+      }
+    }
+
+    checkoutBtn.disabled = true;
+    document.querySelector(".btn-text").style.display = "none";
+    document.querySelector(".btn-loading").style.display = "inline";
+  });
+
+});
 </script>
+
 
 </body>
 </html>

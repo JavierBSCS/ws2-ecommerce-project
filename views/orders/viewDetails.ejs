@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Order #<%= order.orderId %> - Details</title>
-  
   <link rel="stylesheet" href="/viewDetails.css">
-
 </head>
 
 <body>
@@ -28,6 +26,18 @@
           <p style="color: var(--text-muted); margin-top: 5px;">
             Placed on <%= new Date(order.createdAt).toLocaleString() %>
           </p>
+          <% if (order.paymentMethod === 'gcash') { %>
+            <p style="color: var(--accent-blue); margin-top: 5px;">
+              💳 Payment Method: GCash
+              <% if (order.gcashReference) { %>
+                | Reference: <%= order.gcashReference %>
+              <% } %>
+            </p>
+          <% } else { %>
+            <p style="color: var(--accent-green); margin-top: 5px;">
+              💰 Payment Method: Cash on Delivery
+            </p>
+          <% } %>
         </div>
         <div class="order-meta">
           <span class="status-badge status-<%= order.orderStatus %>">
@@ -38,7 +48,202 @@
           </p>
         </div>
       </div>
+
+<!-- Admin Actions for Multiple Order Statuses -->
+<% if (currentUser.role === 'admin' && (order.orderStatus === 'pending' || order.orderStatus === 'paid' || order.orderStatus === 'shipped')) { %>
+  <div class="admin-actions">
+    <h3>🛡️ Admin Actions</h3>
+    
+    <!-- For GCash Orders -->
+    <% if (order.paymentMethod === 'gcash') { %>
+      <!-- SCREENSHOT DISPLAY -->
+      <% if (order.paymentScreenshot && order.orderStatus === 'pending') { %>
+        <div class="screenshot-section">
+          <h4>📸 Payment Proof Screenshot</h4>
+          <div class="screenshot-container">
+            <img src="<%= order.paymentScreenshot %>" 
+                 alt="Payment Proof" 
+                 class="payment-screenshot"
+                 onclick="openScreenshotModal(this.src)">
+            <div class="screenshot-actions">
+              <button type="button" class="btn btn-outline" onclick="openScreenshotModal('<%= order.paymentScreenshot %>')">
+                🔍 View Full Size
+              </button>
+            </div>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">
+            Verify the payment with reference: <strong><%= order.gcashReference %></strong>
+          </p>
+        </div>
+      <% } else if (order.orderStatus === 'pending') { %>
+        <div class="screenshot-section">
+          <h4>📸 Payment Proof Screenshot</h4>
+          <div class="no-screenshot">
+            <p style="color: var(--danger-red);">⚠️ No payment screenshot provided by customer</p>
+          </div>
+        </div>
+      <% } %>
+    <% } else if (order.paymentMethod === 'cod' && order.orderStatus === 'pending') { %>
+      <!-- For COD Orders -->
+      <div class="cod-instructions">
+        <h4>💰 Cash on Delivery Instructions</h4>
+        <div class="instructions-grid">
+          <div class="instruction-step">
+            <div class="step-icon">1</div>
+            <div class="step-content">
+              <strong>Prepare for Delivery</strong>
+              <p>Ensure order is ready for shipping</p>
+            </div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-icon">2</div>
+            <div class="step-content">
+              <strong>Collect Payment</strong>
+              <p>Collect ₱<%= order.totalAmount.toFixed(2) %> upon delivery</p>
+            </div>
+          </div>
+          <div class="instruction-step">
+            <div class="step-icon">3</div>
+            <div class="step-content">
+              <strong>Mark as Paid</strong>
+              <p>Update status after successful payment collection</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+    
+    <div class="action-buttons">
+      <!-- Mark as Paid Button (for pending orders only) -->
+      <% if (order.orderStatus === 'pending') { %>
+        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+          <input type="hidden" name="status" value="paid">
+          <% if (order.paymentMethod === 'gcash') { %>
+            <button type="submit" class="btn btn-success" 
+                    onclick="return confirm('Confirm that you have verified the GCash payment and screenshot?')">
+              ✅ Verify Payment
+            </button>
+          <% } else if (order.paymentMethod === 'cod') { %>
+            <button type="submit" class="btn btn-success" 
+                    onclick="return confirm('Confirm that payment has been collected from the customer?')">
+              ✅ Mark as Paid (COD)
+            </button>
+          <% } %>
+        </form>
+      <% } %>
       
+      <!-- Mark as Shipped Button (for paid orders only) -->
+      <% if (order.orderStatus === 'paid') { %>
+        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+          <input type="hidden" name="status" value="shipped">
+          <button type="submit" class="btn btn-primary" 
+                  onclick="return confirm('Mark this order as shipped?')">
+            🚚 Mark as Shipped
+          </button>
+        </form>
+      <% } %>
+
+      <!-- Mark as Completed Button (for shipped orders only) -->
+      <% if (order.orderStatus === 'shipped') { %>
+        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+          <input type="hidden" name="status" value="completed">
+          <button type="submit" class="btn btn-success" 
+                  onclick="return confirm('Mark this order as completed/delivered?')">
+            🎉 Mark as Completed
+          </button>
+        </form>
+      <% } %>
+      
+      <!-- Cancel Order Button (for pending/paid orders) -->
+      <% if (order.orderStatus === 'pending' || order.orderStatus === 'paid') { %>
+        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+          <input type="hidden" name="status" value="cancelled">
+          <button type="submit" class="btn btn-danger" 
+                  onclick="return confirm('Are you sure you want to cancel this order?')">
+            ❌ Cancel Order
+          </button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+<% } %>
+
+<!-- Customer Actions for Pending Orders -->
+<% if (currentUser.role !== 'admin' && order.orderStatus === 'pending') { %>
+  <div class="customer-notice">
+    <div class="notice-icon">⏳</div>
+    <div class="notice-content">
+      <% if (order.paymentMethod === 'gcash') { %>
+        <h4>Payment Verification Pending</h4>
+        <p>Your GCash payment is being verified. Please wait for admin confirmation.</p>
+        <% if (order.gcashReference) { %>
+          <p><strong>Reference Number:</strong> <%= order.gcashReference %></p>
+        <% } %>
+      <% } else if (order.paymentMethod === 'cod') { %>
+        <h4>Order Processing</h4>
+        <p>Your Cash on Delivery order is being processed. Please wait for delivery.</p>
+        <p><strong>Payment Amount:</strong> ₱<%= order.totalAmount.toFixed(2) %></p>
+        <p><small>Please prepare exact amount for the delivery personnel</small></p>
+      <% } %>
+    </div>
+  </div>
+<% } %>
+
+<!-- Customer Actions for Paid Orders -->
+<% if (currentUser.role !== 'admin' && order.orderStatus === 'paid') { %>
+  <div class="customer-notice">
+    <div class="notice-icon">✅</div>
+    <div class="notice-content">
+      <h4>Payment Confirmed!</h4>
+      <% if (order.paymentMethod === 'gcash') { %>
+        <p>Your GCash payment has been verified and confirmed.</p>
+      <% } else if (order.paymentMethod === 'cod') { %>
+        <p>Your Cash on Delivery payment has been received and confirmed.</p>
+      <% } %>
+      <p><strong>Status:</strong> Preparing for shipment</p>
+      <p><small>Your order will be shipped soon. You'll receive updates on the delivery.</small></p>
+    </div>
+  </div>
+<% } %>
+
+<!-- Customer Actions for Shipped Orders -->
+<% if (currentUser.role !== 'admin' && order.orderStatus === 'shipped') { %>
+  <div class="customer-notice">
+    <div class="notice-icon">🚚</div>
+    <div class="notice-content">
+      <h4>Order Shipped!</h4>
+      <p>Your order is on the way to you.</p>
+      <p><strong>Status:</strong> Out for delivery</p>
+      <p><small>Please be available to receive your package.</small></p>
+    </div>
+  </div>
+<% } %>
+
+<!-- Customer Actions for Completed Orders -->
+<% if (currentUser.role !== 'admin' && order.orderStatus === 'completed') { %>
+  <div class="customer-notice">
+    <div class="notice-icon">🎉</div>
+    <div class="notice-content">
+      <h4>Order Completed!</h4>
+      <p>Your order has been successfully delivered and completed.</p>
+      <p><strong>Status:</strong> Order fulfilled</p>
+      <p><small>Thank you for your purchase!</small></p>
+    </div>
+  </div>
+<% } %>
+
+<!-- Customer Actions for Cancelled Orders -->
+<% if (currentUser.role !== 'admin' && order.orderStatus === 'cancelled') { %>
+  <div class="customer-notice">
+    <div class="notice-icon">❌</div>
+    <div class="notice-content">
+      <h4>Order Cancelled</h4>
+      <p>This order has been cancelled.</p>
+      <p><strong>Status:</strong> Order cancelled</p>
+      <p><small>If this was a mistake, please contact support.</small></p>
+    </div>
+  </div>
+<% } %>
       <h3>🛍️ Order Items (<%= order.items.length %>)</h3>
       <ul class="items-list">
         <% order.items.forEach((item, index) => { %>
@@ -149,6 +354,67 @@
     <% } %>
   </div>
 </div>
+<!-- Screenshot Modal -->
+<div id="screenshotModal" class="screenshot-modal">
+  <span class="close-modal" onclick="closeScreenshotModal()">&times;</span>
+  <img class="screenshot-modal-content" id="modalImage">
+</div>
+
+<script>
+// Enhanced Screenshot Modal Functionality
+function openScreenshotModal(src) {
+  const modal = document.getElementById('screenshotModal');
+  const modalImg = document.getElementById('modalImage');
+  
+  modal.style.display = 'block';
+  modalImg.src = src;
+  
+  // Add keyboard event listener
+  document.addEventListener('keydown', handleModalKeydown);
+}
+
+function closeScreenshotModal() {
+  const modal = document.getElementById('screenshotModal');
+  modal.style.display = 'none';
+  
+  // Remove keyboard event listener
+  document.removeEventListener('keydown', handleModalKeydown);
+}
+
+function handleModalKeydown(e) {
+  if (e.key === 'Escape') {
+    closeScreenshotModal();
+  }
+}
+
+// Close modal when clicking outside the image
+document.getElementById('screenshotModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeScreenshotModal();
+  }
+});
+
+// Add loading state for images
+document.addEventListener('DOMContentLoaded', function() {
+  const screenshotImages = document.querySelectorAll('.payment-screenshot');
+  
+  screenshotImages.forEach(img => {
+    // Add loading attribute for better performance
+    img.setAttribute('loading', 'lazy');
+    
+    // Add error handling
+    img.addEventListener('error', function() {
+      this.alt = 'Failed to load screenshot';
+      this.style.borderColor = 'var(--danger-red)';
+    });
+    
+    // Add load success styling
+    img.addEventListener('load', function() {
+      this.style.borderColor = 'var(--accent-green)';
+    });
+  });
+});
+</script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const Product = require("../models/Product");
 const requireLogin = require("../middleware/auth");
+const { ObjectId } = require("mongodb"); // Add this
 
 
 // Add product to cart
@@ -9,7 +9,10 @@ router.get("/add/:id", async (req, res) => {
     try {
         if (!req.session.cart) req.session.cart = [];
 
-        const product = await Product.findById(req.params.id);
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const productsCol = db.collection("products");
+        
+        const product = await productsCol.findOne({ _id: new ObjectId(req.params.id) });
         if (!product) return res.redirect("/");
 
         // Check if product already exists in cart
@@ -19,7 +22,7 @@ router.get("/add/:id", async (req, res) => {
             existing.qty += 1; // increase quantity
         } else {
             req.session.cart.push({
-                productId: product._id,
+                productId: req.params.id, // Use string ID
                 name: product.name,
                 price: product.price,
                 qty: 1
@@ -32,7 +35,6 @@ router.get("/add/:id", async (req, res) => {
         res.redirect("/");
     }
 });
-
 // Increase quantity
 router.post("/increase/:id", (req, res) => {
     try {
@@ -102,20 +104,7 @@ router.get("/", (req, res) => {
     });
 });
 
-//checkout
-router.get("/checkout", requireLogin, async (req, res) => {
-    const cart = req.session.cart || [];
 
-    if (cart.length === 0) {
-        return res.redirect("/cart");
-    }
-
-res.render("customer/checkout", {
-    title: "Checkout",
-    cart
-});
-
-});
 
 
 module.exports = router;
