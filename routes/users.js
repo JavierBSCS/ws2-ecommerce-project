@@ -12,7 +12,7 @@ const upload = require("../middleware/upload");
 const uploadProfile = require("../middleware/uploadProfile");
 const fs = require("fs");
 const path = require("path");
-
+const uploadProduct = require("../middleware/uploadProduct");
 
 // =======================================================================
 //  PROFILE PAGE
@@ -377,7 +377,7 @@ router.get("/admin/products", requireLogin, async (req, res) => {
   res.render("admin/manageProducts", {
     products,
     currentUser: req.session.user,
-    highlightedProduct: req.query.highlight || null // ADD THIS LINE
+    highlightedProduct: req.query.highlight || null
   });
 });
 
@@ -397,12 +397,12 @@ router.get("/admin/products/add", requireLogin, (req, res) => {
 
 
 // =======================================================================
-//  ADD PRODUCT (POST)
+//  ADD PRODUCT (POST) - CLEAN VERSION
 // =======================================================================
 router.post(
   "/admin/products/add",
   requireLogin,
-  upload.single("image"),
+  uploadProduct.array("images", 10),
   async (req, res) => {
     if (req.session.user.role !== "admin")
       return res.status(403).send("Access denied.");
@@ -411,8 +411,13 @@ router.post(
       const db = req.app.locals.client.db(req.app.locals.dbName);
       const { name, price, description, category, stock, status } = req.body;
 
+      // Handle multiple uploaded images
       const imagesArr = [];
-      if (req.file) imagesArr.push("/uploads/" + req.file.filename);
+      if (req.files && req.files.length > 0) {
+        req.files.forEach((file) => {
+          imagesArr.push("/uploads/" + file.filename);
+        });
+      }
 
       const stockVal = parseInt(stock || "0");
       let statusVal = status || "available";
@@ -428,14 +433,26 @@ router.post(
         images: imagesArr,
         description: description || "",
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       const result = await db.collection("products").insertOne(product);
       
-      // REDIRECT WITH HIGHLIGHT PARAMETER FOR NEW PRODUCT
       res.redirect(`/users/admin/products?highlight=${result.insertedId}`);
     } catch (err) {
       console.error("❌ Add product error:", err);
+      
+      // Clean up uploaded files if error occurred
+      if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+          try {
+            fs.unlinkSync(file.path);
+          } catch (err) {
+            console.error("Error cleaning up file:", err);
+          }
+        });
+      }
+      
       res.send("Something went wrong.");
     }
   }
@@ -458,12 +475,8 @@ router.get("/admin/products/edit/:id", requireLogin, async (req, res) => {
 
     if (!product) return res.send("Product not found.");
 
-    const imagesCsv = Array.isArray(product.images)
-      ? product.images.join(", ")
-      : "";
-
     res.render("admin/editProduct", {
-      product: { ...product, imagesCsv },
+      product,
       currentUser: req.session.user,
     });
   } catch (err) {
@@ -472,21 +485,20 @@ router.get("/admin/products/edit/:id", requireLogin, async (req, res) => {
   }
 });
 
-
 // =======================================================================
-//  EDIT PRODUCT (POST)
+//  EDIT PRODUCT (POST) - CLEAN VERSION
 // =======================================================================
 router.post(
   "/admin/products/edit/:id",
   requireLogin,
-  upload.single("image"),
+  uploadProduct.array("images", 10),
   async (req, res) => {
     if (req.session.user.role !== "admin")
       return res.status(403).send("Access denied.");
 
     try {
       const db = req.app.locals.client.db(req.app.locals.dbName);
-      const { name, price, description, category, stock, status } = req.body;
+      const { name, price, description, category, stock, status, deletedImages } = req.body;
 
       const product = await db
         .collection("products")
@@ -494,21 +506,39 @@ router.post(
 
       if (!product) return res.send("Product not found.");
 
-      let imagesArr = Array.isArray(product.images)
-        ? [...product.images]
-        : [];
+      // Start with existing images
+      let imagesArr = Array.isArray(product.images) ? [...product.images] : [];
 
-      if (req.body.images && req.body.images.trim()) {
-        imagesArr = req.body.images
-          .split(",")
-          .map((i) => i.trim())
-          .filter((i) => i.length > 0);
+      // Remove deleted images
+      if (deletedImages && deletedImages.trim() !== '') {
+        try {
+          const deletedArray = JSON.parse(deletedImages);
+          imagesArr = imagesArr.filter(img => !deletedArray.includes(img));
+          
+          // Delete the actual files from server
+          deletedArray.forEach(imgPath => {
+            try {
+              if (imgPath.startsWith('/uploads/')) {
+                const filename = imgPath.split('/').pop();
+                const filePath = path.join(__dirname, '..', 'public', 'uploads', filename);
+                if (fs.existsSync(filePath)) {
+                  fs.unlinkSync(filePath);
+                }
+              }
+            } catch (err) {
+              // Silent fail for file deletion errors
+            }
+          });
+        } catch (parseError) {
+          // Silent fail for parsing errors
+        }
       }
 
-      if (req.file) {
-        const newImg = "/uploads/" + req.file.filename;
-        if (imagesArr.length > 0) imagesArr[0] = newImg;
-        else imagesArr.push(newImg);
+      // Add new uploaded images
+      if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+          imagesArr.push("/uploads/" + file.filename);
+        });
       }
 
       const stockVal = parseInt(stock || "0");
@@ -532,15 +562,25 @@ router.post(
         }
       );
 
-      // REDIRECT WITH HIGHLIGHT PARAMETER
       res.redirect(`/users/admin/products?highlight=${req.params.id}`);
     } catch (err) {
       console.error("❌ Update product error:", err);
+      
+      // Clean up uploaded files if error occurred
+      if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+          try {
+            fs.unlinkSync(file.path);
+          } catch (err) {
+            // Silent fail for cleanup errors
+          }
+        });
+      }
+      
       res.send("Something went wrong.");
     }
   }
 );
-
 
 // =======================================================================
 //  DELETE PRODUCT

@@ -78,7 +78,7 @@
 
     .container {
       width: 100%;
-      max-width: 600px;
+      max-width: 700px;
       background: rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid var(--glass-border);
@@ -145,6 +145,57 @@
     }
 
     /* ================================
+       DROP ZONE STYLES
+       ================================ */
+
+    .drop-zone {
+      border: 2px dashed var(--accent-blue);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .drop-zone:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-green);
+    }
+
+    .drop-zone.dragover {
+      background: rgba(76, 201, 240, 0.1);
+      border-color: var(--accent-green);
+      transform: scale(1.02);
+    }
+
+    .drop-zone-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .drop-zone-text {
+      margin: 0;
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .drop-zone-subtext {
+      margin: 10px 0 0 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .file-count {
+      color: var(--accent-green);
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    /* ================================
        CURRENT IMAGES
        ================================ */
 
@@ -155,9 +206,15 @@
       margin-bottom: 20px;
     }
 
-    .current-images img {
+    .image-item {
+      position: relative;
       width: 120px;
       height: 120px;
+    }
+
+    .current-images img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       border-radius: 12px;
       border: 2px solid var(--glass-border);
@@ -169,11 +226,99 @@
       border-color: var(--accent-blue);
     }
 
+    .remove-existing {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff6b6b;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      opacity: 0;
+    }
+
+    .image-item:hover .remove-existing {
+      opacity: 1;
+    }
+
+    .remove-existing:hover {
+      background: #ff5252;
+      transform: scale(1.1);
+    }
+
+    /* ================================
+       NEW IMAGES PREVIEW
+       ================================ */
+
+    .new-images-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .new-image-item {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      transition: all 0.3s ease;
+    }
+
+    .new-images-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid var(--accent-green);
+      transition: all 0.3s ease;
+    }
+
+    .new-image-item:hover img {
+      transform: scale(1.05);
+      border-color: var(--accent-blue);
+    }
+
+    .remove-new {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff6b6b;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      opacity: 0;
+    }
+
+    .new-image-item:hover .remove-new {
+      opacity: 1;
+    }
+
+    .remove-new:hover {
+      background: #ff5252;
+      transform: scale(1.1);
+    }
+
     /* ================================
        BUTTONS
        ================================ */
 
-    button {
+    button[type="submit"] {
       width: 100%;
       background: rgba(79, 232, 176, 0.2);
       border: 1px solid var(--accent-green);
@@ -189,7 +334,7 @@
       margin-top: 10px;
     }
 
-    button:hover {
+    button[type="submit"]:hover {
       background: rgba(79, 232, 176, 0.3);
       transform: translateY(-2px);
       box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
@@ -249,10 +394,24 @@
     }
 
     select option {
-  background: #0d1b2a;    /* Dark solid background */
-  color: #ffffff;         /* White text */
-}
+      background: #0d1b2a;
+      color: #ffffff;
+    }
 
+    .image-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .section-title {
+      color: var(--accent-blue);
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
 
     /* ================================
        RESPONSIVE
@@ -265,6 +424,7 @@
       
       .container {
         padding: 30px 20px;
+        max-width: 100%;
       }
       
       h2 {
@@ -272,6 +432,11 @@
       }
       
       .current-images img {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .image-item {
         width: 100px;
         height: 100px;
       }
@@ -289,59 +454,53 @@
 
   <div class="container">
     <h2>✏️ Edit Product</h2>
-         <a href="/users/admin/products" class="back">⬅ Back to Products</a>
+    <a href="/users/admin/products" class="back">⬅ Back to Products</a>
 
-
-    <form action="/users/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
+    <form action="/users/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data" id="editForm">
       <label>Name</label>
       <input type="text" name="name" value="<%= product.name %>" required>
 
       <label>Price</label>
       <input type="number" step="0.01" name="price" value="<%= product.price %>" required>
 
-<label>Category</label>
-<select name="category" required>
-  <option value="">Select category</option>
-
-  <option value="Food" <%= product.category === "Food" ? "selected" : "" %>>Food</option>
-  <option value="Cars" <%= product.category === "Cars" ? "selected" : "" %>>Cars</option>
-  <option value="Electronics" <%= product.category === "Electronics" ? "selected" : "" %>>Electronics</option>
-  <option value="Clothes" <%= product.category === "Clothes" ? "selected" : "" %>>Clothes</option>
-  <option value="Accessories" <%= product.category === "Accessories" ? "selected" : "" %>>Accessories</option>
-  <option value="Home" <%= product.category === "Home" ? "selected" : "" %>>Home</option>
-
-  <option value="Sports" <%= product.category === "Sports" ? "selected" : "" %>>Sports</option>
-  <option value="Books" <%= product.category === "Books" ? "selected" : "" %>>Books</option>
-  <option value="Toys" <%= product.category === "Toys" ? "selected" : "" %>>Toys</option>
-  <option value="Beauty" <%= product.category === "Beauty" ? "selected" : "" %>>Beauty</option>
-  <option value="Fitness" <%= product.category === "Fitness" ? "selected" : "" %>>Fitness</option>
-  <option value="Health" <%= product.category === "Health" ? "selected" : "" %>>Health</option>
-  <option value="Office" <%= product.category === "Office" ? "selected" : "" %>>Office Supplies</option>
-  <option value="Pets" <%= product.category === "Pets" ? "selected" : "" %>>Pet Supplies</option>
-  <option value="Garden" <%= product.category === "Garden" ? "selected" : "" %>>Garden</option>
-  <option value="Music" <%= product.category === "Music" ? "selected" : "" %>>Music</option>
-  <option value="Jewelry" <%= product.category === "Jewelry" ? "selected" : "" %>>Jewelry</option>
-  <option value="Tools" <%= product.category === "Tools" ? "selected" : "" %>>Tools</option>
-  <option value="Appliances" <%= product.category === "Appliances" ? "selected" : "" %>>Appliances</option>
-  <option value="Gadgets" <%= product.category === "Gadgets" ? "selected" : "" %>>Gadgets</option>
-
-  <option value="Software" <%= product.category === "Software" ? "selected" : "" %>>Software</option>
-  <option value="Games" <%= product.category === "Games" ? "selected" : "" %>>Games</option>
-  <option value="Subscriptions" <%= product.category === "Subscriptions" ? "selected" : "" %>>Subscriptions</option>
-  <option value="Courses" <%= product.category === "Courses" ? "selected" : "" %>>Online Courses</option>
-  <option value="Services" <%= product.category === "Services" ? "selected" : "" %>>Services</option>
-
-  <option value="Beverages" <%= product.category === "Beverages" ? "selected" : "" %>>Beverages</option>
-  <option value="Snacks" <%= product.category === "Snacks" ? "selected" : "" %>>Snacks</option>
-  <option value="Fruits" <%= product.category === "Fruits" ? "selected" : "" %>>Fruits</option>
-  <option value="Vegetables" <%= product.category === "Vegetables" ? "selected" : "" %>>Vegetables</option>
-  <option value="Frozen" <%= product.category === "Frozen" ? "selected" : "" %>>Frozen Food</option>
-  <option value="Bakery" <%= product.category === "Bakery" ? "selected" : "" %>>Bakery</option>
-</select>
-
+      <label>Category</label>
+      <select name="category" required>
+        <option value="">Select category</option>
+        <option value="Food" <%= product.category === "Food" ? "selected" : "" %>>Food</option>
+        <option value="Cars" <%= product.category === "Cars" ? "selected" : "" %>>Cars</option>
+        <option value="Electronics" <%= product.category === "Electronics" ? "selected" : "" %>>Electronics</option>
+        <option value="Clothes" <%= product.category === "Clothes" ? "selected" : "" %>>Clothes</option>
+        <option value="Accessories" <%= product.category === "Accessories" ? "selected" : "" %>>Accessories</option>
+        <option value="Home" <%= product.category === "Home" ? "selected" : "" %>>Home</option>
+        <option value="Sports" <%= product.category === "Sports" ? "selected" : "" %>>Sports</option>
+        <option value="Books" <%= product.category === "Books" ? "selected" : "" %>>Books</option>
+        <option value="Toys" <%= product.category === "Toys" ? "selected" : "" %>>Toys</option>
+        <option value="Beauty" <%= product.category === "Beauty" ? "selected" : "" %>>Beauty</option>
+        <option value="Fitness" <%= product.category === "Fitness" ? "selected" : "" %>>Fitness</option>
+        <option value="Health" <%= product.category === "Health" ? "selected" : "" %>>Health</option>
+        <option value="Office" <%= product.category === "Office" ? "selected" : "" %>>Office Supplies</option>
+        <option value="Pets" <%= product.category === "Pets" ? "selected" : "" %>>Pet Supplies</option>
+        <option value="Garden" <%= product.category === "Garden" ? "selected" : "" %>>Garden</option>
+        <option value="Music" <%= product.category === "Music" ? "selected" : "" %>>Music</option>
+        <option value="Jewelry" <%= product.category === "Jewelry" ? "selected" : "" %>>Jewelry</option>
+        <option value="Tools" <%= product.category === "Tools" ? "selected" : "" %>>Tools</option>
+        <option value="Appliances" <%= product.category === "Appliances" ? "selected" : "" %>>Appliances</option>
+        <option value="Gadgets" <%= product.category === "Gadgets" ? "selected" : "" %>>Gadgets</option>
+        <option value="Software" <%= product.category === "Software" ? "selected" : "" %>>Software</option>
+        <option value="Games" <%= product.category === "Games" ? "selected" : "" %>>Games</option>
+        <option value="Subscriptions" <%= product.category === "Subscriptions" ? "selected" : "" %>>Subscriptions</option>
+        <option value="Courses" <%= product.category === "Courses" ? "selected" : "" %>>Online Courses</option>
+        <option value="Services" <%= product.category === "Services" ? "selected" : "" %>>Services</option>
+        <option value="Beverages" <%= product.category === "Beverages" ? "selected" : "" %>>Beverages</option>
+        <option value="Snacks" <%= product.category === "Snacks" ? "selected" : "" %>>Snacks</option>
+        <option value="Fruits" <%= product.category === "Fruits" ? "selected" : "" %>>Fruits</option>
+        <option value="Vegetables" <%= product.category === "Vegetables" ? "selected" : "" %>>Vegetables</option>
+        <option value="Frozen" <%= product.category === "Frozen" ? "selected" : "" %>>Frozen Food</option>
+        <option value="Bakery" <%= product.category === "Bakery" ? "selected" : "" %>>Bakery</option>
+      </select>
 
       <label>Description</label>
-      <textarea name="description" rows="4"><%= product.description %></textarea>
+      <textarea name="description" rows="4" required><%= product.description %></textarea>
 
       <label>Status</label>
       <select name="status" required>
@@ -351,31 +510,249 @@
       </select>
 
       <label>Stock</label>
-      <input type="number" name="stock" value="<%= product.stock %>" min="0">
+      <input type="number" name="stock" value="<%= product.stock %>" min="0" required>
 
-      <label>Current Images</label>
-      <div class="current-images">
-        <% 
-          let imgs = product.images && product.images.length ? product.images : 
-                    (product.imageUrl ? [product.imageUrl] : []);
-        %>
-        <% imgs.forEach(img => { %>
-          <img src="<%= img %>">
-        <% }) %>
+      <!-- Current Images Section -->
+      <div class="image-section">
+        <div class="section-title">Current Images</div>
+        <div class="current-images" id="currentImages">
+          <% 
+            // Ensure we always have an array of images
+            let imgs = [];
+            if (product.images && Array.isArray(product.images)) {
+              imgs = product.images;
+            } else if (product.imageUrl) {
+              imgs = [product.imageUrl];
+            }
+          %>
+          <% if (imgs.length > 0) { %>
+            <% imgs.forEach((img, index) => { %>
+              <div class="image-item" data-image="<%= img %>">
+                <img src="<%= img %>" alt="Product Image <%= index + 1 %>">
+                <button type="button" class="remove-existing" onclick="removeExistingImage(this)" title="Remove this image">×</button>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p style="color: var(--text-muted); font-style: italic;">No images currently</p>
+          <% } %>
+        </div>
       </div>
 
-      <label>Upload New Image (optional)</label>
-      <input type="file" name="image" accept="image/*">
+      <!-- Hidden field to track deleted images -->
+      <input type="hidden" name="deletedImages" id="deletedImages" value="">
 
-      <label>OR Edit Image URLs (CSV)</label>
-      <input type="text" name="images" value="<%= product.imagesCsv %>">
+      <!-- New Images Upload Section -->
+      <div class="image-section">
+        <div class="section-title">Add New Images</div>
+        <label>Upload Additional Images</label>
+        <div id="dropZone" class="drop-zone">
+          <span class="drop-zone-icon">📁</span>
+          <p class="drop-zone-text">Click to select images or drag & drop here</p>
+          <p class="drop-zone-subtext">You can select multiple files one by one</p>
+          <div class="file-count" id="fileCount"></div>
+          <input type="file" name="images" accept="image/*" multiple id="newImageInput" style="display: none;">
+        </div>
+        
+        <!-- New Images Preview -->
+        <div class="new-images-preview" id="newImagesPreview"></div>
+      </div>
 
       <button type="submit">Save Changes</button>
     </form>
-
-    
   </div>
 </div>
+
+<script>
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('newImageInput');
+  const previewContainer = document.getElementById('newImagesPreview');
+  const fileCountDisplay = document.getElementById('fileCount');
+  const deletedImagesInput = document.getElementById('deletedImages');
+  
+  // Store all selected files for new images
+  let newFiles = [];
+  let deletedImages = [];
+
+  // Initialize drop zone
+  function initializeDropZone() {
+    // Click on drop zone to trigger file input
+    dropZone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', function(e) {
+      handleNewFiles(this.files);
+    });
+
+    // Drag and drop functionality
+    dropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+      
+      if (e.dataTransfer.files.length) {
+        handleNewFiles(e.dataTransfer.files);
+      }
+    });
+  }
+
+  // Initialize on page load
+  initializeDropZone();
+
+  function handleNewFiles(files) {
+    console.log('New files selected:', files.length);
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        alert('Please select only image files.');
+        continue;
+      }
+      
+      // Check if file is already uploaded
+      if (newFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) {
+        console.log('File already uploaded:', file.name);
+        continue;
+      }
+      
+      newFiles.push(file);
+      
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'new-image-item';
+        previewDiv.setAttribute('data-filename', file.name);
+        
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.alt = 'New image preview';
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-new';
+        removeBtn.innerHTML = '×';
+        removeBtn.title = 'Remove this image';
+        removeBtn.onclick = function() {
+          // Remove from preview
+          previewDiv.remove();
+          
+          // Remove from files array
+          const index = newFiles.findIndex(f => f.name === file.name);
+          if (index > -1) {
+            newFiles.splice(index, 1);
+          }
+          
+          // Update file input and display
+          updateFileInput();
+          updateFileCount();
+        };
+        
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(removeBtn);
+        previewContainer.appendChild(previewDiv);
+      };
+      
+      reader.readAsDataURL(file);
+    }
+    
+    updateFileInput();
+    updateFileCount();
+  }
+
+  function updateFileInput() {
+    // Update the actual file input with all new files
+    const dt = new DataTransfer();
+    newFiles.forEach(file => dt.items.add(file));
+    fileInput.files = dt.files;
+    
+    console.log('File input updated with', fileInput.files.length, 'new files');
+  }
+
+  function updateFileCount() {
+    const count = newFiles.length;
+    if (count > 0) {
+      fileCountDisplay.textContent = `${count} new image(s) selected`;
+    } else {
+      fileCountDisplay.textContent = '';
+    }
+  }
+
+  function removeExistingImage(button) {
+    const imageItem = button.parentElement;
+    const imageUrl = imageItem.getAttribute('data-image');
+    
+    // Add to deleted images array
+    if (!deletedImages.includes(imageUrl)) {
+      deletedImages.push(imageUrl);
+      deletedImagesInput.value = JSON.stringify(deletedImages);
+    }
+    
+    // Remove from display with animation
+    imageItem.style.opacity = '0';
+    imageItem.style.transform = 'scale(0.8)';
+    setTimeout(() => {
+      imageItem.remove();
+    }, 300);
+  }
+
+  // Form validation
+  document.getElementById('editForm').addEventListener('submit', function(e) {
+    const price = document.querySelector('input[name="price"]').value;
+    if (parseFloat(price) <= 0) {
+      e.preventDefault();
+      alert('Please enter a valid price greater than 0.');
+      return false;
+    }
+    
+    const stock = document.querySelector('input[name="stock"]').value;
+    if (parseInt(stock) < 0) {
+      e.preventDefault();
+      alert('Stock cannot be negative.');
+      return false;
+    }
+    
+    // Check if all images would be deleted (both existing and new)
+    const remainingCurrentImages = document.querySelectorAll('#currentImages .image-item').length;
+    const newImagesCount = newFiles.length;
+    
+    console.log('Remaining current images:', remainingCurrentImages);
+    console.log('New images:', newImagesCount);
+    
+    if (remainingCurrentImages === 0 && newImagesCount === 0) {
+      e.preventDefault();
+      alert('Product must have at least one image. Please add new images or keep some existing ones.');
+      return false;
+    }
+    
+    // Final verification
+    if (fileInput.files.length === 0 && remainingCurrentImages === 0) {
+      e.preventDefault();
+      alert('No images detected. Please ensure the product has at least one image.');
+      return false;
+    }
+    
+    console.log('Form submitted successfully with:', {
+      remainingCurrentImages: remainingCurrentImages,
+      newImages: newImagesCount,
+      deletedImages: deletedImages.length
+    });
+    
+    return true;
+  });
+</script>
 
 </body>
 </html>
