@@ -242,27 +242,49 @@
       <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
     </div>
 
-    <div class="profile-card">
-      <h1 class="title">👤 Welcome, <%= user.firstName %> <%= user.lastName %>!</h1>
+<div class="profile-card">
 
-      <div class="profile-details">
-        <p><strong>User ID:</strong> <%= user.userId %></p>
-        <p><strong>Email:</strong> <%= user.email %></p>
-        <p><strong>Role:</strong> <%= user.role %></p>
-        <p><strong>Status:</strong> ✅ Active</p>
-        <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
-      </div>
+  <!-- PROFILE PICTURE -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <img 
+      src="<%= user.profileImage || '/uploads/default-avatar.png' %>" 
+      alt="Profile Picture"
+      style="
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(76, 201, 240, 0.5);
+        box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
+      "
+    >
+  </div>
 
-      <div class="profile-actions">
-        <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
+  <!-- TITLE -->
+  <h1 class="title">👤 <%= user.firstName %> <%= user.lastName %>!</h1>
 
-        <% if (user.role === 'admin') { %>
-          <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
-        <% } %>
+  <!-- PROFILE DETAILS -->
+  <div class="profile-details">
+    <p><strong>User ID:</strong> <%= user.userId %></p>
+    <p><strong>Email:</strong> <%= user.email %></p>
+    <p><strong>Role:</strong> <%= user.role %></p>
+    <p><strong>Status:</strong> ✅ Active</p>
+    <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
+  </div>
 
-        <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
-      </div>
-    </div>
+  <!-- ACTION BUTTONS -->
+  <div class="profile-actions">
+    <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
+
+    <% if (user.role === 'admin') { %>
+      <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
+    <% } %>
+
+    <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
+  </div>
+
+</div>
+
   </div>
 
 </body>
