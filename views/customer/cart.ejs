@@ -83,10 +83,19 @@
       </div>
 
       <div class="checkout-section">
-        <form id="checkoutForm" method="POST" action="/orders/checkout">
-  <input type="hidden" name="items" id="itemsInput">
-  <button type="submit" class="btn btn-success">🚀 Proceed to Checkout</button>
-</form>
+        <div class="button-group">
+          <a href="/users/dashboard" class="btn btn-primary shop-more-btn">🛍️ Shop More</a>
+          
+          <form id="checkoutForm" method="POST" action="/orders/checkout" class="checkout-form">
+            <input type="hidden" name="items" id="itemsInput">
+            <button type="submit" class="btn btn-success">🚀 Proceed to Checkout</button>
+          </form>
+        </div>
+      </div>
+
+    <% } %>
+  </div>
+</div>
 
 <script>
   // Convert cart items to JSON on submit
@@ -100,12 +109,6 @@
     document.getElementById("itemsInput").value = JSON.stringify(formatted);
   });
 </script>
-
-      </div>
-
-    <% } %>
-  </div>
-</div>
 
 </body>
 </html>

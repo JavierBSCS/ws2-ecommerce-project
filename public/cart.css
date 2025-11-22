@@ -397,3 +397,72 @@
       display: inline;
       margin: 0;
     }
+
+
+    /* ================================
+   BUTTON GROUP STYLES
+   ================================ */
+
+.button-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.checkout-form {
+  margin: 0;
+  display: inline-block;
+}
+
+.shop-more-btn {
+  background: rgba(157, 78, 221, 0.2);
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.shop-more-btn:hover {
+  background: rgba(157, 78, 221, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+
+/* ================================
+   RESPONSIVE BUTTON GROUP
+   ================================ */
+
+@media (max-width: 768px) {
+  .button-group {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .shop-more-btn,
+  .btn-success {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .button-group {
+    gap: 12px;
+  }
+  
+  .shop-more-btn,
+  .btn-success {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+}
