@@ -4,46 +4,190 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-  <link rel="stylesheet" href="/style.css">
+
   <style>
-    /* Password criteria feedback */
-    .password-criteria {
-      margin-top: 10px;
+    /* =======================
+       GLASS NEON FORM STYLE
+       ======================= */
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: "Inter", Arial, sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      color: #e5e9f0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    /* Back Button */
+    .back-btn {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.25);
+      backdrop-filter: blur(12px);
+      text-decoration: none;
       font-size: 14px;
-      line-height: 1.5;
+      transition: 0.25s ease;
     }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: scale(1.05);
+    }
+
+    .form-container {
+      width: 400px;
+      margin-top: 60px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 30px;
+      border-radius: 15px;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-title {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #4cc9f0;
+      text-shadow: 0 0 10px rgba(76, 201, 240, 0.4);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #a9bcd0;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.2);
+      color: #fff;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #4cc9f0;
+      box-shadow: 0 0 10px rgba(76, 201, 240, 0.6);
+      outline: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #4cc9f0;
+      color: #000;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: 0.25s ease;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background: #72e0ff;
+      transform: scale(1.03);
+    }
+
+    /* Spacing between Turnstile and button */
+.cf-turnstile {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center; /* center horizontally */
+}
+
+
+    .switch-link {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: #e5e9f0;
+    }
+
+    .switch-link a {
+      color: #4cc9f0;
+      text-decoration: none;
+    }
+
+    /* Password criteria */
     .password-criteria p {
-      margin: 2px 0;
-      color: red;
+      margin: 3px 0;
+      font-size: 13px;
+      color: #ff6b6b;
     }
+
     .password-criteria p.valid {
-      color: green;
+      color: #4fe8b0;
+    }
+
+    /* Confirm match */
+    #confirmStatus {
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    #confirmStatus.valid {
+      color: #4fe8b0;
+    }
+
+    #confirmStatus.invalid {
+      color: #ff6b6b;
     }
   </style>
 </head>
+
 <body>
+
+  <!-- Back button -->
+  <a href="/users/login" class="back-btn">⬅ Back</a>
+
   <div class="form-container">
     <h1 class="form-title"><%= title %></h1>
 
-    <form id="registerForm" action="/users/register" method="POST" class="form-card">
+    <form id="registerForm" action="/users/register" method="POST">
+
       <div class="form-group">
-        <label for="firstName">First Name</label>
-        <input type="text" id="firstName" name="firstName" required>
+        <label>First Name</label>
+        <input type="text" name="firstName" required>
       </div>
 
       <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" name="lastName" required>
+        <label>Last Name</label>
+        <input type="text" name="lastName" required>
       </div>
 
       <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+        <label>Email</label>
+        <input type="email" name="email" required>
       </div>
 
       <div class="form-group">
-        <label for="password">Password</label>
+        <label>Password</label>
         <input type="password" id="password" name="password" required>
+
         <div class="password-criteria">
           <p id="length">● At least 8 characters</p>
           <p id="uppercase">● Uppercase letter</p>
@@ -53,10 +197,17 @@
         </div>
       </div>
 
-      <!-- 🧠 Cloudflare Turnstile widget -->
+      <!-- CONFIRM PASSWORD -->
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" required>
+        <p id="confirmStatus"></p>
+      </div>
+
+      <!-- Turnstile -->
       <div class="cf-turnstile" data-sitekey="<%= process.env.TURNSTILE_SITEKEY %>"></div>
 
-      <button type="submit" class="btn primary">Register</button>
+      <button type="submit" class="btn">Register</button>
     </form>
 
     <p class="switch-link">
@@ -64,50 +215,73 @@
     </p>
   </div>
 
-  <!-- ✅ Cloudflare Turnstile Script -->
+  <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script>
-    const passwordInput = document.getElementById('password');
-    const length = document.getElementById('length');
-    const uppercase = document.getElementById('uppercase');
-    const lowercase = document.getElementById('lowercase');
-    const number = document.getElementById('number');
-    const special = document.getElementById('special');
-    const form = document.getElementById('registerForm');
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+    const confirmStatus = document.getElementById("confirmStatus");
 
-    passwordInput.addEventListener('input', () => {
-      const value = passwordInput.value;
+    const lengthC = document.getElementById("length");
+    const upperC = document.getElementById("uppercase");
+    const lowerC = document.getElementById("lowercase");
+    const numberC = document.getElementById("number");
+    const specialC = document.getElementById("special");
 
-      // Length
-      length.classList.toggle('valid', value.length >= 8);
+    const form = document.getElementById("registerForm");
 
-      // Uppercase
-      uppercase.classList.toggle('valid', /[A-Z]/.test(value));
+    password.addEventListener("input", validatePassword);
+    confirmPassword.addEventListener("input", validateConfirm);
 
-      // Lowercase
-      lowercase.classList.toggle('valid', /[a-z]/.test(value));
+    function validatePassword() {
+      const v = password.value;
 
-      // Number
-      number.classList.toggle('valid', /[0-9]/.test(value));
+      lengthC.classList.toggle("valid", v.length >= 8);
+      upperC.classList.toggle("valid", /[A-Z]/.test(v));
+      lowerC.classList.toggle("valid", /[a-z]/.test(v));
+      numberC.classList.toggle("valid", /[0-9]/.test(v));
+      specialC.classList.toggle("valid", /[!@#$%^&*(),.?":{}|<>]/.test(v));
+    }
 
-      // Special character
-      special.classList.toggle('valid', /[!@#$%^&*(),.?":{}|<>]/.test(value));
-    });
+    function validateConfirm() {
+      if (confirmPassword.value === "") {
+        confirmStatus.textContent = "";
+        return;
+      }
 
-    form.addEventListener('submit', (e) => {
-      const value = passwordInput.value;
-      const isValid = value.length >= 8 &&
-                      /[A-Z]/.test(value) &&
-                      /[a-z]/.test(value) &&
-                      /[0-9]/.test(value) &&
-                      /[!@#$%^&*(),.?":{}|<>]/.test(value);
+      if (confirmPassword.value === password.value) {
+        confirmStatus.textContent = "Passwords match ✔";
+        confirmStatus.className = "valid";
+      } else {
+        confirmStatus.textContent = "Passwords do not match ✖";
+        confirmStatus.className = "invalid";
+      }
+    }
 
-      if (!isValid) {
+    form.addEventListener("submit", (e) => {
+      const pass = password.value;
+      const confirm = confirmPassword.value;
+
+      const valid =
+        pass.length >= 8 &&
+        /[A-Z]/.test(pass) &&
+        /[a-z]/.test(pass) &&
+        /[0-9]/.test(pass) &&
+        /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+
+      if (!valid) {
         e.preventDefault();
-        alert('Password does not meet the required criteria.');
+        alert("Password does not meet the requirements.");
+        return;
+      }
+
+      if (pass !== confirm) {
+        e.preventDefault();
+        alert("Passwords do not match.");
       }
     });
   </script>
+
 </body>
 </html>
