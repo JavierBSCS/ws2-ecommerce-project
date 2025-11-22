@@ -377,6 +377,7 @@ router.get("/admin/products", requireLogin, async (req, res) => {
   res.render("admin/manageProducts", {
     products,
     currentUser: req.session.user,
+    highlightedProduct: req.query.highlight || null // ADD THIS LINE
   });
 });
 
@@ -429,8 +430,10 @@ router.post(
         createdAt: new Date(),
       };
 
-      await db.collection("products").insertOne(product);
-      res.redirect("/users/admin/products");
+      const result = await db.collection("products").insertOne(product);
+      
+      // REDIRECT WITH HIGHLIGHT PARAMETER FOR NEW PRODUCT
+      res.redirect(`/users/admin/products?highlight=${result.insertedId}`);
     } catch (err) {
       console.error("❌ Add product error:", err);
       res.send("Something went wrong.");
@@ -529,7 +532,8 @@ router.post(
         }
       );
 
-      res.redirect("/users/admin/products");
+      // REDIRECT WITH HIGHLIGHT PARAMETER
+      res.redirect(`/users/admin/products?highlight=${req.params.id}`);
     } catch (err) {
       console.error("❌ Update product error:", err);
       res.send("Something went wrong.");

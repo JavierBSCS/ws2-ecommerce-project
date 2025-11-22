@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard</title>
-   <style>
+  <style>
     /* ================================
        MODERN GLASS NEON DASHBOARD THEME
        ================================ */
@@ -20,6 +20,7 @@
       --text-light: #e5e9f0;
       --text-muted: #9aa3b2;
       --card-bg: rgba(255, 255, 255, 0.06);
+      --danger-red: #ff6b6b;
     }
 
     html, body {
@@ -33,6 +34,26 @@
     }
 
     /* ================================
+       CUSTOM SCROLLBAR
+       ================================ */
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+    }
+
+    /* ================================
        LAYOUT
        ================================ */
 
@@ -43,15 +64,15 @@
     }
 
     /* ================================
-       SIDEBAR
+       SIDEBAR - UPDATED STYLING
        ================================ */
 
     .sidebar {
-      width: 220px;
-      background: rgba(15, 23, 42, 0.55);
-      backdrop-filter: blur(18px) saturate(180%);
+      width: 200px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
       border-right: 1px solid var(--glass-border);
-      padding: 24px;
+      padding: 30px;
       position: fixed;
       top: 0;
       left: 0;
@@ -65,80 +86,71 @@
     }
 
     .sidebar.hidden {
-      transform: translateX(-290px);
+      transform: translateX(-300px);
     }
 
     .sidebar h2 {
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 700;
-      margin-bottom: 24px;
+      margin-bottom: 30px;
       color: var(--accent-blue);
-      text-shadow: 0 0 12px #4cc9f0aa;
+      text-shadow: 0 0 15px #4cc9f0aa;
+      text-align: center;
+    }
+
+    .sidebar h3 {
+      color: var(--accent-green);
+      margin: 25px 0 15px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
     .sidebar a {
       display: block;
-      padding: 12px 14px;
+      padding: 14px 18px;
       margin-bottom: 12px;
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.08);
       border: 1px solid var(--glass-border);
-      border-radius: 10px;
+      border-radius: 12px;
       color: var(--text-light);
       text-decoration: none;
       font-weight: 600;
-      transition: 0.23s ease;
-      backdrop-filter: blur(3px);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
     }
 
     .sidebar a:hover {
-      background: rgba(76, 201, 240, 0.18);
+      background: rgba(76, 201, 240, 0.2);
       border-color: var(--accent-blue);
       color: #fff;
       transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(76, 201, 240, 0.3);
     }
 
-    /*SCROLL BAR*/
-    ::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(8px);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(6px);
-  border-radius: 10px;
-}
-
-    
-
-
     /* ================================
-       MENU TOGGLE BUTTON
+       MENU TOGGLE BUTTON - UPDATED STYLING
        ================================ */
 
     .menu-toggle {
       position: fixed;
-      top: 14px;
-      left: calc(var(--sidebar-width) + 20px);
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.06);
+      top: 15px;
+      left: 200px;
+      padding: 12px 16px;
+      background: rgba(76, 201, 240, 0.2);
       color: white;
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--accent-blue);
       border-radius: 12px;
       cursor: pointer;
       backdrop-filter: blur(10px);
-      transition: 0.3s ease;
+      transition: all 0.3s ease;
       z-index: 50;
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
     }
 
     .menu-toggle:hover {
-      transform: scale(1.08);
-      background: rgba(255, 255, 255, 0.10);
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
     }
 
     .menu-toggle.shift-left {
@@ -146,52 +158,201 @@
     }
 
     /* ================================
-       MAIN SECTION
+       MAIN CONTENT AREA
        ================================ */
 
-    .main {
+    .main-content {
       margin-left: var(--sidebar-width);
-      padding: 70px 32px 32px;
+      padding: 40px;
       width: calc(100% - var(--sidebar-width));
       min-height: 100vh;
-      overflow: visible;
       position: relative;
     }
 
-    .sidebar.hidden + .main {
+    .sidebar.hidden + .main-content {
       margin-left: 0;
       width: 100%;
     }
 
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 4px;
-      color: #ffffff;
+    /* ================================
+       CONTAINER
+       ================================ */
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    p.lead {
-      margin-top: 0;
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--accent-blue);
+      text-shadow: 0 0 15px #4cc9f0aa;
+      text-align: center;
+    }
+
+    .lead {
+      text-align: center;
       color: var(--text-muted);
       font-size: 1.1rem;
+      margin-bottom: 30px;
     }
 
     /* ================================
-       PRODUCT GRID — FIXED & RESPONSIVE
+       BUTTONS
+       ================================ */
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(157, 78, 221, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+    }
+
+    .btn-success {
+      background: rgba(79, 232, 176, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-green);
+      box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .btn-success:hover {
+      background: rgba(79, 232, 176, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+    }
+
+    .btn-danger {
+      background: rgba(255, 107, 107, 0.2);
+      color: var(--text-light);
+      border-color: var(--danger-red);
+      box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 107, 107, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
+    }
+
+    .btn-disabled {
+      background: rgba(156, 163, 175, 0.2);
+      color: var(--text-muted);
+      border-color: #9ca3af;
+      box-shadow: 0 0 15px rgba(156, 163, 175, 0.3);
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      cursor: not-allowed;
+    }
+
+    .btn-disabled:hover {
+      transform: none;
+    }
+
+    /* ================================
+       FILTER BAR
+       ================================ */
+
+    .filter-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input,
+    .filter-bar select {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-light);
+      backdrop-filter: blur(10px);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s ease;
+      width: 200px;
+      box-sizing: border-box;
+    }
+
+    .filter-bar input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .filter-bar input:focus,
+    .filter-bar select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.4);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .filter-bar select option {
+      background: #0d1b2a;
+      color: var(--text-light);
+    }
+
+    /* ================================
+       PRODUCT GRID
        ================================ */
 
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr); /* EXACTLY 5 PER ROW */
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
       width: 100%;
-      margin-top: 25px;
-    }
-
-    .price {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #4fe8b0;
-      text-shadow: 0 0 8px rgba(79,232,176,0.6);
     }
 
     /* ================================
@@ -200,12 +361,12 @@
 
     .product-card {
       background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(16px);
-      border-radius: 14px;
-      padding: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      transition: 0.25s ease;
-      box-shadow: 0 0 12px rgba(0,0,0,0.35);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
       height: 420px;
@@ -213,264 +374,202 @@
     }
 
     .product-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      border-color: #4cc9f0;
-      box-shadow: 0 0 24px rgba(76, 201, 240, 0.35);
+      transform: translateY(-8px);
+      box-shadow: 0 0 40px rgba(76, 201, 240, 0.4);
+      border-color: var(--accent-blue);
     }
 
     .product-card img {
       width: 100%;
-      height: 150px;
+      height: 160px;
       object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--glass-border);
     }
 
     .product-card h3 {
-      margin: 4px 0 6px;
-      font-size: 1.15rem;
+      margin: 0 0 8px 0;
+      font-size: 1.2rem;
       color: #fff;
       min-height: 28px;
     }
 
-    .product-card p.desc {
-      font-size: 0.85rem;
-      max-height: 80px;
-      overflow-y: auto;
+    .product-card .desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      max-height: 60px;
+      overflow: hidden;
+      margin-bottom: 15px;
     }
 
     .product-meta {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      font-size: 0.85rem;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
     }
 
-    .product-category {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
+    .price {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--accent-green);
+      text-shadow: 0 0 8px rgba(79, 232, 176, 0.6);
     }
 
     .category-text {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-light);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
     }
 
-     .filter-wrapper {
-      width: 100%;
+    .stock-info {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
     }
-
 
     /* ================================
-       CARD BUTTONS
+       STATUS BADGES
+       ================================ */
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status-available {
+      background: rgba(79, 232, 176, 0.2);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .status-unavailable {
+      background: rgba(255, 107, 107, 0.2);
+      color: var(--danger-red);
+      border: 1px solid var(--danger-red);
+    }
+
+    .status-maintenance {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    /* ================================
+       PRODUCT ACTIONS
        ================================ */
 
     .product-actions {
       display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
       gap: 10px;
       margin-top: auto;
-      justify-content: center; 
-      align-items: center;
-    }
-
-    .btn {
-      text-decoration: none;
-      padding: 10px 14px;
-      border-radius: 10px;
-      color: white;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
       justify-content: center;
-      min-width: 85px;
-      transition: 0.22s ease;
-      font-size: 0.85rem;
     }
 
-    .btn.view {
-      background: #4a90e2;
-      box-shadow: 0 0 12px rgba(74, 144, 226, 0.45);
+    /* ================================
+       EMPTY STATE
+       ================================ */
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
     }
 
-    .btn.view:hover {
-      transform: scale(1.05);
-      background: #5a9ff2;
-      box-shadow: 0 0 18px rgba(74, 144, 226, 0.7);
+    .empty-state p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
     }
-
-    .btn.cart {
-      background: #2ecc71;
-      box-shadow: 0 0 12px rgba(46, 204, 113, 0.45);
-    }
-
-    .btn.cart:hover {
-      transform: scale(1.05);
-      background: #3edc81;
-      box-shadow: 0 0 18px rgba(46, 204, 113, 0.7);
-    }
-
-    .btn.edit {
-      background: #6c5ce7;
-      box-shadow: 0 0 12px rgba(108, 92, 231, 0.45);
-    }
-
-    .btn.edit:hover {
-      transform: scale(1.05);
-      background: #7d6bff;
-      box-shadow: 0 0 18px rgba(108, 92, 231, 0.7);
-    }
-
-    .btn.delete {
-      background: #d63031;
-      box-shadow: 0 0 12px rgba(214, 48, 49, 0.45);
-    }
-
-    .btn.delete:hover {
-      transform: scale(1.05);
-      background: #ff4b4b;
-      box-shadow: 0 0 18px rgba(255, 75, 75, 0.7);
-    }
-
-    .btn.disabled {
-      background: #7f8c8d;
-      box-shadow: 0 0 12px rgba(127, 140, 141, 0.45);
-      cursor: not-allowed;
-    }
-
-    .btn.disabled:hover {
-      transform: none;
-    }
-
-    .status-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #fff;
-      z-index: 10;
-      backdrop-filter: blur(6px);
-    }
-    .status-available { background: #2ecc71d8; }
-    .status-unavailable { background: #e74c3cd8; }
-    .status-maintenance { background: #f1c40fd8; }
-
-/* ================================
-   SEARCH & FILTER BAR
-   ================================ */
-
-.filter-bar {
-  display: flex;
-  gap: 16px;
-  margin-top: 18px;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.filter-bar input,
-.filter-bar select {
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  background: rgba(30, 41, 59, 0.85);
-  color: var(--text-light);
-  backdrop-filter: blur(6px);
-  font-size: 1rem;
-  outline: none;
-  transition: 0.25s ease;
-  width: 200px; /* FIX: Set fixed width instead of min-width */
-  box-sizing: border-box; /* FIX: Include padding in width calculation */
-}
-
-.filter-bar input::placeholder {
-  color: var(--text-muted);
-}
-
-.filter-bar input:focus,
-.filter-bar select:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 12px rgba(76,201,240,0.35);
-  background: rgba(30, 41, 59, 0.95);
-}
-
-/* Ensure dropdown options are visible */
-.filter-bar select option {
-  background: #1e293b;
-  color: var(--text-light);
-  padding: 10px;
-}
-
-/* For better mobile experience */
-@media (max-width: 768px) {
-  .filter-bar {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .filter-bar input,
-  .filter-bar select {
-    width: 100%; /* FIX: Full width on mobile */
-    max-width: 300px;
-  }
-}
 
     /* ================================
        RESPONSIVE
        ================================ */
 
-    @media (max-width: 1400px) {
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 250px;
+        padding: 20px;
+      }
+      
+      .main-content {
+        padding: 20px;
+      }
+      
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .filter-bar {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .filter-bar input,
+      .filter-bar select {
+        width: 100%;
+        max-width: 300px;
+      }
+      
       .product-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      }
+      
+      .menu-toggle {
+        top: 15px;
+        left: calc(var(--sidebar-width) + 15px);
+      }
+      
+      .menu-toggle.shift-left {
+        left: 15px;
       }
     }
 
-    @media (max-width: 1100px) {
-      .product-grid {
-        grid-template-columns: repeat(3, 1fr);
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
       }
-    }
-
-    @media (max-width: 850px) {
-      .product-grid {
-        grid-template-columns: repeat(2, 1fr);
+      
+      h1 {
+        font-size: 1.6rem;
       }
-    }
-
-    @media (max-width: 720px) {
-      .menu-toggle { left: 20px !important; }
-      .sidebar { width: 210px; }
-      .main { margin-left: 210px; }
-    }
-
-    @media (max-width: 600px) {
+      
       .product-grid {
         grid-template-columns: 1fr;
       }
-      .filter-bar {
+      
+      .product-actions {
         flex-direction: column;
       }
-      .main {
-        padding: 70px 16px 16px;
+      
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="app">
 
-    <!-- Sidebar -->
+    <!-- Sidebar Menu -->
     <div class="sidebar" id="sidebar">
       <h2>Dashboard</h2>
 
@@ -478,7 +577,7 @@
       <a href="/users/orders/history">🛒 My Orders</a>
 
       <% if (currentUser && currentUser.role === "admin") { %>
-        <h3 style="color: #d1d5db; margin-top: 14px;">Admin Tools</h3>
+        <h3>Admin Tools</h3>
         <a href="/users/admin/products/add">➕ Add Product</a>
         <a href="/users/admin/products">📦 Manage Products</a>
         <a href="/users/admin/users">👥 Manage Users</a>
@@ -487,117 +586,111 @@
       <a href="/users/logout">🚪 Logout</a>
     </div>
 
-    <!-- Menu toggle (transparent) -->
+    <!-- Menu Toggle Button -->
     <button id="menuToggle" class="menu-toggle">☰ Menu</button>
 
-    <!-- Main -->
-    <div class="main" id="mainContent">
-      <div class="center-header">
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+      <div class="container">
         <h1>Welcome, <%= currentUser ? currentUser.firstName : 'Guest' %> 👋</h1>
-        <p class="lead">Browse available products below:</p>
-      </div>
+        <p class="lead">Browse available products below</p>
 
-      <div class="filter-bar">
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="Search product name..."
-        />
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search product name..."
+          />
 
-        <select id="categoryFilter">
-          <option value="">All Categories</option>
-          <% 
-            const categories = [...new Set(products.map(p => p.category || "General"))];
-            categories.forEach(c => { 
-          %>
-            <option value="<%= c %>"><%= c %></option>
-          <% }) %>
-        </select>
+          <select id="categoryFilter">
+            <option value="">All Categories</option>
+            <% 
+              const categories = [...new Set(products.map(p => p.category || "General"))];
+              categories.forEach(c => { 
+            %>
+              <option value="<%= c %>"><%= c %></option>
+            <% }) %>
+          </select>
 
-        <select id="statusFilter">
-          <option value="">All Status</option>
-          <option value="available">Available</option>
-          <option value="unavailable">Unavailable</option>
-          <option value="maintenance">Maintenance</option>
-        </select>
-      </div>
+          <select id="statusFilter">
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
 
-      <div class="product-grid">
-        <% if (products && products.length > 0) { %>
-          <% products.forEach(p => { %>
-            <div class="product-card">
-              <img 
-                src="<%= 
-                  (p.images && p.images[0]) 
-                    ? p.images[0] 
-                    : (p.imageUrl ? p.imageUrl : '/placeholder.png') 
-                %>" 
-                alt="product image" 
-              />
+        <!-- Product Grid -->
+        <div class="product-grid">
+          <% if (products && products.length > 0) { %>
+            <% products.forEach(p => { %>
+              <div class="product-card">
+                <img 
+                  src="<%= 
+                    (p.images && p.images[0]) 
+                      ? p.images[0] 
+                      : (p.imageUrl ? p.imageUrl : '/placeholder.png') 
+                  %>" 
+                  alt="product image" 
+                />
 
-              <div class="product-meta">
-                <div class="product-category">
-                  <span class="label">Category:</span>
-                  <strong class="category-text"><%= p.category || 'General' %></strong>
+                <div class="product-meta">
+                  <div>
+                    <span class="category-text"><%= p.category || 'General' %></span>
+                  </div>
+                  <div>
+                    <span class="price">₱<%= (p.price || 0).toFixed(2) %></span>
+                  </div>
                 </div>
 
-                <div>
-                  <span class="price">₱<%= (p.price || 0).toFixed(2) %></span>
+                <h3><%= p.name %></h3>
+                <p class="desc">
+                  <%= p.description ? (p.description.length > 100 ? p.description.substring(0,100) + '…' : p.description) : 'No description available' %>
+                </p>
+
+                <div class="stock-info">
+                  <div>
+                    Stock: <strong><%= typeof p.stock === 'number' ? p.stock : '—' %></strong>
+                  </div>
+                  <div>
+                    <% if (p.status) { %>
+                      <span class="status-badge 
+                        <% if (p.status === 'available') { %> status-available 
+                        <% } else if (p.status === 'unavailable') { %> status-unavailable 
+                        <% } else if (p.status === 'maintenance') { %> status-maintenance 
+                        <% } %>">
+                        <%= p.status %>
+                      </span>
+                    <% } %>
+                  </div>
                 </div>
-              </div>
 
-              <h3><%= p.name %></h3>
-              <p class="desc"><%= p.description ? (p.description.length > 140 ? p.description.substring(0,140) + '…' : p.description) : '' %></p>
+                <div class="product-actions">
+                  <a class="btn btn-primary" href="/products/view/<%= p._id %>">🔍 View</a>
 
-              <div class="product-meta" style="margin-top:6px; align-items: center;">
-                <div class="stock">
-                  <% if (typeof p.stock === 'number') { %>
-                    Stock: <strong><%= p.stock %></strong>
-                  <% } else { %>
-                    Stock: <strong>—</strong>
+                  <% if (currentUser && (currentUser.role === 'customer' || currentUser.role === 'user')) { %>
+                    <% if (p.stock && p.stock > 0 && p.status === 'available') { %>
+                      <a class="btn btn-success" href="/cart/add/<%= p._id %>">🛒 Add to Cart</a>
+                    <% } else { %>
+                      <span class="btn btn-disabled">Out of stock</span>
+                    <% } %>
+                  <% } %>
+
+                  <% if (currentUser && currentUser.role === 'admin') { %>
+                    <a class="btn btn-secondary" href="/users/admin/products/edit/<%= p._id %>">✏ Edit</a>
+                    <a class="btn btn-danger" href="/users/admin/products/delete/<%= p._id %>">🗑 Delete</a>
                   <% } %>
                 </div>
-
-                <div>
-                  <% if (p.status) { %>
-                    <span class="status-badge 
-                      <% if (p.status === 'available') { %> status-available 
-                      <% } else if (p.status === 'unavailable') { %> status-unavailable 
-                      <% } else if (p.status === 'maintenance') { %> status-maintenance 
-                      <% } %>">
-                      <%= p.status %>
-                    </span>
-                  <% } %>
-                </div>
-
-                <div style="font-size:0.85rem;color:#6b7280;">
-                  Added: <%= p.createdAt ? (new Date(p.createdAt)).toLocaleDateString() : '—' %>
-                </div>
               </div>
-
-              <div class="product-actions">
-               <a class="btn view" href="/products/view/<%= p._id %>">🔍 View</a>
-
-                <% if (currentUser && (currentUser.role === 'customer' || currentUser.role === 'user')) { %>
-                  <% if (p.stock && p.stock > 0) { %>
-                    <a class="btn cart" href="/cart/add/<%= p._id %>">🛒 Add to Cart</a>
-                  <% } else { %>
-                    <span class="btn disabled">Out of stock</span>
-                  <% } %>
-                <% } %>
-
-                <% if (currentUser && currentUser.role === 'admin') { %>
-                  <a class="btn edit" href="/users/admin/products/edit/<%= p._id %>">✏ Edit</a>
-                  <a class="btn delete" href="/users/admin/products/delete/<%= p._id %>">🗑 Delete</a>
-                <% } %>
-              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="empty-state">
+              <p>No products available.</p>
+              <a href="/users/admin/products/add" class="btn btn-primary">➕ Add First Product</a>
             </div>
-          <% }) %>
-        <% } else { %>
-          <div style="grid-column: 1 / -1; color:#475569; text-align: center; padding: 40px;">
-            No products available.
-          </div>
-        <% } %>
+          <% } %>
+        </div>
       </div>
     </div>
   </div>
@@ -620,41 +713,38 @@
     }
 
     menuToggle.addEventListener('click', toggleMenu);
-
-    // start with consistent position
     updateTogglePosition();
+
+    // Filter functionality
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const cards = document.querySelectorAll(".product-card");
+
+    function applyFilters() {
+      const search = searchInput.value.toLowerCase();
+      const category = categoryFilter.value;
+      const status = statusFilter.value.toLowerCase();
+
+      cards.forEach(card => {
+        const name = card.querySelector("h3").innerText.toLowerCase();
+        const cat = card.querySelector(".category-text").innerText.trim();
+        const stat = card.querySelector(".status-badge")?.innerText.trim().toLowerCase();
+
+        let match = true;
+
+        if (search && !name.includes(search)) match = false;
+        if (category && category !== cat) match = false;
+        if (status && status !== stat) match = false;
+
+        card.style.display = match ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+    categoryFilter.addEventListener("change", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
   </script>
-  <script>
-  const searchInput = document.getElementById("searchInput");
-  const categoryFilter = document.getElementById("categoryFilter");
-  const statusFilter = document.getElementById("statusFilter");
-  const cards = document.querySelectorAll(".product-card");
-
-  function applyFilters() {
-    const search = searchInput.value.toLowerCase();
-    const category = categoryFilter.value;
-    const status = statusFilter.value.toLowerCase();
-
-    cards.forEach(card => {
-      const name = card.querySelector("h3").innerText.toLowerCase();
-      const cat = card.querySelector(".category-text").innerText.trim();
-      const stat = card.querySelector(".status-badge")?.innerText.trim().toLowerCase();
-
-      let match = true;
-
-      if (search && !name.includes(search)) match = false;
-      if (category && category !== cat) match = false;
-      if (status && status !== stat) match = false;
-
-      card.style.display = match ? "" : "none";
-    });
-  }
-
-  searchInput.addEventListener("input", applyFilters);
-  categoryFilter.addEventListener("change", applyFilters);
-  statusFilter.addEventListener("change", applyFilters);
-</script>
-
 
 </body>
 </html>

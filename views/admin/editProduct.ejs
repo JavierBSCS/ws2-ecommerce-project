@@ -237,7 +237,7 @@
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
-      margin-top: 20px;
+      margin-bottom: 20px;
       width: auto;
       align-self: center;
     }
@@ -289,6 +289,8 @@
 
   <div class="container">
     <h2>✏️ Edit Product</h2>
+         <a href="/users/admin/products" class="back">⬅ Back to Products</a>
+
 
     <form action="/users/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
       <label>Name</label>
@@ -297,14 +299,46 @@
       <label>Price</label>
       <input type="number" step="0.01" name="price" value="<%= product.price %>" required>
 
-      <label>Category</label>
-      <select name="category" required>
-        <option value="Food" <%= product.category === "Food" ? "selected" : "" %>>Food</option>
-        <option value="Cars" <%= product.category === "Cars" ? "selected" : "" %>>Cars</option>
-        <option value="Electronics" <%= product.category === "Electronics" ? "selected" : "" %>>Electronics</option>
-        <option value="Clothes" <%= product.category === "Clothes" ? "selected" : "" %>>Clothes</option>
-        <option value="Home" <%= product.category === "Home" ? "selected" : "" %>>Home</option>
-      </select>
+<label>Category</label>
+<select name="category" required>
+  <option value="">Select category</option>
+
+  <option value="Food" <%= product.category === "Food" ? "selected" : "" %>>Food</option>
+  <option value="Cars" <%= product.category === "Cars" ? "selected" : "" %>>Cars</option>
+  <option value="Electronics" <%= product.category === "Electronics" ? "selected" : "" %>>Electronics</option>
+  <option value="Clothes" <%= product.category === "Clothes" ? "selected" : "" %>>Clothes</option>
+  <option value="Accessories" <%= product.category === "Accessories" ? "selected" : "" %>>Accessories</option>
+  <option value="Home" <%= product.category === "Home" ? "selected" : "" %>>Home</option>
+
+  <option value="Sports" <%= product.category === "Sports" ? "selected" : "" %>>Sports</option>
+  <option value="Books" <%= product.category === "Books" ? "selected" : "" %>>Books</option>
+  <option value="Toys" <%= product.category === "Toys" ? "selected" : "" %>>Toys</option>
+  <option value="Beauty" <%= product.category === "Beauty" ? "selected" : "" %>>Beauty</option>
+  <option value="Fitness" <%= product.category === "Fitness" ? "selected" : "" %>>Fitness</option>
+  <option value="Health" <%= product.category === "Health" ? "selected" : "" %>>Health</option>
+  <option value="Office" <%= product.category === "Office" ? "selected" : "" %>>Office Supplies</option>
+  <option value="Pets" <%= product.category === "Pets" ? "selected" : "" %>>Pet Supplies</option>
+  <option value="Garden" <%= product.category === "Garden" ? "selected" : "" %>>Garden</option>
+  <option value="Music" <%= product.category === "Music" ? "selected" : "" %>>Music</option>
+  <option value="Jewelry" <%= product.category === "Jewelry" ? "selected" : "" %>>Jewelry</option>
+  <option value="Tools" <%= product.category === "Tools" ? "selected" : "" %>>Tools</option>
+  <option value="Appliances" <%= product.category === "Appliances" ? "selected" : "" %>>Appliances</option>
+  <option value="Gadgets" <%= product.category === "Gadgets" ? "selected" : "" %>>Gadgets</option>
+
+  <option value="Software" <%= product.category === "Software" ? "selected" : "" %>>Software</option>
+  <option value="Games" <%= product.category === "Games" ? "selected" : "" %>>Games</option>
+  <option value="Subscriptions" <%= product.category === "Subscriptions" ? "selected" : "" %>>Subscriptions</option>
+  <option value="Courses" <%= product.category === "Courses" ? "selected" : "" %>>Online Courses</option>
+  <option value="Services" <%= product.category === "Services" ? "selected" : "" %>>Services</option>
+
+  <option value="Beverages" <%= product.category === "Beverages" ? "selected" : "" %>>Beverages</option>
+  <option value="Snacks" <%= product.category === "Snacks" ? "selected" : "" %>>Snacks</option>
+  <option value="Fruits" <%= product.category === "Fruits" ? "selected" : "" %>>Fruits</option>
+  <option value="Vegetables" <%= product.category === "Vegetables" ? "selected" : "" %>>Vegetables</option>
+  <option value="Frozen" <%= product.category === "Frozen" ? "selected" : "" %>>Frozen Food</option>
+  <option value="Bakery" <%= product.category === "Bakery" ? "selected" : "" %>>Bakery</option>
+</select>
+
 
       <label>Description</label>
       <textarea name="description" rows="4"><%= product.description %></textarea>
@@ -339,7 +373,7 @@
       <button type="submit">Save Changes</button>
     </form>
 
-    <a href="/users/admin/products" class="back">⬅ Back to Products</a>
+    
   </div>
 </div>
 

@@ -3,166 +3,480 @@
 <head>
   <meta charset="UTF-8">
   <title><%= product.name %></title>
-
   <style>
+    /* ================================
+       MODERN GLASS NEON DASHBOARD THEME
+       ================================ */
+
     :root {
+      --sidebar-width: 250px;
       --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
-      --glass-bg: rgba(255, 255, 255, 0.10);
+      --glass-light: rgba(255, 255, 255, 0.12);
       --glass-border: rgba(255, 255, 255, 0.22);
       --accent-blue: #4cc9f0;
       --accent-green: #4fe8b0;
+      --accent-purple: #9d4edd;
       --text-light: #e5e9f0;
       --text-muted: #9aa3b2;
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --danger-red: #ff6b6b;
     }
 
-    body {
+    html, body {
       margin: 0;
-      padding: 40px;
+      padding: 0;
+      height: 100%;
       background: var(--bg-gradient);
       font-family: "Inter", Arial, sans-serif;
       color: var(--text-light);
+      overflow-x: hidden; /* Prevent horizontal scroll */
     }
 
+    /* ================================
+       CUSTOM SCROLLBAR
+       ================================ */
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+    }
+
+    /* ================================
+       PROFILE CONTAINER
+       ================================ */
+
+    .profile-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    /* ================================
+       CONTAINER - ORIGINAL SIZE
+       ================================ */
+
     .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 28px;
-      border-radius: 18px;
-      background: var(--glass-bg);
+      width: 100%;
+      max-width: 900px; /* Original size */
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 0 22px rgba(0,0,0,0.35);
+      border-radius: 20px;
+      padding: 40px; /* Original padding */
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden; /* Prevent container from causing scroll */
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
     }
 
     h1 {
-      margin-top: 0;
-      font-size: 2rem;
-      color: #fff;
-      text-shadow: 0 0 8px rgba(76,201,240,0.45);
-    }
-
-    img {
-      width: 100%;
-      max-height: 380px;
-      object-fit: cover;
-      border-radius: 14px;
-      margin: 18px 0;
-      box-shadow: 0 0 18px rgba(0,0,0,0.45);
-    }
-
-    .details {
-      font-size: 1.1rem;
-      line-height: 1.6rem;
-    }
-
-    .details strong {
+      font-size: 2.2rem; /* Original size */
+      font-weight: 700;
+      margin-bottom: 10px;
       color: var(--accent-blue);
+      text-shadow: 0 0 15px #4cc9f0aa;
+      text-align: center;
     }
 
-    .btn-back {
-      display: inline-block;
-      padding: 10px 16px;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      text-decoration: none;
-      color: white;
-      font-weight: 600;
-      margin-bottom: 15px;
-      backdrop-filter: blur(8px);
-      transition: 0.25s ease;
-    }
-
-    .btn-back:hover {
-      background: rgba(255,255,255,0.18);
-      transform: scale(1.05);
-    }
-
-    .actions {
-      margin-top: 25px;
-      display: flex;
-      gap: 14px;
-    }
+    /* ================================
+       BUTTONS - ORIGINAL SIZE
+       ================================ */
 
     .btn {
-      padding: 12px 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px; /* Original size */
       border-radius: 12px;
       text-decoration: none;
-      color: #fff;
       font-weight: 600;
-      transition: 0.25s ease;
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--glass-border);
+      font-size: 1rem; /* Original size */
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      text-align: center;
     }
 
-    .btn.cart {
-      background: #2ecc71bb;
-      box-shadow: 0 0 12px rgba(46,204,113,0.45);
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
     }
 
-    .btn.cart:hover {
-      transform: scale(1.07);
-      background: #3edc81;
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
     }
 
-    .btn.disabled {
-      background: #7f8c8d;
+    .btn-success {
+      background: rgba(79, 232, 176, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-green);
+      box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+    }
+
+    .btn-success:hover {
+      background: rgba(79, 232, 176, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+    }
+
+    .btn-disabled {
+      background: rgba(156, 163, 175, 0.2);
+      color: var(--text-muted);
+      border-color: #9ca3af;
+      box-shadow: 0 0 15px rgba(156, 163, 175, 0.3);
       cursor: not-allowed;
     }
 
+    .btn-disabled:hover {
+      transform: none;
+    }
+
+    /* ================================
+       PRODUCT IMAGE - ORIGINAL SIZE
+       ================================ */
+
+    .product-image {
+      width: 100%;
+      max-height: 400px; /* Original size */
+      object-fit: cover;
+      border-radius: 16px;
+      margin: 25px 0;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ================================
+       PRICE - ORIGINAL SIZE
+       ================================ */
+
     .price {
-      font-size: 1.4rem;
+      font-size: 1.8rem; /* Original size */
       font-weight: 700;
-      margin: 10px 0;
+      margin: 15px 0;
       color: var(--accent-green);
-      text-shadow: 0 0 10px rgba(79,232,176,0.55);
+      text-shadow: 0 0 10px rgba(79, 232, 176, 0.6);
+      text-align: center;
+    }
+
+    /* ================================
+       PRODUCT DETAILS - SCROLLABLE DESCRIPTION ONLY
+       ================================ */
+
+    .product-details {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 25px; /* Original padding */
+      margin: 25px 0;
+    }
+
+    .detail-item {
+      margin-bottom: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .detail-item strong {
+      color: var(--accent-green);
+      font-weight: 600;
+      display: inline-block;
+      min-width: 120px; /* Original size */
+      font-size: 1rem; /* Original size */
+    }
+
+    .detail-item .value {
+      color: var(--text-light);
+      margin-left: 10px;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* ================================
+       SCROLLABLE DESCRIPTION ONLY - VERTICAL SCROLL
+       ================================ */
+
+    .description-scroll {
+      max-height: 150px; /* Scrollable height */
+      overflow-y: auto; /* Vertical scroll only */
+      overflow-x: hidden; /* Prevent horizontal scroll */
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      margin-top: 10px;
+      word-wrap: break-word; /* Prevent long words from causing horizontal scroll */
+    }
+
+    .description-scroll p {
+      margin: 0;
+      line-height: 1.6;
+      word-break: break-word; /* Break long words */
+    }
+
+    /* Custom scrollbar for description */
+    .description-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .description-scroll::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+
+    .description-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+    }
+
+    /* ================================
+       STATUS BADGES - ORIGINAL SIZE
+       ================================ */
+
+    .status-badge {
+      padding: 6px 12px; /* Original size */
+      border-radius: 8px;
+      font-size: 0.8rem; /* Original size */
+      font-weight: 600;
+      text-transform: capitalize;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    .status-available {
+      background: rgba(79, 232, 176, 0.2);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .status-unavailable {
+      background: rgba(255, 107, 107, 0.2);
+      color: var(--danger-red);
+      border: 1px solid var(--danger-red);
+    }
+
+    .status-maintenance {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    /* ================================
+       ACTIONS SECTION - ORIGINAL SIZE
+       ================================ */
+
+    .actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    /* ================================
+       RESPONSIVE
+       ================================ */
+
+    @media (max-width: 768px) {
+      .profile-container {
+        padding: 60px 15px 20px;
+      }
+      
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .price {
+        font-size: 1.5rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 250px;
+      }
+      
+      .back-btn {
+        top: 15px;
+        left: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 1.6rem;
+      }
+      
+      .product-details {
+        padding: 20px 15px;
+      }
+      
+      .detail-item {
+        flex-direction: column;
+      }
+      
+      .detail-item strong {
+        min-width: auto;
+        margin-bottom: 5px;
+      }
+      
+      .detail-item .value {
+        margin-left: 0;
+      }
+      
+      .description-scroll {
+        max-height: 120px;
+      }
+    }
+
+            .back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+      width: auto;
+      align-self: center;
+    }
+
+    .back:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
     }
   </style>
-
 </head>
+
 <body>
 
+<div class="profile-container">
+  <!-- Home button outside container -->
+  <div class="back-btn">
+    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+  </div>
+
   <div class="container">
-
-    <a href="/users/dashboard" class="btn-back">⬅ Back to Dashboard</a>
-
+    <a href="/users/dashboard" class="back">⬅ Back to Products</a>
     <h1><%= product.name %></h1>
 
-    <div class="price">₱<%= product.price %></div>
+    <div class="price">₱<%= (product.price || 0).toFixed(2) %></div>
 
+    <!-- Product Image -->
     <% if (product.images && product.images.length) { %>
-      <img src="<%= product.images[0] %>" alt="Product Image">
+      <img src="<%= product.images[0] %>" alt="Product Image" class="product-image">
     <% } else { %>
-      <img src="/placeholder.png" alt="No Image">
+      <img src="/placeholder.png" alt="No Image" class="product-image">
     <% } %>
 
-    <div class="details">
-      <p><strong>Category:</strong> <%= product.category %></p>
-      <p><strong>Description:</strong> <%= product.description %></p>
-      <p><strong>Stock:</strong> <%= product.stock %></p>
+    <!-- Product Details -->
+    <div class="product-details">
+      <div class="detail-item">
+        <strong>Category:</strong>
+        <span class="value"><%= product.category || 'General' %></span>
+      </div>
+
+      <div class="detail-item">
+        <strong>Description:</strong>
+        <div class="description-scroll">
+          <p><%= product.description || 'No description available' %></p>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <strong>Stock:</strong>
+        <span class="value"><%= typeof product.stock === 'number' ? product.stock : '—' %></span>
+        <% if (product.status) { %>
+          <span class="status-badge 
+            <% if (product.status === 'available') { %> status-available 
+            <% } else if (product.status === 'unavailable') { %> status-unavailable 
+            <% } else if (product.status === 'maintenance') { %> status-maintenance 
+            <% } %>">
+            <%= product.status %>
+          </span>
+        <% } %>
+      </div>
+
+      <% if (product.createdAt) { %>
+        <div class="detail-item">
+          <strong>Added:</strong>
+          <span class="value"><%= new Date(product.createdAt).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+          }) %></span>
+        </div>
+      <% } %>
     </div>
 
-<div class="actions">
-
-  <% if (user && user.role === "admin") { %>
-
-      <!-- Admin logged in → no add to cart -->
-      <span class="btn disabled">Admins cannot buy</span>
-
-  <% } else { %>
-
-      <% if (product.stock > 0) { %>
-          <a href="/cart/add/<%= product._id %>" class="btn cart">🛒 Add to Cart</a>
+    <!-- Actions -->
+    <div class="actions">
+      <% if (user && user.role === "admin") { %>
+        <span class="btn btn-disabled">Admins cannot buy</span>
+        <a href="/users/admin/products/edit/<%= product._id %>" class="btn btn-primary">✏ Edit Product</a>
       <% } else { %>
-          <span class="btn disabled">Out of Stock</span>
+        <% if (product.stock > 0 && product.status === 'available') { %>
+          <a href="/cart/add/<%= product._id %>" class="btn btn-success">🛒 Add to Cart</a>
+        <% } else { %>
+          <span class="btn btn-disabled">Out of Stock</span>
+        <% } %>
       <% } %>
-
-  <% } %>
-
-</div>
-
-
+    </div>
   </div>
+</div>
 
 </body>
 </html>

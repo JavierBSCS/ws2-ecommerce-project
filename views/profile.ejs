@@ -20,10 +20,7 @@
       --text-light: #e5e9f0;
       --text-muted: #9aa3b2;
       --card-bg: rgba(255, 255, 255, 0.06);
-    }
-
-    * {
-      box-sizing: border-box;
+      --success-color: #4fe8b0;
     }
 
     html, body {
@@ -34,10 +31,6 @@
       font-family: "Inter", Arial, sans-serif;
       color: var(--text-light);
       overflow-x: hidden;
-    }
-
-    body {
-      overflow-y: auto;
     }
 
     /* ================================
@@ -52,18 +45,12 @@
       background: rgba(255,255,255,0.05);
       backdrop-filter: blur(8px);
       border-radius: 10px;
-      margin: 4px 0;
     }
 
     ::-webkit-scrollbar-thumb {
       background: rgba(255,255,255,0.25);
       backdrop-filter: blur(6px);
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.35);
     }
 
     /* ================================
@@ -87,27 +74,27 @@
     }
 
     /* ================================
-       PROFILE CARD
+       CONTAINER
        ================================ */
 
-    .profile-card {
+    .container {
+      width: 100%;
+      max-width: 500px;
       background: rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid var(--glass-border);
       border-radius: 20px;
       padding: 40px;
-      width: 100%;
-      max-width: 500px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .profile-card:hover {
+    .container:hover {
       transform: translateY(-5px);
       box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
     }
 
-    .title {
+    h2 {
       font-size: 2.2rem;
       font-weight: 700;
       margin-bottom: 30px;
@@ -117,44 +104,8 @@
     }
 
     /* ================================
-       PROFILE DETAILS
-       ================================ */
-
-    .profile-details {
-      margin-bottom: 30px;
-    }
-
-    .profile-details p {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 15px 20px;
-      margin-bottom: 12px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .profile-details p:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--accent-blue);
-      transform: translateX(5px);
-    }
-
-    .profile-details strong {
-      color: var(--accent-green);
-      font-weight: 600;
-    }
-
-    /* ================================
        BUTTONS
        ================================ */
-
-    .profile-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
 
     .btn {
       display: inline-flex;
@@ -189,6 +140,7 @@
       color: var(--text-light);
       border-color: var(--accent-purple);
       box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+      margin-bottom: 20px;
     }
 
     .btn-secondary:hover {
@@ -211,19 +163,105 @@
     }
 
     /* ================================
+       ALERT MESSAGES
+       ================================ */
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      text-align: center;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      border: 1px solid;
+      animation: slideDown 0.5s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-success {
+      background: rgba(79, 232, 176, 0.2);
+      border-color: var(--success-color);
+      color: var(--success-color);
+      box-shadow: 0 0 20px rgba(79, 232, 176, 0.3);
+    }
+
+    /* ================================
+       PROFILE DETAILS
+       ================================ */
+
+    .profile-details {
+      margin-bottom: 30px;
+    }
+
+    .profile-details p {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .profile-details p:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-blue);
+      transform: translateX(5px);
+    }
+
+    .profile-details strong {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    /* ================================
+       PROFILE ACTIONS
+       ================================ */
+
+    .profile-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ================================
+       AVATAR
+       ================================ */
+
+    .avatar-box {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .avatar-preview {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(76, 201, 240, 0.5);
+      box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
+      margin-bottom: 12px;
+    }
+
+    /* ================================
        RESPONSIVE
        ================================ */
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .profile-container {
         padding: 60px 15px 20px;
       }
       
-      .profile-card {
+      .container {
         padding: 30px 20px;
       }
       
-      .title {
+      h2 {
         font-size: 1.8rem;
       }
       
@@ -231,61 +269,71 @@
         padding: 12px 15px;
         font-size: 0.9rem;
       }
+      
+      .alert {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+      }
+      
+      .avatar-preview {
+        width: 120px;
+        height: 120px;
+      }
     }
   </style>
 </head>
-<body class="profile-body">
 
-  <div class="profile-container">
-    <!-- Home button outside profile card -->
-    <div class="back-btn">
-      <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
-    </div>
+<body>
 
-<div class="profile-card">
-
-  <!-- PROFILE PICTURE -->
-  <div style="text-align: center; margin-bottom: 20px;">
-    <img 
-      src="<%= user.profileImage || '/uploads/default-avatar.png' %>" 
-      alt="Profile Picture"
-      style="
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid rgba(76, 201, 240, 0.5);
-        box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
-      "
-    >
+<div class="profile-container">
+  <!-- Home button outside container -->
+  <div class="back-btn">
+    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
   </div>
 
-  <!-- TITLE -->
-  <h1 class="title">👤 <%= user.firstName %> <%= user.lastName %>!</h1>
+  <div class="container">
+    <h2 class="title">👤 <%= user.firstName %> <%= user.lastName %>!</h2>
 
-  <!-- PROFILE DETAILS -->
-  <div class="profile-details">
-    <p><strong>User ID:</strong> <%= user.userId %></p>
-    <p><strong>Email:</strong> <%= user.email %></p>
-    <p><strong>Role:</strong> <%= user.role %></p>
-    <p><strong>Status:</strong> ✅ Active</p>
-    <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
-  </div>
-
-  <!-- ACTION BUTTONS -->
-  <div class="profile-actions">
-    <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
-
-    <% if (user.role === 'admin') { %>
-      <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
+    <!-- Success Message for Password Change -->
+    <% if (typeof passwordChanged !== 'undefined' && passwordChanged === '1') { %>
+      <div class="alert alert-success">
+        ✅ Password changed successfully!
+      </div>
     <% } %>
 
-    <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
-  </div>
+    <a href="/users/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
 
+    <!-- PROFILE PICTURE -->
+    <div class="avatar-box">
+      <img 
+        src="<%= user.profileImage || '/uploads/default-avatar.png' %>" 
+        alt="Profile Picture"
+        class="avatar-preview"
+      >
+    </div>
+
+    <!-- PROFILE DETAILS -->
+    <div class="profile-details">
+      <p><strong>User ID:</strong> <%= user.userId %></p>
+      <p><strong>Email:</strong> <%= user.email %></p>
+      <p><strong>Role:</strong> <%= user.role %></p>
+      <p><strong>Status:</strong> ✅ Active</p>
+      <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="profile-actions">
+      <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
+
+      <% if (user.role === 'admin') { %>
+        <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
+      <% } %>
+
+      <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
+    </div>
+
+  </div>
 </div>
-
-  </div>
 
 </body>
 </html>
