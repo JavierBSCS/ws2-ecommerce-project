@@ -61,16 +61,19 @@ app.use("/products", productsRoute);
 // 2️⃣ CART ROUTES
 app.use("/cart", cartRoute);
 
-// 3️⃣ USERS (contains its own 404 so must come later)
+// 3️⃣ ORDERS ROUTES — MOVE THIS ABOVE USERS
+app.use("/orders", ordersRoute);
+
+// 4️⃣ USERS ROUTES (contains its own 404 — must be last)
 app.use('/users', usersRoute);
 
-// 4️⃣ OTHER ROUTES
+// 5️⃣ OTHER ROUTES
 app.use('/password', passwordRoute);
-app.use("/orders", ordersRoute);
 app.use("/admin", adminOrdersRoute);
 
-// 5️⃣ INDEX ROUTE
+// 6️⃣ INDEX ROUTE
 app.use('/', indexRoute);
+
 
 // ================================
 // SITEMAP

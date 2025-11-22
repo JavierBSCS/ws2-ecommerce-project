@@ -1,36 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>My Orders</title>
+
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text-light: #e5e9f0;
+      --accent-blue: #4cc9f0;
+      --accent-green: #4fe8b0;
+      --danger-red: #ff6b6b;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: "Inter", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-light);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px;
+      border-radius: 15px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2rem;
+      text-shadow: 0 0 8px rgba(76,201,240,0.4);
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    th {
+      color: var(--accent-blue);
+      font-size: 1.1rem;
+    }
+
+    tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .btn-cancel {
+      padding: 8px 14px;
+      background: var(--danger-red);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .btn-cancel:hover {
+      background: #ff7b7b;
+      transform: scale(1.05);
+    }
+
+    .status {
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status.to_pay {
+      color: var(--accent-green);
+    }
+
+    .status.cancelled {
+      color: var(--danger-red);
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 15px;
+      color: white;
+      text-decoration: none;
+      padding: 10px 16px;
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      backdrop-filter: blur(12px);
+    }
+  </style>
+
 </head>
 <body>
 
-<h1>📦 My Orders</h1>
+<div class="container">
 
-<% if (!orders.length) { %>
-  <p>You have not placed any orders yet.</p>
-<% } else { %>
+  <a href="/users/dashboard" class="back">⬅ Back to Dashboard</a>
 
-<table border="1" cellpadding="10">
-  <tr>
-    <th>Order ID</th>
-    <th>Total</th>
-    <th>Status</th>
-    <th>Date</th>
-  </tr>
+  <h1>📦 My Orders</h1>
 
-  <% orders.forEach(o => { %>
+  <% if (!orders.length) { %>
+      <p>You have not placed any orders yet.</p>
+  <% } else { %>
+
+  <table>
     <tr>
-      <td><%= o.orderId %></td>
-      <td>₱<%= o.totalAmount.toFixed(2) %></td>
-      <td><%= o.orderStatus %></td>
-      <td><%= new Date(o.createdAt).toLocaleString() %></td>
+      <th>Order ID</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Date</th>
+      <th>Actions</th>
     </tr>
-  <% }) %>
 
-</table>
+    <% orders.forEach(o => { %>
+      <tr>
+        <td><%= o.orderId %></td>
+        <td>₱<%= (o.totalAmount || o.subtotal || 0).toFixed(2) %></td>
 
-<% } %>
+
+        <td class="status <%= o.orderStatus %>">
+          <%= o.orderStatus %>
+        </td>
+
+        <td><%= new Date(o.createdAt).toLocaleString() %></td>
+
+        <td>
+          <% if (o.orderStatus === "to_pay") { %>
+<form action="/orders/cancel/<%= o.orderId %>" method="POST" style="display:inline;">
+    <button type="submit" button class="btn-cancel">Cancel</button>
+</form>
+
+          <% } else { %>
+            —
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+
+  </table>
+  <% } %>
+
+</div>
 
 </body>
 </html>
