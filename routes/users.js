@@ -14,6 +14,10 @@ const fs = require("fs");
 const path = require("path");
 const uploadProduct = require("../middleware/uploadProduct");
 
+
+function getDb(req) {
+    return req.app.locals.client.db(req.app.locals.dbName);
+}
 // =======================================================================
 //  PROFILE PAGE
 // =======================================================================
@@ -402,25 +406,80 @@ router.get("/dashboard", requireLogin, async (req, res) => {
 
 
 // =======================================================================
-//  ADMIN: MANAGE PRODUCTS
+//  ADMIN: MANAGE PRODUCTS (UPDATED FOR LESSON 22)
 // =======================================================================
 router.get("/admin/products", requireLogin, async (req, res) => {
-  if (req.session.user.role !== "admin")
-    return res.status(403).send("Access denied.");
+    if (req.session.user.role !== "admin")
+        return res.status(403).send("Access denied.");
 
-  const db = req.app.locals.client.db(req.app.locals.dbName);
-  const products = await db.collection("products").find().toArray();
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const productsCollection = db.collection("products");
+        
+        // Search filters (Lesson 22)
+        const searchName = (req.query.searchName || "").trim();
+        const searchCategory = (req.query.searchCategory || "").trim();
+        
+        const query = {};
+        if (searchName) {
+            query.name = { $regex: searchName, $options: "i" };
+        }
+        if (searchCategory) {
+            query.category = searchCategory;
+        }
 
-  res.render("admin/manageProducts", {
-    products,
-    currentUser: req.session.user,
-    highlightedProduct: req.query.highlight || null
-  });
+        const products = await productsCollection
+            .find(query)
+            .sort({ createdAt: -1 })
+            .toArray();
+
+        // Messages (Lesson 22)
+        const success = req.query.success;
+        const action = req.query.action;
+        const error = req.query.error;
+        let message = null;
+        
+        if (success == "1" && action == "created") {
+            message = {
+                type: "success",
+                text: "Product created successfully."
+            };
+        } else if (success == "1" && action == "updated") {
+            message = {
+                type: "success", 
+                text: "Product updated successfully."
+            };
+        } else if (success == "1" && action == "deleted") {
+            message = {
+                type: "success",
+                text: "Product deleted successfully."
+            };
+        } else if (error == "cannot_delete_used") {
+            message = {
+                type: "error",
+                text: "Cannot delete this product because it is already used in one or more orders."
+            };
+        }
+
+        res.render("admin/manageProducts", {
+            products,
+            currentUser: req.session.user,
+            highlightedProduct: req.query.highlight || null,
+            // Lesson 22 additions
+            message,
+            searchName,
+            searchCategory
+        });
+
+    } catch (err) {
+        console.error("❌ Admin products error:", err);
+        res.status(500).send("Error loading products.");
+    }
 });
 
 
 // =======================================================================
-//  ADD PRODUCT (GET)
+//  ADD PRODUCT (GET) - FIXED
 // =======================================================================
 router.get("/admin/products/add", requireLogin, (req, res) => {
   if (req.session.user.role !== "admin")
@@ -429,75 +488,91 @@ router.get("/admin/products/add", requireLogin, (req, res) => {
   res.render("admin/addproduct", {
     title: "Add Product",
     currentUser: req.session.user,
+    errors: [], // Add this line - initialize empty errors array
+    formData: {} // Add this line - initialize empty formData object
   });
 });
 
 
 // =======================================================================
-//  ADD PRODUCT (POST) - CLEAN VERSION
+//  ADD PRODUCT (POST) - UPDATED WITH LESSON 22 VALIDATION
 // =======================================================================
 router.post(
-  "/admin/products/add",
-  requireLogin,
-  uploadProduct.array("images", 10),
-  async (req, res) => {
-    if (req.session.user.role !== "admin")
-      return res.status(403).send("Access denied.");
+    "/admin/products/add",
+    requireLogin,
+    uploadProduct.array("images", 10),
+    async (req, res) => {
+        if (req.session.user.role !== "admin")
+            return res.status(403).send("Access denied.");
 
-    try {
-      const db = req.app.locals.client.db(req.app.locals.dbName);
-      const { name, price, description, category, stock, status } = req.body;
+        try {
+            const db = req.app.locals.client.db(req.app.locals.dbName);
+            
+            // Lesson 22: Validate input
+            const { errors, formData, priceNumber } = validateProductInput(req.body);
 
-      // Handle multiple uploaded images
-      const imagesArr = [];
-      if (req.files && req.files.length > 0) {
-        req.files.forEach((file) => {
-          imagesArr.push("/uploads/" + file.filename);
-        });
-      }
+            if (errors.length > 0) {
+                // Validation failed - show form again with errors
+                return res.status(400).render("admin/addproduct", {
+                    title: "Add Product",
+                    currentUser: req.session.user,
+                    errors,
+                    formData
+                });
+            }
 
-      const stockVal = parseInt(stock || "0");
-      let statusVal = status || "available";
-      if (stockVal === 0 && statusVal !== "maintenance")
-        statusVal = "unavailable";
+            // Handle multiple uploaded images
+            const imagesArr = [];
+            if (req.files && req.files.length > 0) {
+                req.files.forEach((file) => {
+                    imagesArr.push("/uploads/" + file.filename);
+                });
+            }
 
-      const product = {
-        name: name || "Untitled",
-        category: category || "General",
-        price: parseFloat(price) || 0,
-        stock: stockVal,
-        status: statusVal,
-        images: imagesArr,
-        description: description || "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+            const stockVal = parseInt(req.body.stock || "0");
+            let statusVal = req.body.status || "available";
+            if (stockVal === 0 && statusVal !== "maintenance")
+                statusVal = "unavailable";
 
-      const result = await db.collection("products").insertOne(product);
-      
-      res.redirect(`/users/admin/products?highlight=${result.insertedId}`);
-    } catch (err) {
-      console.error("❌ Add product error:", err);
-      
-      // Clean up uploaded files if error occurred
-      if (req.files && req.files.length > 0) {
-        req.files.forEach(file => {
-          try {
-            fs.unlinkSync(file.path);
-          } catch (err) {
-            console.error("Error cleaning up file:", err);
-          }
-        });
-      }
-      
-      res.send("Something went wrong.");
+            const product = {
+                name: formData.name,
+                category: formData.category,
+                price: priceNumber,
+                stock: stockVal,
+                status: statusVal,
+                images: imagesArr,
+                description: formData.description,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            const result = await db.collection("products").insertOne(product);
+            
+            // Lesson 22: Redirect with success message AND highlight
+            res.redirect("/users/admin/products?success=1&action=created&highlight=" + result.insertedId);
+
+        } catch (err) {
+            console.error("❌ Add product error:", err);
+            
+            // Clean up uploaded files if error occurred
+            if (req.files && req.files.length > 0) {
+                req.files.forEach(file => {
+                    try {
+                        fs.unlinkSync(file.path);
+                    } catch (err) {
+                        console.error("Error cleaning up file:", err);
+                    }
+                });
+            }
+            
+            res.status(500).send("Something went wrong.");
+        }
     }
-  }
 );
 
 
 // =======================================================================
-//  EDIT PRODUCT (GET)
+//  EDIT PRODUCT (GET) - FIXED
 // =======================================================================
 router.get("/admin/products/edit/:id", requireLogin, async (req, res) => {
   if (req.session.user.role !== "admin")
@@ -515,6 +590,8 @@ router.get("/admin/products/edit/:id", requireLogin, async (req, res) => {
     res.render("admin/editProduct", {
       product,
       currentUser: req.session.user,
+      errors: [], // Add this line - initialize empty errors array
+      formData: {} // Add this line - initialize empty formData object
     });
   } catch (err) {
     console.error("❌ Fetch product error:", err);
@@ -523,120 +600,151 @@ router.get("/admin/products/edit/:id", requireLogin, async (req, res) => {
 });
 
 // =======================================================================
-//  EDIT PRODUCT (POST) - CLEAN VERSION
+//  EDIT PRODUCT (POST) - UPDATED WITH LESSON 22 VALIDATION
 // =======================================================================
 router.post(
-  "/admin/products/edit/:id",
-  requireLogin,
-  uploadProduct.array("images", 10),
-  async (req, res) => {
-    if (req.session.user.role !== "admin")
-      return res.status(403).send("Access denied.");
+    "/admin/products/edit/:id",
+    requireLogin,
+    uploadProduct.array("images", 10),
+    async (req, res) => {
+        if (req.session.user.role !== "admin")
+            return res.status(403).send("Access denied.");
 
-    try {
-      const db = req.app.locals.client.db(req.app.locals.dbName);
-      const { name, price, description, category, stock, status, deletedImages } = req.body;
-
-      const product = await db
-        .collection("products")
-        .findOne({ _id: new ObjectId(req.params.id) });
-
-      if (!product) return res.send("Product not found.");
-
-      // Start with existing images
-      let imagesArr = Array.isArray(product.images) ? [...product.images] : [];
-
-      // Remove deleted images
-      if (deletedImages && deletedImages.trim() !== '') {
         try {
-          const deletedArray = JSON.parse(deletedImages);
-          imagesArr = imagesArr.filter(img => !deletedArray.includes(img));
-          
-          // Delete the actual files from server
-          deletedArray.forEach(imgPath => {
-            try {
-              if (imgPath.startsWith('/uploads/')) {
-                const filename = imgPath.split('/').pop();
-                const filePath = path.join(__dirname, '..', 'public', 'uploads', filename);
-                if (fs.existsSync(filePath)) {
-                  fs.unlinkSync(filePath);
-                }
-              }
-            } catch (err) {
-              // Silent fail for file deletion errors
+            const db = req.app.locals.client.db(req.app.locals.dbName);
+            
+            // Lesson 22: Validate input
+            const { errors, formData, priceNumber } = validateProductInput(req.body);
+
+            const product = await db
+                .collection("products")
+                .findOne({ _id: new ObjectId(req.params.id) });
+
+            if (!product) return res.send("Product not found.");
+
+            if (errors.length > 0) {
+                // Validation failed - show form again with errors
+                return res.status(400).render("admin/editProduct", {
+                    product,
+                    currentUser: req.session.user,
+                    errors,
+                    formData: { ...formData, status: req.body.status, stock: req.body.stock }
+                });
             }
-          });
-        } catch (parseError) {
-          // Silent fail for parsing errors
+
+            const { deletedImages } = req.body;
+
+            // Start with existing images
+            let imagesArr = Array.isArray(product.images) ? [...product.images] : [];
+
+            // Remove deleted images
+            if (deletedImages && deletedImages.trim() !== '') {
+                try {
+                    const deletedArray = JSON.parse(deletedImages);
+                    imagesArr = imagesArr.filter(img => !deletedArray.includes(img));
+                    
+                    // Delete the actual files from server
+                    deletedArray.forEach(imgPath => {
+                        try {
+                            if (imgPath.startsWith('/uploads/')) {
+                                const filename = imgPath.split('/').pop();
+                                const filePath = path.join(__dirname, '..', 'public', 'uploads', filename);
+                                if (fs.existsSync(filePath)) {
+                                    fs.unlinkSync(filePath);
+                                }
+                            }
+                        } catch (err) {
+                            // Silent fail for file deletion errors
+                        }
+                    });
+                } catch (parseError) {
+                    // Silent fail for parsing errors
+                }
+            }
+
+            // Add new uploaded images
+            if (req.files && req.files.length > 0) {
+                req.files.forEach(file => {
+                    imagesArr.push("/uploads/" + file.filename);
+                });
+            }
+
+            const stockVal = parseInt(req.body.stock || "0");
+            let statusVal = req.body.status || "available";
+            if (stockVal === 0 && statusVal !== "maintenance")
+                statusVal = "unavailable";
+
+            await db.collection("products").updateOne(
+                { _id: new ObjectId(req.params.id) },
+                {
+                    $set: {
+                        name: formData.name,
+                        description: formData.description,
+                        category: formData.category,
+                        stock: stockVal,
+                        price: priceNumber,
+                        status: statusVal,
+                        images: imagesArr,
+                        updatedAt: new Date(),
+                    },
+                }
+            );
+
+            // Lesson 22: Redirect with success message AND highlight
+            res.redirect("/users/admin/products?success=1&action=updated&highlight=" + req.params.id);
+
+        } catch (err) {
+            console.error("❌ Update product error:", err);
+            
+            // Clean up uploaded files if error occurred
+            if (req.files && req.files.length > 0) {
+                req.files.forEach(file => {
+                    try {
+                        fs.unlinkSync(file.path);
+                    } catch (err) {
+                        // Silent fail for cleanup errors
+                    }
+                });
+            }
+            
+            res.status(500).send("Something went wrong.");
         }
-      }
-
-      // Add new uploaded images
-      if (req.files && req.files.length > 0) {
-        req.files.forEach(file => {
-          imagesArr.push("/uploads/" + file.filename);
-        });
-      }
-
-      const stockVal = parseInt(stock || "0");
-      let statusVal = status || "available";
-      if (stockVal === 0 && statusVal !== "maintenance")
-        statusVal = "unavailable";
-
-      await db.collection("products").updateOne(
-        { _id: new ObjectId(req.params.id) },
-        {
-          $set: {
-            name,
-            description,
-            category: category || "General",
-            stock: stockVal,
-            price: parseFloat(price) || 0,
-            status: statusVal,
-            images: imagesArr,
-            updatedAt: new Date(),
-          },
-        }
-      );
-
-      res.redirect(`/users/admin/products?highlight=${req.params.id}`);
-    } catch (err) {
-      console.error("❌ Update product error:", err);
-      
-      // Clean up uploaded files if error occurred
-      if (req.files && req.files.length > 0) {
-        req.files.forEach(file => {
-          try {
-            fs.unlinkSync(file.path);
-          } catch (err) {
-            // Silent fail for cleanup errors
-          }
-        });
-      }
-      
-      res.send("Something went wrong.");
     }
-  }
 );
 
 // =======================================================================
-//  DELETE PRODUCT
+//  DELETE PRODUCT - FIXED SAFE DELETE
 // =======================================================================
 router.get("/admin/products/delete/:id", requireLogin, async (req, res) => {
-  if (req.session.user.role !== "admin")
-    return res.status(403).send("Access denied.");
+    if (req.session.user.role !== "admin")
+        return res.status(403).send("Access denied.");
 
-  try {
-    const db = req.app.locals.client.db(req.app.locals.dbName);
-    await db
-      .collection("products")
-      .deleteOne({ _id: new ObjectId(req.params.id) });
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const productsCollection = db.collection("products");
+        const ordersCollection = db.collection("orders");
 
-    res.redirect("/users/admin/products");
-  } catch (err) {
-    console.error("❌ Delete product error:", err);
-    res.send("Something went wrong.");
-  }
+        const productId = req.params.id;
+
+        // Check if this product is used in any orders
+        const orderUsingProduct = await ordersCollection.findOne({
+            "items.productId": productId
+        });
+
+        if (orderUsingProduct) {
+            // Product is used in at least one order - do not delete
+            return res.redirect("/users/admin/products?error=cannot_delete_used");
+        }
+
+        // Safe to delete - no orders found with this product
+        await productsCollection.deleteOne({ _id: new ObjectId(productId) });
+
+        res.redirect("/users/admin/products?success=1&action=deleted");
+
+    } catch (err) {
+        console.error("❌ Delete product error:", err);
+        res.status(500).send("Something went wrong.");
+    }
 });
 
 
@@ -823,6 +931,54 @@ router.post("/admin/qr-codes/save-details", requireLogin, async (req, res) => {
     res.status(500).send("Something went wrong.");
   }
 });
+
+// =======================================================================
+//  VALIDATION HELPER (Lesson 22)
+// =======================================================================
+function validateProductInput(body) {
+    const errors = [];
+    const name = (body.name || "").trim();
+    const description = (body.description || "").trim();
+    const category = (body.category || "").trim();
+
+    const priceRaw = (body.price || "").toString().trim();
+    const price = Number(priceRaw);
+
+    if (!name) {
+        errors.push("Product name is required.");
+    } else if (name.length < 2) {
+        errors.push("Product name must be at least 2 characters.");
+    }
+
+    if (!description) {
+        errors.push("Description is required.");
+    } else if (description.length < 5) {
+        errors.push("Description must be at least 5 characters.");
+    }
+
+    if (!priceRaw) {
+        errors.push("Price is required.");
+    } else if (Number.isNaN(price)) {
+        errors.push("Price must be a valid number.");
+    } else if (price <= 0) {
+        errors.push("Price must be greater than 0.");
+    }
+
+    if (!category) {
+        errors.push("Category is required.");
+    }
+
+    const formData = {
+        name,
+        description,
+        price: priceRaw, // keep raw input for the form
+        category,
+        status: body.status || "available",
+        stock: body.stock || "0"
+    };
+
+    return { errors, formData, priceNumber: price };
+}
 
 
 // =======================================================================
