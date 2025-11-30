@@ -73,28 +73,28 @@
       <button type="submit">Save Profile</button>
     </form>
 
-    <!-- PASSWORD SECTION -->
-    <h3 class="sub-section-title">🔐 Change Password</h3>
+      <!-- PASSWORD SECTION -->
+      <h3 class="sub-section-title">🔐 Change Password</h3>
 
-    <form action="/users/change-password/<%= user.userId %>" method="POST" id="passwordForm">
+      <form action="/users/change-password/<%= user.userId %>" method="POST" id="passwordForm">
 
-      <label>Old Password</label>
-      <input type="password" name="oldPassword" id="oldPassword" placeholder="Enter current password" required>
+        <label>Old Password</label>
+        <input type="password" name="oldPassword" id="oldPassword" placeholder="Enter current password" required>
 
-      <label>New Password</label>
-      <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
-      <div class="password-strength" id="passwordStrength">
-        Password must be at least 8 characters long
-      </div>
+        <label>New Password</label>
+        <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
+        <div class="password-strength" id="passwordStrength">
+          Password must be at least 8 characters long
+        </div>
 
-      <label>Confirm New Password</label>
-      <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
-      <div class="password-match" id="passwordMatch"></div>
+        <label>Confirm New Password</label>
+        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
+        <div class="password-match" id="passwordMatch"></div>
 
-      <button type="submit" class="btn-secondary" style="width: 100%; margin-top: 10px;">
-        Update Password
-      </button>
-    </form>
+        <button type="submit" class="btn-secondary" style="width: 100%; margin-top: 10px;">
+          Update Password
+        </button>
+      </form>
   </div>
 </div>
 

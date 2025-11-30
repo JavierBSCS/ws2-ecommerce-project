@@ -354,3 +354,24 @@
         height: 120px;
       }
     }
+
+    /* Password Validation Styles */
+      .password-strength, .password-match {
+        font-size: 0.85rem;
+        margin-top: 5px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+      }
+
+      .password-strength.valid, .password-match.valid {
+        background: rgba(79, 232, 176, 0.2);
+        color: var(--success-color);
+        border: 1px solid var(--success-color);
+      }
+
+      .password-strength.invalid, .password-match.invalid {
+        background: rgba(214, 48, 49, 0.2);
+        color: #d63031;
+        border: 1px solid #d63031;
+      }

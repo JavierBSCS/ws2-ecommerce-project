@@ -179,6 +179,64 @@ router.post(
 );
 
 // =======================================================================
+//  CHANGE PASSWORD (POST)
+// =======================================================================
+router.post("/change-password/:userId", requireLogin, async (req, res) => {
+  try {
+    if (req.session.user.userId !== req.params.userId) {
+      return res.status(403).send("❌ You can only change your own password.");
+    }
+
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const usersCollection = db.collection("users");
+
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+    // Get current user
+    const user = await usersCollection.findOne({ userId: req.params.userId });
+    if (!user) {
+      return res.send("❌ User not found.");
+    }
+
+    // Validate old password
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!isOldPasswordValid) {
+      return res.send("❌ Current password is incorrect.");
+    }
+
+    // Validate new password
+    if (newPassword.length < 8) {
+      return res.send("❌ New password must be at least 8 characters long.");
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.send("❌ New passwords do not match.");
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password in database
+    await usersCollection.updateOne(
+      { userId: req.params.userId },
+      { 
+        $set: { 
+          passwordHash: hashedPassword,
+          updatedAt: new Date()
+        } 
+      }
+    );
+
+    // Redirect to profile with success message
+    res.redirect("/users/profile?passwordChanged=1");
+    
+  } catch (err) {
+    console.error("❌ Change password error:", err);
+    res.send("Something went wrong.");
+  }
+});
+
+// =======================================================================
 //  REGISTER (GET)
 // =======================================================================
 router.get("/register", (req, res) => {
