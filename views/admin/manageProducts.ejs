@@ -6,7 +6,6 @@
   <title>Manage Products</title>
   <link rel="stylesheet" href="/manageProducts.css">
 
-
 </head>
 
 <body>
@@ -24,6 +23,61 @@
       <a href="/users/admin/products/add" class="add-btn">+ Add New Product</a>
     </h2>
     
+    <!-- Lesson 22: Success/Error Messages -->
+    <% if (message) { %>
+      <div style="padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid <%= message.type == 'success' ? 'green' : 'red' %>; background-color: <%= message.type == 'success' ? '#d4edda' : '#f8d7da' %>; color: <%= message.type == 'success' ? 'green' : 'red' %>;">
+        <%= message.text %>
+      </div>
+    <% } %>
+
+    <!-- Lesson 22: Search Form - Updated with Category Dropdown -->
+    <section class="filter-section">
+      <form class="filter-form" action="/users/admin/products" method="GET">
+        <div class="filter-group">
+          <label class="filter-label" for="searchName">Search by name</label>
+          <input 
+            class="filter-input"
+            type="text" 
+            id="searchName" 
+            name="searchName" 
+            value="<%= typeof searchName !== 'undefined' ? searchName : '' %>"
+            placeholder="Enter product name..."
+          >
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label" for="searchCategory">Category</label>
+          <select 
+            class="filter-select"
+            id="searchCategory" 
+            name="searchCategory"
+          >
+            <option value="">All Categories</option>
+            <%
+              const categories = [
+                "Food", "Cars", "Electronics", "Clothes", "Accessories", "Home", "Sports", 
+                "Books", "Toys", "Beauty", "Fitness", "Health", "Office", "Pets", "Garden", 
+                "Music", "Jewelry", "Tools", "Appliances", "Gadgets", "Software", "Games", 
+                "Subscriptions", "Courses", "Services", "Beverages", "Snacks", "Fruits", 
+                "Vegetables", "Frozen", "Bakery"
+              ];
+              
+              const currentCategory = typeof searchCategory !== 'undefined' ? searchCategory : '';
+              
+              categories.forEach(cat => {
+                const isSelected = currentCategory === cat;
+            %>
+            <option value="<%= cat %>" <%= isSelected ? 'selected' : '' %>><%= cat %></option>
+            <% }); %>
+          </select>
+        </div>
+        
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary">Search</button>
+          <a href="/users/admin/products" class="btn btn-secondary">Clear</a>
+        </div>
+      </form>
+    </section>
 
     <div class="table-container">
       <table>
