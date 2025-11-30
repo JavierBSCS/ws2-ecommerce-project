@@ -17,6 +17,19 @@
   </div>
 
   <div class="container">
+    <!-- Success Message for Profile Edit -->
+<% if (typeof editSuccess !== 'undefined' && editSuccess === '1') { %>
+  <div class="alert alert-success">
+    ✅ Profile updated successfully!
+  </div>
+<% } %>
+
+<!-- Success Message for Password Change -->
+<% if (typeof passwordChanged !== 'undefined' && passwordChanged === '1') { %>
+  <div class="alert alert-success">
+    ✅ Password changed successfully!
+  </div>
+<% } %>
     <h2 class="title">👤 <%= user.firstName %> <%= user.lastName %>!</h2>
 
     <!-- Success Message for Password Change -->
@@ -45,6 +58,38 @@
       <p><strong>Status:</strong> ✅ Active</p>
       <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
     </div>
+
+    <!-- ADDRESS INFORMATION - ADD THIS SECTION -->
+<div class="address-section">
+  <h3 class="section-title">📍 Address Information</h3>
+  <div class="address-details">
+    <% if (user.address || user.city || user.province || user.zip || user.phone) { %>
+      <% if (user.address) { %>
+        <div class="address-item">
+          <strong>Address:</strong> <%= user.address %>
+        </div>
+      <% } %>
+      
+      <% if (user.city || user.province || user.zip) { %>
+        <div class="address-item">
+          <strong>Location:</strong> 
+          <%= [user.city, user.province, user.zip].filter(Boolean).join(', ') %>
+        </div>
+      <% } %>
+      
+      <% if (user.phone) { %>
+        <div class="address-item">
+          <strong>Phone:</strong> <%= user.phone %>
+        </div>
+      <% } %>
+    <% } else { %>
+      <div class="no-address">
+        <p>📝 No address information added yet</p>
+        <small>Add your address in the edit profile section</small>
+      </div>
+    <% } %>
+  </div>
+</div>
 
     <!-- ACTION BUTTONS -->
     <div class="profile-actions">

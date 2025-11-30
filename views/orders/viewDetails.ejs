@@ -19,6 +19,13 @@
     
     <h1>📋 Order Details</h1>
     
+    <!-- Success Messages -->
+    <% if (typeof return_requested !== 'undefined' && return_requested === '1') { %>
+      <div class="success-message">
+        ✅ Return request submitted successfully! Please wait for admin approval.
+      </div>
+    <% } %>
+
     <% if (order) { %>
       <div class="order-header">
         <div>
@@ -49,201 +56,330 @@
         </div>
       </div>
 
-<!-- Admin Actions for Multiple Order Statuses -->
-<% if (currentUser.role === 'admin' && (order.orderStatus === 'pending' || order.orderStatus === 'paid' || order.orderStatus === 'shipped')) { %>
-  <div class="admin-actions">
-    <h3>🛡️ Admin Actions</h3>
-    
-    <!-- For GCash Orders -->
-    <% if (order.paymentMethod === 'gcash') { %>
-      <!-- SCREENSHOT DISPLAY -->
-      <% if (order.paymentScreenshot && order.orderStatus === 'pending') { %>
-        <div class="screenshot-section">
-          <h4>📸 Payment Proof Screenshot</h4>
-          <div class="screenshot-container">
-            <img src="<%= order.paymentScreenshot %>" 
-                 alt="Payment Proof" 
-                 class="payment-screenshot"
-                 onclick="openScreenshotModal(this.src)">
-            <div class="screenshot-actions">
-              <button type="button" class="btn btn-outline" onclick="openScreenshotModal('<%= order.paymentScreenshot %>')">
-                🔍 View Full Size
+      <!-- Return Request Success Message -->
+      <% if (typeof return_requested !== 'undefined' && return_requested === '1') { %>
+        <div class="success-message">
+          ✅ Return request submitted successfully! Please wait for admin approval.
+        </div>
+      <% } %>
+
+      <!-- Refund Processed Success Message -->
+      <% if (typeof refund_processed !== 'undefined' && refund_processed === '1') { %>
+        <div class="success-message">
+          ✅ Refund processed successfully! Order has been refunded.
+        </div>
+      <% } %>
+
+      <!-- RETURN/REFUND FUNCTIONALITY -->
+
+      <!-- Customer Return Request Button -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === "completed") { %>
+        <div class="return-request-section">
+          <h3>🔄 Return/Refund Request</h3>
+          <form action="/orders/request-return/<%= order.orderId %>" method="POST" class="return-form">
+            <div class="form-group">
+              <label for="returnReason">Reason for return:</label>
+              <textarea id="returnReason" name="returnReason" rows="3" placeholder="Please explain why you want to return this order..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-warning" 
+                    onclick="return confirm('Request return/refund for this order?')">
+              🔄 Request Return/Refund
+            </button>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- Customer Actions for Return Requested Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === "return_requested") { %>
+        <div class="customer-notice">
+          <div class="notice-icon">🔄</div>
+          <div class="notice-content">
+            <h4>Return Requested</h4>
+            <p>Your return request has been submitted and is awaiting admin approval.</p>
+            <% if (order.returnReason) { %>
+              <p><strong>Reason:</strong> <%= order.returnReason %></p>
+            <% } %>
+            <p><strong>Requested on:</strong> <%= new Date(order.returnRequestedAt).toLocaleString() %></p>
+            <p><small>Please wait for admin to process your return request.</small></p>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Customer Actions for Refunded Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === 'refund') { %>
+        <div class="customer-notice">
+          <div class="notice-icon">💰</div>
+          <div class="notice-content">
+            <h4>Refund Processed</h4>
+            <p>Your refund has been processed successfully.</p>
+            <% if (order.refundAmount) { %>
+              <p><strong>Refund Amount:</strong> ₱<%= order.refundAmount.toFixed(2) %></p>
+            <% } %>
+            <% if (order.refundReason) { %>
+              <p><strong>Reason:</strong> <%= order.refundReason %></p>
+            <% } %>
+            <p><strong>Processed on:</strong> <%= new Date(order.refundProcessedAt).toLocaleString() %></p>
+            <p><small>The refund amount will be credited back to your original payment method.</small></p>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Admin Actions for Return Requested Orders -->
+      <% if (currentUser.role === 'admin' && order.orderStatus === "return_requested") { %>
+        <div class="admin-actions">
+          <h3>🔄 Return Request - Action Required</h3>
+          <div class="return-info">
+            <% if (order.returnReason) { %>
+              <p><strong>Customer Reason:</strong> <%= order.returnReason %></p>
+            <% } %>
+            <p><strong>Requested on:</strong> <%= new Date(order.returnRequestedAt).toLocaleString() %></p>
+          </div>
+          <div class="action-buttons">
+            <form action="/orders/process-refund/<%= order.orderId %>" method="POST" style="display: inline;">
+              <input type="hidden" name="refundAmount" value="<%= order.totalAmount %>">
+              <input type="hidden" name="refundReason" value="Return approved - <%= order.returnReason || 'No reason provided' %>">
+              <button type="submit" class="btn btn-success" 
+                      onclick="return confirm('Approve return and process full refund of ₱<%= order.totalAmount.toFixed(2) %>?')">
+                ✅ Approve Return & Refund
               </button>
-            </div>
-          </div>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">
-            Verify the payment with reference: <strong><%= order.gcashReference %></strong>
-          </p>
-        </div>
-      <% } else if (order.orderStatus === 'pending') { %>
-        <div class="screenshot-section">
-          <h4>📸 Payment Proof Screenshot</h4>
-          <div class="no-screenshot">
-            <p style="color: var(--danger-red);">⚠️ No payment screenshot provided by customer</p>
+            </form>
+            <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+              <input type="hidden" name="status" value="completed">
+              <button type="submit" class="btn btn-danger" 
+                      onclick="return confirm('Reject return request?')">
+                ❌ Reject Return
+              </button>
+            </form>
           </div>
         </div>
       <% } %>
-    <% } else if (order.paymentMethod === 'cod' && order.orderStatus === 'pending') { %>
-      <!-- For COD Orders -->
-      <div class="cod-instructions">
-        <h4>💰 Cash on Delivery Instructions</h4>
-        <div class="instructions-grid">
-          <div class="instruction-step">
-            <div class="step-icon">1</div>
-            <div class="step-content">
-              <strong>Prepare for Delivery</strong>
-              <p>Ensure order is ready for shipping</p>
-            </div>
+
+      <!-- Admin Actions for Refunded Orders -->
+      <% if (currentUser.role === 'admin' && order.orderStatus === 'refund') { %>
+        <div class="admin-actions">
+          <h3>💰 Refund Processed</h3>
+          <div class="refund-info">
+            <% if (order.refundAmount) { %>
+              <p><strong>Refund Amount:</strong> ₱<%= order.refundAmount.toFixed(2) %></p>
+            <% } %>
+            <% if (order.refundReason) { %>
+              <p><strong>Reason:</strong> <%= order.refundReason %></p>
+            <% } %>
+            <p><strong>Processed on:</strong> <%= new Date(order.refundProcessedAt).toLocaleString() %></p>
           </div>
-          <div class="instruction-step">
-            <div class="step-icon">2</div>
-            <div class="step-content">
-              <strong>Collect Payment</strong>
-              <p>Collect ₱<%= order.totalAmount.toFixed(2) %> upon delivery</p>
-            </div>
-          </div>
-          <div class="instruction-step">
-            <div class="step-icon">3</div>
-            <div class="step-content">
-              <strong>Mark as Paid</strong>
-              <p>Update status after successful payment collection</p>
-            </div>
-          </div>
+          <p style="color: var(--accent-green);">This order has been refunded to the customer.</p>
         </div>
-      </div>
-    <% } %>
-    
-    <div class="action-buttons">
-      <!-- Mark as Paid Button (for pending orders only) -->
-      <% if (order.orderStatus === 'pending') { %>
-        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
-          <input type="hidden" name="status" value="paid">
+      <% } %>
+
+      <!-- EXISTING ADMIN ACTIONS FOR OTHER STATUSES -->
+      <% if (currentUser.role === 'admin' && (order.orderStatus === 'pending' || order.orderStatus === 'paid' || order.orderStatus === 'shipped')) { %>
+        <div class="admin-actions">
+          <h3>🛡️ Admin Actions</h3>
+          
+          <!-- For GCash Orders -->
           <% if (order.paymentMethod === 'gcash') { %>
-            <button type="submit" class="btn btn-success" 
-                    onclick="return confirm('Confirm that you have verified the GCash payment and screenshot?')">
-              ✅ Verify Payment
-            </button>
-          <% } else if (order.paymentMethod === 'cod') { %>
-            <button type="submit" class="btn btn-success" 
-                    onclick="return confirm('Confirm that payment has been collected from the customer?')">
-              ✅ Mark as Paid (COD)
-            </button>
+            <!-- SCREENSHOT DISPLAY -->
+            <% if (order.paymentScreenshot && order.orderStatus === 'pending') { %>
+              <div class="screenshot-section">
+                <h4>📸 Payment Proof Screenshot</h4>
+                <div class="screenshot-container">
+                  <img src="<%= order.paymentScreenshot %>" 
+                       alt="Payment Proof" 
+                       class="payment-screenshot"
+                       onclick="openScreenshotModal(this.src)">
+                  <div class="screenshot-actions">
+                    <button type="button" class="btn btn-outline" onclick="openScreenshotModal('<%= order.paymentScreenshot %>')">
+                      🔍 View Full Size
+                    </button>
+                  </div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">
+                  Verify the payment with reference: <strong><%= order.gcashReference %></strong>
+                </p>
+              </div>
+            <% } else if (order.orderStatus === 'pending') { %>
+              <div class="screenshot-section">
+                <h4>📸 Payment Proof Screenshot</h4>
+                <div class="no-screenshot">
+                  <p style="color: var(--danger-red);">⚠️ No payment screenshot provided by customer</p>
+                </div>
+              </div>
+            <% } %>
+          <% } else if (order.paymentMethod === 'cod' && order.orderStatus === 'pending') { %>
+            <!-- For COD Orders -->
+            <div class="cod-instructions">
+              <h4>💰 Cash on Delivery Instructions</h4>
+              <div class="instructions-grid">
+                <div class="instruction-step">
+                  <div class="step-icon">1</div>
+                  <div class="step-content">
+                    <strong>Prepare for Delivery</strong>
+                    <p>Ensure order is ready for shipping</p>
+                  </div>
+                </div>
+                <div class="instruction-step">
+                  <div class="step-icon">2</div>
+                  <div class="step-content">
+                    <strong>Collect Payment</strong>
+                    <p>Collect ₱<%= order.totalAmount.toFixed(2) %> upon delivery</p>
+                  </div>
+                </div>
+                <div class="instruction-step">
+                  <div class="step-icon">3</div>
+                  <div class="step-content">
+                    <strong>Mark as Paid</strong>
+                    <p>Update status after successful payment collection</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           <% } %>
-        </form>
-      <% } %>
-      
-      <!-- Mark as Shipped Button (for paid orders only) -->
-      <% if (order.orderStatus === 'paid') { %>
-        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
-          <input type="hidden" name="status" value="shipped">
-          <button type="submit" class="btn btn-primary" 
-                  onclick="return confirm('Mark this order as shipped?')">
-            🚚 Mark as Shipped
-          </button>
-        </form>
+          
+          <div class="action-buttons">
+            <!-- Mark as Paid Button (for pending orders only) -->
+            <% if (order.orderStatus === 'pending') { %>
+              <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+                <input type="hidden" name="status" value="paid">
+                <% if (order.paymentMethod === 'gcash') { %>
+                  <button type="submit" class="btn btn-success" 
+                          onclick="return confirm('Confirm that you have verified the GCash payment and screenshot?')">
+                    ✅ Verify Payment
+                  </button>
+                <% } else if (order.paymentMethod === 'cod') { %>
+                  <button type="submit" class="btn btn-success" 
+                          onclick="return confirm('Confirm that payment has been collected from the customer?')">
+                    ✅ Mark as Paid (COD)
+                  </button>
+                <% } %>
+              </form>
+            <% } %>
+            
+            <!-- Mark as Shipped Button (for paid orders only) -->
+            <% if (order.orderStatus === 'paid') { %>
+              <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+                <input type="hidden" name="status" value="shipped">
+                <button type="submit" class="btn btn-primary" 
+                        onclick="return confirm('Mark this order as shipped?')">
+                  🚚 Mark as Shipped
+                </button>
+              </form>
+            <% } %>
+
+            <!-- Mark as Completed Button (for shipped orders only) -->
+            <% if (order.orderStatus === 'shipped') { %>
+              <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+                <input type="hidden" name="status" value="completed">
+                <button type="submit" class="btn btn-success" 
+                        onclick="return confirm('Mark this order as completed/delivered?')">
+                  🎉 Mark as Completed
+                </button>
+              </form>
+            <% } %>
+            
+            <!-- Cancel Order Button (for pending/paid orders) -->
+            <% if (order.orderStatus === 'pending' || order.orderStatus === 'paid') { %>
+              <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+                <input type="hidden" name="status" value="cancelled">
+                <button type="submit" class="btn btn-danger" 
+                        onclick="return confirm('Are you sure you want to cancel this order?')">
+                  ❌ Cancel Order
+                </button>
+              </form>
+            <% } %>
+
+            <!-- Mark as Refund Button (for completed orders only) -->
+            <% if (order.orderStatus === "completed") { %>
+              <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
+                <input type="hidden" name="status" value="refund">
+                <button type="submit" class="btn btn-warning" 
+                        onclick="return confirm('Mark this order for refund? This will initiate the refund process.')">
+                  💰 Process Refund
+                </button>
+              </form>
+            <% } %>
+          </div>
+        </div>
       <% } %>
 
-      <!-- Mark as Completed Button (for shipped orders only) -->
-      <% if (order.orderStatus === 'shipped') { %>
-        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
-          <input type="hidden" name="status" value="completed">
-          <button type="submit" class="btn btn-success" 
-                  onclick="return confirm('Mark this order as completed/delivered?')">
-            🎉 Mark as Completed
-          </button>
-        </form>
+      <!-- EXISTING CUSTOMER NOTIFICATIONS FOR OTHER STATUSES -->
+      <!-- Customer Actions for Pending Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === 'pending') { %>
+        <div class="customer-notice">
+          <div class="notice-icon">⏳</div>
+          <div class="notice-content">
+            <% if (order.paymentMethod === 'gcash') { %>
+              <h4>Payment Verification Pending</h4>
+              <p>Your GCash payment is being verified. Please wait for admin confirmation.</p>
+              <% if (order.gcashReference) { %>
+                <p><strong>Reference Number:</strong> <%= order.gcashReference %></p>
+              <% } %>
+            <% } else if (order.paymentMethod === 'cod') { %>
+              <h4>Order Processing</h4>
+              <p>Your Cash on Delivery order is being processed. Please wait for delivery.</p>
+              <p><strong>Payment Amount:</strong> ₱<%= order.totalAmount.toFixed(2) %></p>
+              <p><small>Please prepare exact amount for the delivery personnel</small></p>
+            <% } %>
+          </div>
+        </div>
       <% } %>
-      
-      <!-- Cancel Order Button (for pending/paid orders) -->
-      <% if (order.orderStatus === 'pending' || order.orderStatus === 'paid') { %>
-        <form action="/orders/update-status/<%= order.orderId %>" method="POST" style="display: inline;">
-          <input type="hidden" name="status" value="cancelled">
-          <button type="submit" class="btn btn-danger" 
-                  onclick="return confirm('Are you sure you want to cancel this order?')">
-            ❌ Cancel Order
-          </button>
-        </form>
+
+      <!-- Customer Actions for Paid Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === 'paid') { %>
+        <div class="customer-notice">
+          <div class="notice-icon">✅</div>
+          <div class="notice-content">
+            <h4>Payment Confirmed!</h4>
+            <% if (order.paymentMethod === 'gcash') { %>
+              <p>Your GCash payment has been verified and confirmed.</p>
+            <% } else if (order.paymentMethod === 'cod') { %>
+              <p>Your Cash on Delivery payment has been received and confirmed.</p>
+            <% } %>
+            <p><strong>Status:</strong> Preparing for shipment</p>
+            <p><small>Your order will be shipped soon. You'll receive updates on the delivery.</small></p>
+          </div>
+        </div>
       <% } %>
-    </div>
-  </div>
-<% } %>
 
-<!-- Customer Actions for Pending Orders -->
-<% if (currentUser.role !== 'admin' && order.orderStatus === 'pending') { %>
-  <div class="customer-notice">
-    <div class="notice-icon">⏳</div>
-    <div class="notice-content">
-      <% if (order.paymentMethod === 'gcash') { %>
-        <h4>Payment Verification Pending</h4>
-        <p>Your GCash payment is being verified. Please wait for admin confirmation.</p>
-        <% if (order.gcashReference) { %>
-          <p><strong>Reference Number:</strong> <%= order.gcashReference %></p>
-        <% } %>
-      <% } else if (order.paymentMethod === 'cod') { %>
-        <h4>Order Processing</h4>
-        <p>Your Cash on Delivery order is being processed. Please wait for delivery.</p>
-        <p><strong>Payment Amount:</strong> ₱<%= order.totalAmount.toFixed(2) %></p>
-        <p><small>Please prepare exact amount for the delivery personnel</small></p>
+      <!-- Customer Actions for Shipped Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === 'shipped') { %>
+        <div class="customer-notice">
+          <div class="notice-icon">🚚</div>
+          <div class="notice-content">
+            <h4>Order Shipped!</h4>
+            <p>Your order is on the way to you.</p>
+            <p><strong>Status:</strong> Out for delivery</p>
+            <p><small>Please be available to receive your package.</small></p>
+          </div>
+        </div>
       <% } %>
-    </div>
-  </div>
-<% } %>
 
-<!-- Customer Actions for Paid Orders -->
-<% if (currentUser.role !== 'admin' && order.orderStatus === 'paid') { %>
-  <div class="customer-notice">
-    <div class="notice-icon">✅</div>
-    <div class="notice-content">
-      <h4>Payment Confirmed!</h4>
-      <% if (order.paymentMethod === 'gcash') { %>
-        <p>Your GCash payment has been verified and confirmed.</p>
-      <% } else if (order.paymentMethod === 'cod') { %>
-        <p>Your Cash on Delivery payment has been received and confirmed.</p>
+      <!-- Customer Actions for Completed Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === 'completed') { %>
+        <div class="customer-notice">
+          <div class="notice-icon">🎉</div>
+          <div class="notice-content">
+            <h4>Order Completed!</h4>
+            <p>Your order has been successfully delivered and completed.</p>
+            <p><strong>Status:</strong> Order fulfilled</p>
+            <p><small>Thank you for your purchase!</small></p>
+          </div>
+        </div>
       <% } %>
-      <p><strong>Status:</strong> Preparing for shipment</p>
-      <p><small>Your order will be shipped soon. You'll receive updates on the delivery.</small></p>
-    </div>
-  </div>
-<% } %>
 
-<!-- Customer Actions for Shipped Orders -->
-<% if (currentUser.role !== 'admin' && order.orderStatus === 'shipped') { %>
-  <div class="customer-notice">
-    <div class="notice-icon">🚚</div>
-    <div class="notice-content">
-      <h4>Order Shipped!</h4>
-      <p>Your order is on the way to you.</p>
-      <p><strong>Status:</strong> Out for delivery</p>
-      <p><small>Please be available to receive your package.</small></p>
-    </div>
-  </div>
-<% } %>
+      <!-- Customer Actions for Cancelled Orders -->
+      <% if (currentUser.role !== 'admin' && order.orderStatus === 'cancelled') { %>
+        <div class="customer-notice">
+          <div class="notice-icon">❌</div>
+          <div class="notice-content">
+            <h4>Order Cancelled</h4>
+            <p>This order has been cancelled.</p>
+            <p><strong>Status:</strong> Order cancelled</p>
+            <p><small>If this was a mistake, please contact support.</small></p>
+          </div>
+        </div>
+      <% } %>
 
-<!-- Customer Actions for Completed Orders -->
-<% if (currentUser.role !== 'admin' && order.orderStatus === 'completed') { %>
-  <div class="customer-notice">
-    <div class="notice-icon">🎉</div>
-    <div class="notice-content">
-      <h4>Order Completed!</h4>
-      <p>Your order has been successfully delivered and completed.</p>
-      <p><strong>Status:</strong> Order fulfilled</p>
-      <p><small>Thank you for your purchase!</small></p>
-    </div>
-  </div>
-<% } %>
-
-<!-- Customer Actions for Cancelled Orders -->
-<% if (currentUser.role !== 'admin' && order.orderStatus === 'cancelled') { %>
-  <div class="customer-notice">
-    <div class="notice-icon">❌</div>
-    <div class="notice-content">
-      <h4>Order Cancelled</h4>
-      <p>This order has been cancelled.</p>
-      <p><strong>Status:</strong> Order cancelled</p>
-      <p><small>If this was a mistake, please contact support.</small></p>
-    </div>
-  </div>
-<% } %>
+      <!-- ORDER ITEMS AND SUMMARY -->
       <h3>🛍️ Order Items (<%= order.items.length %>)</h3>
       <ul class="items-list">
         <% order.items.forEach((item, index) => { %>
@@ -279,8 +415,17 @@
           <span class="summary-label">Total Amount</span>
           <span class="summary-value">₱<%= order.totalAmount.toFixed(2) %></span>
         </div>
+
+        <!-- Refund Information -->
+        <% if (order.refundAmount) { %>
+          <div class="summary-row refund-info">
+            <span class="summary-label">Refund Amount</span>
+            <span class="summary-value" style="color: var(--accent-green);">-₱<%= order.refundAmount.toFixed(2) %></span>
+          </div>
+        <% } %>
       </div>
       
+      <!-- CUSTOMER INFORMATION (Admin only) -->
       <% if (currentUser.role === 'admin' && customer) { %>
         <div class="customer-info">
           <h3>👤 Customer Information</h3>
@@ -354,6 +499,7 @@
     <% } %>
   </div>
 </div>
+
 <!-- Screenshot Modal -->
 <div id="screenshotModal" class="screenshot-modal">
   <span class="close-modal" onclick="closeScreenshotModal()">&times;</span>

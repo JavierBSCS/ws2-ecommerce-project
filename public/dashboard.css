@@ -557,3 +557,334 @@
         font-size: 0.9rem;
       }
     }
+    /* ================================
+   ORDER SUMMARY SECTION - GLASS NEON THEME
+   ================================ */
+
+.order-summary-section {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.order-summary-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
+  border-color: var(--accent-blue);
+}
+
+.order-summary-section h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--accent-blue);
+  text-shadow: 0 0 15px #4cc9f0aa;
+  text-align: center;
+}
+
+.order-summary-section > p {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+}
+
+/* ================================
+   STATUS GRID - GLASS NEON STYLE
+   ================================ */
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin: 25px 0;
+}
+
+.status-card {
+  padding: 20px 15px;
+  border-radius: 12px;
+  text-align: center;
+  color: white;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.status-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.status-card h3 {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-card .count {
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* ================================
+   STATUS CARD COLORS - MATCHING YOUR THEME
+   ================================ */
+
+.status-card.pending { 
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.25), rgba(238, 90, 82, 0.35));
+  border-color: rgba(255, 107, 107, 0.4);
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+}
+
+.status-card.pending::before {
+  background: linear-gradient(90deg, #ff6b6b, #ee5a52);
+}
+
+.status-card.pending:hover {
+  box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+}
+
+.status-card.paid { 
+  background: linear-gradient(135deg, rgba(76, 201, 240, 0.25), rgba(68, 160, 141, 0.35));
+  border-color: rgba(76, 201, 240, 0.4);
+  box-shadow: 0 0 20px rgba(76, 201, 240, 0.3);
+}
+
+.status-card.paid::before {
+  background: linear-gradient(90deg, #4cc9f0, #44a08d);
+}
+
+.status-card.paid:hover {
+  box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
+}
+
+.status-card.shipped { 
+  background: linear-gradient(135deg, rgba(69, 183, 209, 0.25), rgba(52, 152, 219, 0.35));
+  border-color: rgba(69, 183, 209, 0.4);
+  box-shadow: 0 0 20px rgba(69, 183, 209, 0.3);
+}
+
+.status-card.shipped::before {
+  background: linear-gradient(90deg, #45b7d1, #3498db);
+}
+
+.status-card.shipped:hover {
+  box-shadow: 0 0 30px rgba(69, 183, 209, 0.5);
+}
+
+.status-card.completed { 
+  background: linear-gradient(135deg, rgba(79, 232, 176, 0.25), rgba(120, 224, 143, 0.35));
+  border-color: rgba(79, 232, 176, 0.4);
+  box-shadow: 0 0 20px rgba(79, 232, 176, 0.3);
+}
+
+.status-card.completed::before {
+  background: linear-gradient(90deg, #4fe8b0, #78e08f);
+}
+
+.status-card.completed:hover {
+  box-shadow: 0 0 30px rgba(79, 232, 176, 0.5);
+}
+
+.status-card.refund { 
+  background: linear-gradient(135deg, rgba(254, 202, 87, 0.25), rgba(253, 203, 110, 0.35));
+  border-color: rgba(254, 202, 87, 0.4);
+  box-shadow: 0 0 20px rgba(254, 202, 87, 0.3);
+}
+
+.status-card.refund::before {
+  background: linear-gradient(90deg, #feca57, #fdcb6e);
+}
+
+.status-card.refund:hover {
+  box-shadow: 0 0 30px rgba(254, 202, 87, 0.5);
+}
+
+.status-card.cancelled { 
+  background: linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(253, 121, 168, 0.35));
+  border-color: rgba(157, 78, 221, 0.4);
+  box-shadow: 0 0 20px rgba(157, 78, 221, 0.3);
+}
+
+.status-card.cancelled::before {
+  background: linear-gradient(90deg, #9d4edd, #fd79a8);
+}
+
+.status-card.cancelled:hover {
+  box-shadow: 0 0 30px rgba(157, 78, 221, 0.5);
+}
+
+/* ================================
+   QUICK LINKS - MATCHING YOUR BUTTON STYLE
+   ================================ */
+
+.quick-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.quick-links .btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  min-width: 160px;
+}
+
+.quick-links .btn-primary {
+  background: rgba(76, 201, 240, 0.2);
+  color: var(--text-light);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+}
+
+.quick-links .btn-primary:hover {
+  background: rgba(76, 201, 240, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+}
+
+.quick-links .btn-secondary {
+  background: rgba(157, 78, 221, 0.2);
+  color: var(--text-light);
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.quick-links .btn-secondary:hover {
+  background: rgba(157, 78, 221, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+@media (max-width: 768px) {
+  .order-summary-section {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .order-summary-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .status-card {
+    padding: 15px 10px;
+  }
+  
+  .status-card h3 {
+    font-size: 0.8rem;
+  }
+  
+  .status-card .count {
+    font-size: 1.5rem;
+  }
+  
+  .quick-links {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .quick-links .btn {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .order-summary-section {
+    padding: 15px;
+  }
+}
+
+/* ================================
+   COUNT ANIMATIONS
+   ================================ */
+
+@keyframes countPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.status-card .count.updated {
+  animation: countPulse 0.6s ease;
+}
+
+/* Empty state handling */
+.status-card .count:empty::before {
+  content: "0";
+}
+
+
+/* Add to your existing dashboard.css */
+
+/* Status Cards for New Statuses */
+.status-card.refund { 
+  background: linear-gradient(135deg, rgba(254, 202, 87, 0.25), rgba(253, 203, 110, 0.35));
+  border-color: rgba(254, 202, 87, 0.4);
+  box-shadow: 0 0 20px rgba(254, 202, 87, 0.3);
+}
+
+.status-card.return_requested { 
+  background: linear-gradient(135deg, rgba(155, 89, 182, 0.25), rgba(155, 89, 182, 0.35));
+  border-color: rgba(155, 89, 182, 0.4);
+  box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
+}
+
+.status-card.refund::before {
+  background: linear-gradient(90deg, #feca57, #fdcb6e);
+}
+
+.status-card.return_requested::before {
+  background: linear-gradient(90deg, #9b59b6, #8e44ad);
+}
+
+/* Status icons */
+.status-card.refund .status-icon::before {
+  content: "💰";
+}
+
+.status-card.return_requested .status-icon::before {
+  content: "🔄";
+}

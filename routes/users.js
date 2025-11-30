@@ -15,12 +15,40 @@ const path = require("path");
 const uploadProduct = require("../middleware/uploadProduct");
 
 // =======================================================================
-//  PROFILE PAGE
+//  PROFILE PAGE - FIXED VERSION
 // =======================================================================
-router.get("/profile", requireLogin, (req, res) => {
-  res.render("profile", { user: req.session.user });
-});
+router.get("/profile", requireLogin, async (req, res) => {
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const usersCollection = db.collection("users");
+    
+    // Fetch complete user data from database, not just session
+    const user = await usersCollection.findOne({ userId: req.session.user.userId });
 
+    if (!user) {
+      return res.status(404).send("❌ User not found");
+    }
+
+    // Ensure all address fields have values
+    const userData = {
+      ...user,
+      address: user.address || '',
+      province: user.province || '',
+      city: user.city || '',
+      zip: user.zip || '',
+      phone: user.phone || ''
+    };
+
+    res.render("profile", { 
+      user: userData,
+      passwordChanged: req.query.passwordChanged,
+      editSuccess: req.query.editSuccess // ADD THIS
+    });
+  } catch (err) {
+    console.error("❌ Profile error:", err);
+    res.status(500).send("Error loading profile");
+  }
+});
 
 // =======================================================================
 //  EDIT USER (GET)
@@ -121,10 +149,16 @@ router.post(
         role: updatedUser.role,
         isEmailVerified: updatedUser.isEmailVerified,
         profileImage: updatedUser.profileImage || null,
+        address: updatedUser.address || '',
+        province: updatedUser.province || '',
+        city: updatedUser.city || '',
+        zip: updatedUser.zip || '',
+        phone: updatedUser.phone || ''
       };
 
       req.session.save(() => {
-        res.redirect("/users/profile");
+        // ADD SUCCESS PARAMETER HERE
+        res.redirect("/users/profile?editSuccess=1");
       });
     } catch (err) {
       console.error("❌ Error updating user:", err);
@@ -139,7 +173,6 @@ router.post(
     }
   }
 );
-
 
 // =======================================================================
 //  REGISTER (GET)
@@ -375,13 +408,16 @@ router.get("/orders/history", requireLogin, async (req, res) => {
 
 
 // =======================================================================
-//  DASHBOARD
+//  DASHBOARD - COMPLETE VERSION WITH ORDER COUNTS
 // =======================================================================
 router.get("/dashboard", requireLogin, async (req, res) => {
   try {
+    console.log("🔍 DASHBOARD - Loading for user:", req.session.user.userId);
+    
     const db = req.app.locals.client.db(req.app.locals.dbName);
+    
+    // Get products
     const products = await db.collection("products").find().toArray();
-
     const normalized = products.map((p) => {
       const images = [];
       if (p.images && Array.isArray(p.images)) images.push(...p.images);
@@ -389,10 +425,41 @@ router.get("/dashboard", requireLogin, async (req, res) => {
       return { ...p, images };
     });
 
+    // ✅ ADD ORDER COUNTING LOGIC
+    const ordersCol = db.collection("orders");
+    const userOrders = await ordersCol.find({ userId: req.session.user.userId }).toArray();
+
+    console.log("📦 Orders found for user:", userOrders.length);
+    userOrders.forEach(order => {
+      console.log(`   Order ${order.orderId}: ${order.orderStatus}`);
+    });
+
+    // Count orders by status
+    const statusCounts = {
+      pending: 0,
+      paid: 0,
+      shipped: 0,
+      completed: 0,
+      refund: 0,
+      cancelled: 0
+    };
+
+    userOrders.forEach(order => {
+      const status = order.orderStatus;
+      if (statusCounts[status] !== undefined) {
+        statusCounts[status] += 1;
+      }
+    });
+
+    console.log("📊 Final counts:", statusCounts);
+
     res.render("dashboard", {
       title: "User Dashboard",
       currentUser: req.session.user,
       products: normalized,
+      // ✅ PASS ORDER DATA TO TEMPLATE
+      statusCounts: statusCounts,
+      totalOrders: userOrders.length
     });
   } catch (err) {
     console.error("❌ Dashboard error:", err);

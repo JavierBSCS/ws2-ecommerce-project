@@ -5,26 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard</title>
   <link rel="stylesheet" href="/dashboard.css">
-
 </head>
 
 <body>
   <div class="app">
-
     <!-- Sidebar Menu -->
     <div class="sidebar" id="sidebar">
       <h2>Dashboard</h2>
-
       <a href="/users/profile">👤 Profile</a>
       <a href="/users/orders/history">🛒 My Orders</a>
-
       <% if (currentUser && currentUser.role === "admin") { %>
         <h3>Admin Tools</h3>
         <a href="/users/admin/products/add">➕ Add Product</a>
         <a href="/users/admin/products">📦 Manage Products</a>
         <a href="/users/admin/users">👥 Manage Users</a>
       <% } %>
-
       <a href="/users/logout">🚪 Logout</a>
     </div>
 
@@ -37,6 +32,49 @@
         <h1>Welcome, <%= currentUser ? currentUser.firstName : 'Guest' %> 👋</h1>
         <p class="lead">Browse available products below</p>
 
+<!-- ================================ -->
+<!-- ORDER SUMMARY SECTION - ONLY FOR CUSTOMERS -->
+<!-- ================================ -->
+<% if (currentUser && currentUser.role !== "admin") { %>
+  <section class="order-summary-section">
+    <h2>📊 Order Summary</h2>
+    <p>Total Orders: <strong><%= totalOrders %></strong></p>
+
+    <div class="status-grid">
+      <div class="status-card pending">
+        <h3>Pending Payment</h3>
+        <div class="count"><%= statusCounts.pending %></div>
+      </div>
+      <div class="status-card paid">
+        <h3>Paid / To Ship</h3>
+        <div class="count"><%= statusCounts.paid %></div>
+      </div>
+      <div class="status-card shipped">
+        <h3>Shipped</h3>
+        <div class="count"><%= statusCounts.shipped %></div>
+      </div>
+      <div class="status-card completed">
+        <h3>Completed</h3>
+        <div class="count"><%= statusCounts.completed %></div>
+      </div>
+      <div class="status-card refund">
+        <h3>Return/Refund</h3>
+        <div class="count"><%= statusCounts.refund %></div>
+      </div>
+      <div class="status-card cancelled">
+        <h3>Cancelled</h3>
+        <div class="count"><%= statusCounts.cancelled %></div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="quick-links">
+      <a href="/users/profile" class="btn btn-primary">👤 Edit Profile</a>
+      <a href="/users/orders/history" class="btn btn-secondary">📦 View Purchase History</a>
+    </div>
+  </section>
+<% } %>
+
         <!-- Filter Bar -->
         <div class="filter-bar">
           <input 
@@ -44,7 +82,6 @@
             id="searchInput" 
             placeholder="Search product name..."
           />
-
           <select id="categoryFilter">
             <option value="">All Categories</option>
             <% 
@@ -54,7 +91,6 @@
               <option value="<%= c %>"><%= c %></option>
             <% }) %>
           </select>
-
           <select id="statusFilter">
             <option value="">All Status</option>
             <option value="available">Available</option>
@@ -76,7 +112,6 @@
                   %>" 
                   alt="product image" 
                 />
-
                 <div class="product-meta">
                   <div>
                     <span class="category-text"><%= p.category || 'General' %></span>
@@ -85,12 +120,10 @@
                     <span class="price">₱<%= (p.price || 0).toFixed(2) %></span>
                   </div>
                 </div>
-
                 <h3><%= p.name %></h3>
                 <p class="desc">
                   <%= p.description ? (p.description.length > 100 ? p.description.substring(0,100) + '…' : p.description) : 'No description available' %>
                 </p>
-
                 <div class="stock-info">
                   <div>
                     Stock: <strong><%= typeof p.stock === 'number' ? p.stock : '—' %></strong>
@@ -107,10 +140,8 @@
                     <% } %>
                   </div>
                 </div>
-
                 <div class="product-actions">
                   <a class="btn btn-primary" href="/products/view/<%= p._id %>">🔍 View</a>
-
                   <% if (currentUser && (currentUser.role === 'customer' || currentUser.role === 'user')) { %>
                     <% if (p.stock && p.stock > 0 && p.status === 'available') { %>
                       <a class="btn btn-success" href="/cart/add/<%= p._id %>">🛒 Add to Cart</a>
@@ -118,7 +149,6 @@
                       <span class="btn btn-disabled">Out of stock</span>
                     <% } %>
                   <% } %>
-
                   <% if (currentUser && currentUser.role === 'admin') { %>
                     <a class="btn btn-secondary" href="/users/admin/products/edit/<%= p._id %>">✏ Edit</a>
                     <a class="btn btn-danger" href="/users/admin/products/delete/<%= p._id %>">🗑 Delete</a>
@@ -138,6 +168,7 @@
   </div>
 
   <script>
+    // Your existing JavaScript code...
     const sidebar = document.getElementById('sidebar');
     const menuToggle = document.getElementById('menuToggle');
 
@@ -187,6 +218,5 @@
     categoryFilter.addEventListener("change", applyFilters);
     statusFilter.addEventListener("change", applyFilters);
   </script>
-
 </body>
 </html>
