@@ -30,6 +30,9 @@
                 <button id="exportExcelBtn" class="export-btn excel-btn">
                     📊 Export as Excel
                 </button>
+                <button id="exportDetailedOrdersBtn" class="export-btn detailed-orders-btn">
+                    📋 Export Detailed Orders (Excel)
+                </button>
                 <button onclick="window.print()" class="export-btn print-btn">
                     🖨️ Print Report
                 </button>
@@ -71,31 +74,6 @@
                 </p>
             </form>
         </section>
-        <section class="filter-summary">
-    <h3>Current Filter Summary</h3>
-    <p>
-        <% if (!filters.startDate && !filters.endDate && filters.status === 'all') { %>
-            Showing all orders for all dates and all statuses.
-        <% } else { %>
-            Showing orders
-            <% if (filters.status === 'all') { %>
-                with all statuses
-            <% } else { %>
-                with status "<%= filters.status %>"
-            <% } %>
-            
-            <% if (filters.startDate && filters.endDate) { %>
-                from <%= filters.startDate %> to <%= filters.endDate %>.
-            <% } else if (filters.startDate && !filters.endDate) { %>
-                from <%= filters.startDate %> onwards.
-            <% } else if (!filters.startDate && filters.endDate) { %>
-                up to <%= filters.endDate %>.
-            <% } else { %>
-                for all dates.
-            <% } %>
-        <% } %>
-    </p>
-</section>
 
         <!-- Status Distribution Pie Chart -->
         <section class="status-chart">
@@ -394,6 +372,41 @@
             } catch (error) {
                 console.error('Error exporting PDF:', error);
                 showNotification('Error exporting PDF: ' + error.message, 'error');
+            }
+        }
+                // Export Detailed Orders to Excel
+        document.getElementById('exportDetailedOrdersBtn').addEventListener('click', function() {
+            exportDetailedOrdersToExcel();
+        });
+
+        function exportDetailedOrdersToExcel() {
+            try {
+                console.log('Export detailed orders function called');
+                
+                // Get current filter values
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const status = document.getElementById('status').value;
+                
+                console.log('Filters:', { startDate, endDate, status });
+                
+                // Build URL with filters
+                const url = `/admin/reports/sales/export/orders?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&status=${encodeURIComponent(status)}`;
+                console.log('Export URL:', url);
+                
+                // Create and click a temporary link
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'detailed_orders_report.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Detailed orders export started!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting detailed orders:', error);
+                showNotification('Error exporting detailed orders: ' + error.message, 'error');
             }
         }
 

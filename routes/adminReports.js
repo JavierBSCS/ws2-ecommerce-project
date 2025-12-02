@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const isAdmin = require("../middleware/isAdmin");
+const XLSX = require('xlsx'); // Make sure you have this installed: npm install xlsx
 
 // GET /admin/reports/sales – sales overview with filters and aggregation
 router.get("/reports/sales", isAdmin, async (req, res) => {
@@ -191,6 +192,177 @@ router.get("/reports/sales", isAdmin, async (req, res) => {
     console.error("❌ Error loading sales report:", err);
     res.status(500).send("Error loading sales report.");
   }
+});
+
+// ============================================================================
+// GET /admin/reports/sales/export/orders - Detailed orders Excel export (FIXED)
+// ============================================================================
+router.get("/reports/sales/export/orders", isAdmin, async (req, res) => {
+    console.log("📤 ===== EXPORT START =====");
+    console.log("📋 Query params:", req.query);
+    
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const ordersCollection = db.collection("orders");
+        const usersCollection = db.collection("users");
+        
+        // Read filters from query
+        const startDateRaw = (req.query.startDate || "").trim();
+        const endDateRaw = (req.query.endDate || "").trim();
+        const statusRaw = (req.query.status || "all").trim();
+        
+        // Build MongoDB query
+        const query = {};
+        
+        // Date range filter
+        const dateFilter = {};
+        if (startDateRaw) {
+            const startDate = new Date(startDateRaw);
+            if (!isNaN(startDate.getTime())) {
+                startDate.setHours(0, 0, 0, 0);
+                dateFilter.$gte = startDate;
+                console.log("📅 Export start date:", startDate);
+            }
+        }
+        
+        if (endDateRaw) {
+            const endDate = new Date(endDateRaw);
+            if (!isNaN(endDate.getTime())) {
+                endDate.setHours(23, 59, 59, 999);
+                dateFilter.$lte = endDate;
+                console.log("📅 Export end date:", endDate);
+            }
+        }
+        
+        if (Object.keys(dateFilter).length > 0) {
+            query.createdAt = dateFilter;
+        }
+        
+        // Status filter
+        if (statusRaw !== "all") {
+            query.orderStatus = statusRaw;
+        }
+        
+        console.log("🔍 Export query:", JSON.stringify(query, null, 2));
+        
+        // Fetch orders with all details
+        console.log("📥 Fetching orders from database...");
+        const orders = await ordersCollection.find(query)
+            .sort({ createdAt: -1 })
+            .toArray();
+        
+        console.log(`✅ Found ${orders.length} orders for export`);
+        
+        if (orders.length === 0) {
+            console.log("⚠️ No orders found - returning 404");
+            return res.status(404).send("No orders found with the selected filters.");
+        }
+        
+        // Get all user IDs from orders to fetch user details
+        const userIds = [...new Set(orders.map(order => order.userId).filter(id => id))];
+        console.log("👥 User IDs to fetch:", userIds);
+        
+        // Fetch user details
+        const users = await usersCollection.find({ 
+            userId: { $in: userIds } 
+        }).toArray();
+        
+        // Create a map for quick user lookup
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user.userId] = {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                address: user.address || '',
+                city: user.city || '',
+                province: user.province || '',
+                zip: user.zip || '',
+                phone: user.phone || ''
+            };
+        });
+        
+        console.log(`📧 Fetched ${users.length} user records`);
+        
+        // Create workbook
+        console.log("📊 Creating Excel workbook...");
+        const wb = XLSX.utils.book_new();
+        
+        // Prepare detailed data - ONLY the required columns from your requirements
+        console.log("📝 Preparing detailed data for Excel...");
+        const ordersData = [
+            // Only these columns as per requirements
+            ['Order ID', 'Date/Time', 'User ID', 'User Email', 'Status', 'Total Amount']
+        ];
+        
+        orders.forEach(order => {
+            const user = userMap[order.userId] || {};
+            
+            ordersData.push([
+                order.orderId || order._id.toString(),
+                order.createdAt ? new Date(order.createdAt).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : '',
+                order.userId || '',
+                user.email || '', // Get email from users collection
+                order.orderStatus || '',
+                `₱${Number(order.totalAmount || 0).toFixed(2)}`
+                // Removed Items Count, Customer Name, Shipping Address as per requirements
+            ]);
+        });
+        
+        console.log(`📋 Prepared ${ordersData.length - 1} rows of data`);
+        
+        // Add main sheet
+        console.log("📑 Adding worksheet...");
+        const ws = XLSX.utils.aoa_to_sheet(ordersData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Detailed Orders');
+        
+        // Format columns (only for the required columns)
+        console.log("📐 Formatting columns...");
+        const wscols = [
+            { wch: 20 }, // Order ID
+            { wch: 20 }, // Date/Time
+            { wch: 15 }, // User ID
+            { wch: 25 }, // User Email
+            { wch: 12 }, // Status
+            { wch: 15 }  // Total Amount
+        ];
+        ws['!cols'] = wscols;
+        
+        // Set response headers
+        console.log("📤 Setting response headers...");
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="detailed_orders_${new Date().toISOString().split('T')[0]}.xlsx"`);
+        
+        // Generate Excel buffer
+        console.log("⚙️ Generating Excel buffer...");
+        const buffer = XLSX.write(wb, { 
+            type: 'buffer', 
+            bookType: 'xlsx' 
+        });
+        
+        console.log(`✅ Excel buffer generated: ${buffer.length} bytes`);
+        
+        // Send the buffer
+        res.end(buffer);
+        console.log("📤 ===== EXPORT COMPLETE =====");
+        
+    } catch (error) {
+        console.error('❌ Error exporting detailed orders:', error);
+        console.error('❌ Error stack:', error.stack);
+        
+        // Only send error if headers haven't been sent yet
+        if (!res.headersSent) {
+            res.status(500).send('Error exporting detailed orders Excel file.');
+        } else {
+            console.error('❌ Headers already sent, cannot send error response');
+        }
+    }
 });
 
 module.exports = router;

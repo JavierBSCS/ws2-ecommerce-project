@@ -1083,25 +1083,6 @@ section {
         border-color: inherit !important;
     }
     
-    /* Filter summary for print */
-    .filter-summary {
-        background: #f8f9fa !important;
-        border: 1px solid #ddd !important;
-        color: #333 !important;
-        padding: 15px !important;
-        margin-bottom: 20px !important;
-    }
-    
-    .filter-summary h3 {
-        color: #333 !important;
-        margin-top: 0 !important;
-        font-size: 14pt !important;
-    }
-    
-    .filter-summary p {
-        color: #555 !important;
-        margin-bottom: 0 !important;
-    }
     
     /* Text colors for print */
     .summary strong,
@@ -1135,4 +1116,100 @@ section {
     @page {
         margin: 2cm;
     }
+}
+/* ================================
+   DETAILED ORDERS EXPORT BUTTON
+   ================================ */
+
+.detailed-orders-btn {
+    background: rgba(85, 0, 243, 0.2);
+    color: var(--text-light);
+    border: 1px solid #5500f3;
+    box-shadow: 0 0 15px rgba(85, 0, 243, 0.3);
+}
+
+.detailed-orders-btn:hover {
+    background: rgba(85, 0, 243, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(85, 0, 243, 0.5);
+}
+/* ================================
+   EXPORT BUTTONS - ALL TYPES
+   ================================ */
+
+.export-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    backdrop-filter: blur(10px);
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* PDF Button */
+.pdf-btn {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--danger-red);
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+}
+
+.pdf-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
+}
+
+/* Excel Summary Button */
+.excel-btn {
+    background: rgba(79, 232, 176, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--accent-green);
+    box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+}
+
+.excel-btn:hover {
+    background: rgba(79, 232, 176, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+}
+
+/* Detailed Orders Excel Button */
+.detailed-orders-btn {
+    background: rgba(85, 0, 243, 0.2);
+    color: var(--text-light);
+    border: 1px solid #5500f3;
+    box-shadow: 0 0 15px rgba(85, 0, 243, 0.3);
+}
+
+.detailed-orders-btn:hover {
+    background: rgba(85, 0, 243, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(85, 0, 243, 0.5);
+}
+
+/* Print Button */
+.print-btn {
+    background: rgba(252, 163, 17, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--warning-yellow);
+    box-shadow: 0 0 15px rgba(252, 163, 17, 0.3);
+}
+
+.print-btn:hover {
+    background: rgba(252, 163, 17, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(252, 163, 17, 0.5);
 }
