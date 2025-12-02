@@ -618,120 +618,124 @@
         `;
         document.head.appendChild(style);
 
-        // ==============================================
-        // PIE CHART - Order Status Distribution
-        // ==============================================
-        const statusChartCanvas = document.getElementById('statusChart');
-        if (statusChartCanvas) {
-            try {
-                const statusDistribution = ejsData.statusDistribution;
-                
-                if (statusDistribution && statusDistribution.length > 0) {
-                    const statusLabels = statusDistribution.map(item => {
-                        const status = item._id || 'Unknown';
-                        return status.charAt(0).toUpperCase() + status.slice(1);
-                    });
+            // ==============================================
+            // PIE CHART - Order Status Distribution
+            // ==============================================
+            const statusChartCanvas = document.getElementById('statusChart');
+            if (statusChartCanvas) {
+                try {
+                    const statusDistribution = ejsData.statusDistribution;
                     
-                    const statusData = statusDistribution.map(item => item.count || 0);
-                    
-                    // Create colors based on status
-                    const statusBackgroundColors = statusDistribution.map(item => {
-                        const status = (item._id || '').toLowerCase();
-                        return statusColors[status]?.bg || 'rgba(255, 255, 255, 0.2)';
-                    });
-                    
-                    const statusBorderColors = statusDistribution.map(item => {
-                        const status = (item._id || '').toLowerCase();
-                        return statusColors[status]?.border || 'rgba(255, 255, 255, 0.5)';
-                    });
+                    if (statusDistribution && statusDistribution.length > 0) {
+                        const statusLabels = statusDistribution.map(item => {
+                            const status = item._id || 'Unknown';
+                            const count = item.count || 0;
+                            // Show count in label - like: "Pending (5)"
+                            return `${status.charAt(0).toUpperCase() + status.slice(1)} (${count})`;
+                        });
+                        
+                        const statusData = statusDistribution.map(item => item.count || 0);
+                        
+                        // Create colors based on status
+                        const statusBackgroundColors = statusDistribution.map(item => {
+                            const status = (item._id || '').toLowerCase();
+                            return statusColors[status]?.bg || 'rgba(255, 255, 255, 0.2)';
+                        });
+                        
+                        const statusBorderColors = statusDistribution.map(item => {
+                            const status = (item._id || '').toLowerCase();
+                            return statusColors[status]?.border || 'rgba(255, 255, 255, 0.5)';
+                        });
 
-                    const statusHoverColors = statusDistribution.map(item => {
-                        const status = (item._id || '').toLowerCase();
-                        return statusColors[status]?.hover || 'rgba(255, 255, 255, 0.8)';
-                    });
+                        const statusHoverColors = statusDistribution.map(item => {
+                            const status = (item._id || '').toLowerCase();
+                            return statusColors[status]?.hover || 'rgba(255, 255, 255, 0.8)';
+                        });
 
-                    const statusCtx = statusChartCanvas.getContext('2d');
-                    const statusChart = new Chart(statusCtx, {
-                        type: 'pie',
-                        data: {
-                            labels: statusLabels,
-                            datasets: [{
-                                data: statusData,
-                                backgroundColor: statusBackgroundColors,
-                                borderColor: statusBorderColors,
-                                borderWidth: 2,
-                                hoverBackgroundColor: statusHoverColors,
-                                hoverBorderColor: statusBorderColors,
-                                hoverBorderWidth: 3,
-                                hoverOffset: 20
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                    labels: {
-                                        color: '#e5e9f0',
-                                        font: {
-                                            size: 12,
-                                            family: "'Inter', Arial, sans-serif"
-                                        },
-                                        padding: 15,
-                                        usePointStyle: true,
-                                        pointStyle: 'circle'
-                                    }
-                                },
-                                tooltip: {
-                                    backgroundColor: 'rgba(13, 27, 42, 0.95)',
-                                    titleColor: '#4cc9f0',
-                                    bodyColor: '#e5e9f0',
-                                    borderColor: '#4cc9f0',
+                        const statusCtx = statusChartCanvas.getContext('2d');
+                        const statusChart = new Chart(statusCtx, {
+                            type: 'pie',
+                            data: {
+                                labels: statusLabels,
+                                datasets: [{
+                                    data: statusData,
+                                    backgroundColor: statusBackgroundColors,
+                                    borderColor: statusBorderColors,
                                     borderWidth: 2,
-                                    cornerRadius: 8,
-                                    padding: 10,
-                                    displayColors: true,
-                                    callbacks: {
-                                        label: function(context) {
-                                            const label = context.label || '';
-                                            const value = context.raw || 0;
-                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                            return `${label}: ${value} orders (${percentage}%)`;
+                                    hoverBackgroundColor: statusHoverColors,
+                                    hoverBorderColor: statusBorderColors,
+                                    hoverBorderWidth: 3,
+                                    hoverOffset: 20
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            color: '#e5e9f0',
+                                            font: {
+                                                size: 12,
+                                                family: "'Inter', Arial, sans-serif"
+                                            },
+                                            padding: 15,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(13, 27, 42, 0.95)',
+                                        titleColor: '#4cc9f0',
+                                        bodyColor: '#e5e9f0',
+                                        borderColor: '#4cc9f0',
+                                        borderWidth: 2,
+                                        cornerRadius: 8,
+                                        padding: 10,
+                                        displayColors: true,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const label = context.label || '';
+                                                const value = context.raw || 0;
+                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                                // Remove the count from label for tooltip
+                                                const cleanLabel = label.replace(/ \(\d+\)$/, '');
+                                                return `${cleanLabel}: ${value} orders (${percentage}%)`;
+                                            }
                                         }
                                     }
+                                },
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: true,
+                                    duration: 800
                                 }
-                            },
-                            animation: {
-                                animateScale: true,
-                                animateRotate: true,
-                                duration: 800
+                            }
+                        });
+
+                        // Highlight selected status if filtered
+                        const selectedStatus = ejsData.filters.status;
+                        if (selectedStatus && selectedStatus !== 'all') {
+                            const originalStatusData = statusDistribution.map(item => item._id || '');
+                            const statusIndex = originalStatusData.findIndex(status => 
+                                status.toLowerCase() === selectedStatus.toLowerCase()
+                            );
+                            
+                            if (statusIndex !== -1) {
+                                statusChart.setActiveElements([{
+                                    datasetIndex: 0,
+                                    index: statusIndex
+                                }]);
+                                statusChart.update();
                             }
                         }
-                    });
-
-                    // Highlight selected status if filtered
-                    const selectedStatus = ejsData.filters.status;
-                    if (selectedStatus && selectedStatus !== 'all') {
-                        const originalStatusData = statusDistribution.map(item => item._id || '');
-                        const statusIndex = originalStatusData.findIndex(status => 
-                            status.toLowerCase() === selectedStatus.toLowerCase()
-                        );
-                        
-                        if (statusIndex !== -1) {
-                            statusChart.setActiveElements([{
-                                datasetIndex: 0,
-                                index: statusIndex
-                            }]);
-                            statusChart.update();
-                        }
                     }
+                } catch (error) {
+                    console.error("❌ Error initializing pie chart:", error);
                 }
-            } catch (error) {
-                console.error("❌ Error initializing pie chart:", error);
             }
-        }
 
         // ==============================================
         // LINE CHART - Sales Chart
