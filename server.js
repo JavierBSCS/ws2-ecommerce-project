@@ -16,7 +16,7 @@ const indexRoute = require('./routes/index');
 const productsRoute = require("./routes/products");
 const usersRoute = require('./routes/users');
 const cartRoute = require("./routes/cart");
-
+const adminReportsRoute = require("./routes/adminReports");
 // MIDDLEWARE
 const requireLogin = require('./middleware/requireLogin');
 
@@ -142,6 +142,12 @@ app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml');
   res.sendFile(filePath);
 });
+
+
+// ================================
+// is Admin
+// ================================
+app.use("/admin", adminReportsRoute); 
 
 // ================================
 // MONGO SETUP

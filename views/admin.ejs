@@ -16,21 +16,24 @@
     </div>
 
     <div class="admin-container">
+        <a href="/users/profile" class="btn btn-back">⬅ Back to Profile</a>
+
       <h1 class="admin-title">🛠 Admin Dashboard</h1>
       <p class="admin-welcome">Welcome, <strong><%= currentUser.firstName %></strong> 
         <span class="role-admin">(<%= currentUser.role %>)</span>
       </p>
-
-      <!-- Admin Quick Actions -->
-      <div class="admin-actions">
-        <h2 class="quick-actions-title">🚀 Quick Actions</h2>
-        <p class="quick-actions-subtitle">Manage your store with one click</p>
-        <div class="action-buttons">
-          <a href="/users/admin/products" class="btn btn-primary">📦 Manage Products</a>
-          <a href="/users/admin/qr-codes" class="btn btn-info">📱 Manage QR Codes</a>
-          <a href="/users/orders/history" class="btn btn-success">📋 View All Orders</a>
-        </div>
-      </div>
+      
+<!-- Admin Quick Actions -->
+<div class="admin-actions">
+  <h2 class="quick-actions-title">🚀 Quick Actions</h2>
+  <p class="quick-actions-subtitle">Manage your store with one click</p>
+  <div class="action-buttons">
+    <a href="/users/admin/products" class="btn btn-primary">📦 Manage Products</a>
+    <a href="/users/admin/qr-codes" class="btn btn-info">📱 Manage QR Codes</a>
+    <a href="/users/orders/history" class="btn btn-success">📋 View All Orders</a>
+    <a href="/admin/reports/sales" class="btn btn-warning">📊 Sales Reports</a>
+  </div>
+</div>
 
       <!-- Admin Statistics -->
       <div class="admin-stats">
@@ -93,9 +96,7 @@
         </table>
       </div>
 
-      <div style="text-align: center; margin-top: 40px;">
-        <a href="/users/profile" class="btn btn-back">⬅ Back to Profile</a>
-      </div>
+
     </div>
   </div>
 </body>

@@ -1,0 +1,968 @@
+/* ================================
+   MODERN GLASS NEON SALES REPORTS THEME
+   Matching dashboard.css styling
+   ================================ */
+
+:root {
+  --sidebar-width: 250px;
+  --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+  --glass-light: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --accent-blue: #4cc9f0;
+  --accent-green: #4fe8b0;
+  --accent-purple: #9d4edd;
+  --text-light: #e5e9f0;
+  --text-muted: #9aa3b2;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --danger-red: #ff6b6b;
+  --warning-yellow: #fca311;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-light);
+  min-height: 100vh;
+  padding: 40px 20px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ================================
+   CUSTOM SCROLLBAR - SIMPLE FIX
+   ================================ */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(76, 201, 240, 0.6), rgba(157, 78, 221, 0.6));
+  border-radius: 5px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(76, 201, 240, 0.8), rgba(157, 78, 221, 0.8));
+}
+/* ================================
+   HEADER & NAVIGATION - FIXED POSITIONING
+   ================================ */
+
+.main-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+    text-align: center;
+    min-width: 140px;
+}
+
+.nav-btn-home {
+    background: rgba(76, 201, 240, 0.2);
+    color: var(--text-light);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+}
+
+.nav-btn-home:hover {
+    background: rgba(76, 201, 240, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+}
+
+.nav-btn-back {
+    background: rgba(157, 78, 221, 0.2);
+    color: var(--text-light);
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.nav-btn-back:hover {
+    background: rgba(157, 78, 221, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+
+.page-title {
+    flex: 1;
+    text-align: center;
+}
+
+.page-title h1 {
+    margin-bottom: 0;
+    text-align: center;
+}
+
+/* Remove the old back-btn styles that were causing layout issues */
+.back-btn {
+    display: none;
+}
+
+/* Update the existing header-container for export buttons */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-container h1 {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+/* Responsive design for navigation */
+@media (max-width: 1024px) {
+    .main-header-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .nav-buttons {
+        justify-content: center;
+        order: 1;
+        margin-bottom: 20px;
+    }
+    
+    .page-title {
+        order: 2;
+    }
+    
+    .header-container {
+        order: 3;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .header-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .export-buttons {
+        width: 100%;
+    }
+    
+    .export-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        min-width: auto;
+    }
+    
+    .page-title h1 {
+        font-size: 1.6rem;
+    }
+}
+
+/* ================================
+   SECTIONS - GLASS MORPHISM (MATCHING DASHBOARD)
+   ================================ */
+
+section {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 40px rgba(76, 201, 240, 0.3);
+}
+
+section h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: var(--accent-blue);
+  text-shadow: 0 0 15px #4cc9f0aa;
+  border-bottom: 2px solid rgba(76, 201, 240, 0.3);
+  padding-bottom: 10px;
+}
+
+/* ================================
+   STATUS BADGES - MATCHING DASHBOARD
+   ================================ */
+
+.status {
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  border: 1px solid;
+}
+
+/* Orange */
+.status.pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border-color: #ffc107;
+  text-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Dark Blue */
+.status.paid {
+  background: rgba(85, 0, 243, 0.2);
+  color: #5500f3;
+  border-color: #5500f3;
+  text-shadow: 0 0 8px rgba(85, 0, 243, 0.3);
+}
+
+/* Purple */
+.status.shipped {
+  background: rgba(157, 78, 221, 0.2);
+  color: var(--accent-purple);
+  border-color: var(--accent-purple);
+  text-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+}
+
+/* Green */
+.status.completed {
+  background: rgba(79, 232, 176, 0.3);
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  text-shadow: 0 0 8px rgba(79, 232, 176, 0.3);
+}
+
+/* Cyan */
+.status.refund {
+  background: rgba(0, 183, 255, 0.2);
+  color: #00b7ff;
+  border-color: #00b7ff;
+  text-shadow: 0 0 8px rgba(0, 183, 255, 0.3);
+}
+
+/* Red */
+.status.cancelled {
+  background: rgba(255, 107, 107, 0.2);
+  color: var(--danger-red);
+  border-color: var(--danger-red);
+  text-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+}
+
+/* Also include other statuses for completeness */
+.status.return_requested {
+  background: rgba(119, 216, 255, 0.2);
+  color: #77d8ff;
+  border-color: #77d8ff;
+  text-shadow: 0 0 8px rgba(119, 216, 255, 0.3);
+}
+
+.status.refunded {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border-color: #2ecc71;
+  text-shadow: 0 0 8px rgba(46, 204, 113, 0.3);
+}
+
+.status.delivered {
+  background: rgba(79, 232, 176, 0.3);
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  text-shadow: 0 0 8px rgba(79, 232, 176, 0.3);
+}
+
+/* ================================
+   FILTERS SECTION - MATCHING DASHBOARD INPUTS
+   ================================ */
+
+.filters {
+  background: rgba(76, 201, 240, 0.08);
+}
+
+.filters h2 {
+  color: var(--accent-blue);
+}
+
+.filters form p {
+  margin-bottom: 20px;
+}
+
+.filters label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-light);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Date inputs and select dropdowns - matching dashboard.css */
+.filters input[type="date"],
+.filters select {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-light);
+  backdrop-filter: blur(10px);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.filters input[type="date"]:focus,
+.filters select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Fix dropdown options background */
+.filters select option {
+  background: #0d1b2a;
+  color: var(--text-light);
+  padding: 10px;
+}
+
+/* Calendar picker icon color */
+.filters input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+/* Filter buttons - matching dashboard button styles */
+.filters button[type="submit"] {
+  background: rgba(76, 201, 240, 0.2);
+  color: var(--text-light);
+  border: 1px solid var(--accent-blue);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 15px;
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+  backdrop-filter: blur(10px);
+  font-size: 1rem;
+}
+
+.filters button[type="submit"]:hover {
+  background: rgba(76, 201, 240, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+}
+
+.filters a {
+  color: var(--accent-purple);
+  text-decoration: none;
+  padding: 12px 24px;
+  border: 1px solid var(--accent-purple);
+  border-radius: 12px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+  backdrop-filter: blur(10px);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.filters a:hover {
+  background: rgba(157, 78, 221, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+
+/* ================================
+   SUMMARY SECTION - MATCHING DASHBOARD
+   ================================ */
+
+.summary {
+  background: rgba(79, 232, 176, 0.08);
+}
+
+.summary h2 {
+  color: var(--accent-green);
+}
+
+.summary p {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  color: var(--text-light);
+}
+
+.summary strong {
+  color: var(--accent-blue);
+  margin-right: 10px;
+  min-width: 200px;
+  display: inline-block;
+  text-shadow: 0 0 8px rgba(76, 201, 240, 0.6);
+}
+
+/* ================================
+   TABLE SECTION - MATCHING DASHBOARD
+   ================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+table th {
+  background: rgba(76, 201, 240, 0.15);
+  color: var(--accent-blue);
+  font-weight: 700;
+  padding: 16px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--glass-border);
+  font-size: 0.9rem;
+}
+
+table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+table tr:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ================================
+   CHART SECTION - MATCHING DASHBOARD
+   ================================ */
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+canvas {
+  max-width: 100%;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ================================
+   NO DATA MESSAGES - MATCHING DASHBOARD
+   ================================ */
+
+section p:only-child {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+/* ================================
+   RESPONSIVE DESIGN - MATCHING DASHBOARD
+   ================================ */
+
+@media (max-width: 768px) {
+  body {
+    padding: 20px 15px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  section {
+    padding: 20px;
+  }
+  
+  section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .filters input[type="date"],
+  .filters select {
+    max-width: 100%;
+  }
+  
+  .filters button[type="submit"],
+  .filters a {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  table th,
+  table td {
+    padding: 12px 10px;
+    font-size: 0.9rem;
+  }
+  
+  .summary p {
+    font-size: 1rem;
+  }
+  
+  .summary strong {
+    min-width: 150px;
+  }
+  
+  .chart-container {
+    height: 300px !important;
+  }
+  
+  body > p a {
+    display: block;
+    margin: 10px 0;
+    width: 100%;
+    max-width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .status {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+  
+  section {
+    padding: 15px;
+  }
+  
+  body > p a {
+    font-size: 0.9rem;
+    padding: 10px 15px;
+  }
+  
+  table th,
+  table td {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .chart-container {
+    height: 250px !important;
+    padding: 15px;
+  }
+  
+  .status {
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ================================
+   ANIMATIONS - MATCHING DASHBOARD
+   ================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ================================
+   ENHANCED CHART STYLING
+   ================================ */
+
+.chartjs-tooltip {
+  background: rgba(13, 27, 42, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid var(--accent-blue) !important;
+  border-radius: 8px !important;
+  color: var(--text-light) !important;
+  font-family: "Inter", Arial, sans-serif !important;
+}
+
+.chartjs-legend-text {
+  color: var(--text-light) !important;
+  font-family: "Inter", Arial, sans-serif !important;
+}
+.filter-and-chart-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 1024px) {
+  .filter-and-chart-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.status-chart {
+  background: rgba(157, 78, 221, 0.08);
+}
+
+.status-chart h2 {
+  color: var(--accent-purple);
+}
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--text-light);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(76, 201, 240, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+      margin-top: 20px;
+      width: auto;
+      align-self: center;
+    }
+
+    .back:hover {
+      background: rgba(157, 78, 221, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+    }
+        .back-btn {
+      position: center;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+    .back-btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: rgba(157, 78, 221, 0.2);
+  border: 1px solid var(--accent-purple);
+  border-radius: 12px;
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+  width: auto;
+}
+
+.back:hover {
+  background: rgba(157, 78, 221, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+/* ================================
+   HEADER & EXPORT BUTTONS
+   ================================ */
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-container h1 {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    backdrop-filter: blur(10px);
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pdf-btn {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--danger-red);
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+}
+
+.pdf-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
+}
+
+.excel-btn {
+    background: rgba(79, 232, 176, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--accent-green);
+    box-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
+}
+
+.excel-btn:hover {
+    background: rgba(79, 232, 176, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(79, 232, 176, 0.5);
+}
+
+/* Table actions */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.table-header h2 {
+    margin-bottom: 0;
+}
+
+.table-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(76, 201, 240, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--accent-blue);
+}
+
+.action-btn:hover {
+    background: rgba(76, 201, 240, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Back button styling */
+.back-btn {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.back-btn a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.back-btn .btn-primary {
+    background: rgba(76, 201, 240, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--accent-blue);
+    box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+}
+
+.back-btn .btn-primary:hover {
+    background: rgba(76, 201, 240, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+}
+
+.back-btn .back {
+    background: rgba(157, 78, 221, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--accent-purple);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.back-btn .back:hover {
+    background: rgba(157, 78, 221, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .export-buttons {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .export-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .table-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .back-btn {
+        flex-direction: column;
+    }
+    
+    .back-btn a {
+        width: 100%;
+        justify-content: center;
+    }
+}

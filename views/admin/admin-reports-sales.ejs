@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/admin-reports-sales.css">
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- For Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- Main Header with Navigation and Title -->
+    <div class="main-header-container">
+        <div class="nav-buttons">
+            <a href="/users/dashboard" class="nav-btn nav-btn-home">🏠 Home</a>
+            <a href="/users/admin" class="nav-btn nav-btn-back">← Back to Dashboard</a>
+        </div>
+        
+        <div class="page-title">
+            <h1>Sales Overview</h1>
+        </div>
+        
+        <div class="header-container">
+            <div class="export-buttons">
+                <button id="exportPdfBtn" class="export-btn pdf-btn">
+                    📄 Export as PDF
+                </button>
+                <button id="exportExcelBtn" class="export-btn excel-btn">
+                    📊 Export as Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-and-chart-container">
+        <!-- Filters Section -->
+        <section class="filters">
+            <h2>Filters</h2>
+            <form action="/admin/reports/sales" method="GET">
+                <p>
+                    <label for="startDate">Start date:</label><br />
+                    <input type="date" id="startDate" name="startDate" value="<%= filters.startDate %>" />
+                </p>
+                
+                <p>
+                    <label for="endDate">End date:</label><br />
+                    <input type="date" id="endDate" name="endDate" value="<%= filters.endDate %>" />
+                </p>
+                
+                <p>
+                    <label for="status">Order status:</label><br />
+                    <select id="status" name="status">
+                        <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All statuses</option>
+                        <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed only</option>
+                        <option value="paid" <%= filters.status === 'paid' ? 'selected' : '' %>>Paid</option>
+                        <option value="shipped" <%= filters.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                        <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="refund" <%= filters.status === 'refund' ? 'selected' : '' %>>Refunded</option>
+                        <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                </p>
+                
+                <p>
+                    <button type="submit">Apply filters</button>
+                    <a href="/admin/reports/sales">Clear</a>
+                </p>
+            </form>
+        </section>
+
+        <!-- Status Distribution Pie Chart -->
+        <section class="status-chart">
+            <h2>Order Status Distribution</h2>
+            <% if (statusDistribution && statusDistribution.length > 0) { %>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            <% } else { %>
+                <p>No status data available for the selected filters.</p>
+            <% } %>
+        </section>
+    </div>
+
+    <!-- Summary Section -->
+    <section class="summary">
+        <h2>Summary</h2>
+        <% if (dailySales.length == 0) { %>
+            <p>No sales data found for the selected filters.</p>
+        <% } else { %>
+            <p><strong>Total Sales:</strong> P<%= summary.totalSales.toFixed(2) %></p>
+            <p><strong>Total Orders:</strong> <%= summary.totalOrders %></p>
+            <p><strong>Average Order Value:</strong> P<%= summary.averageOrderValue.toFixed(2) %></p>
+        <% } %>
+    </section>
+
+    <!-- Daily Sales Table -->
+    <section>
+        <div class="table-header">
+            <h2>Daily Sales Table</h2>
+            <div class="table-actions">
+                <button id="copyTableBtn" class="action-btn copy-btn" title="Copy table data">
+                    📋 Copy
+                </button>
+            </div>
+        </div>
+        <% if (dailySales.length == 0) { %>
+            <p>No daily sales to display.</p>
+        <% } else { %>
+            <table id="dailySalesTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Total Sales</th>
+                        <th>Number of Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% dailySales.forEach(function(day) { %>
+                    <tr>
+                        <td><%= day.date %></td>
+                        <td>P<%= Number(day.totalSales).toFixed(2) %></td>
+                        <td><%= day.orderCount %></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </section>
+
+    <!-- Sales Chart -->
+    <section>
+        <h2>Sales Chart</h2>
+        <% if (dailySales.length == 0) { %>
+            <p>No sales data to chart for the selected filters.</p>
+        <% } else { %>
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+        <% } %>
+    </section>
+
+    <script>
+        // Store data from EJS template
+        const ejsData = {
+            summary: {
+                totalSales: <%= summary.totalSales || 0 %>,
+                totalOrders: <%= summary.totalOrders || 0 %>,
+                averageOrderValue: <%= summary.averageOrderValue || 0 %>
+            },
+            dailySales: <%- JSON.stringify(dailySales || []) %>,
+            statusDistribution: <%- JSON.stringify(statusDistribution || []) %>,
+            filters: {
+                status: '<%= filters.status %>'
+            },
+            salesLabels: <%- JSON.stringify(labels || []) %>,
+            salesValues: <%- JSON.stringify(salesData || []) %>
+        };
+
+        // Status colors matching your CSS
+        const statusColors = {
+            'pending': {
+                bg: 'rgba(255, 193, 7, 0.8)',
+                border: '#ffc107',
+                hover: 'rgba(255, 193, 7, 1)'
+            },
+            'paid': {
+                bg: 'rgba(85, 0, 243, 0.8)',
+                border: '#5500f3',
+                hover: 'rgba(85, 0, 243, 1)'
+            },
+            'shipped': {
+                bg: 'rgba(157, 78, 221, 0.8)',
+                border: '#9d4edd',
+                hover: 'rgba(157, 78, 221, 1)'
+            },
+            'completed': {
+                bg: 'rgba(79, 232, 176, 0.8)',
+                border: '#4fe8b0',
+                hover: 'rgba(79, 232, 176, 1)'
+            },
+            'refund': {
+                bg: 'rgba(0, 183, 255, 0.8)',
+                border: '#00b7ff',
+                hover: 'rgba(0, 183, 255, 1)'
+            },
+            'cancelled': {
+                bg: 'rgba(255, 107, 107, 0.8)',
+                border: '#ff6b6b',
+                hover: 'rgba(255, 107, 107, 1)'
+            },
+            'return_requested': {
+                bg: 'rgba(119, 216, 255, 0.8)',
+                border: '#77d8ff',
+                hover: 'rgba(119, 216, 255, 1)'
+            }
+        };
+
+        // ==============================================
+        // EXPORT FUNCTIONALITY
+        // ==============================================
+        
+        // Export as PDF
+        document.getElementById('exportPdfBtn').addEventListener('click', function() {
+            exportToPDF();
+        });
+
+        // Export as Excel
+        document.getElementById('exportExcelBtn').addEventListener('click', function() {
+            exportToExcel();
+        });
+
+        // Copy table data
+        document.getElementById('copyTableBtn').addEventListener('click', function() {
+            copyTableData();
+        });
+
+        function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // Title
+                doc.setFontSize(20);
+                doc.setTextColor(44, 62, 80);
+                doc.text('Sales Overview Report', 105, 20, null, null, 'center');
+                
+                // Subtitle with filter info
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                
+                const filtersText = `Date Range: ${document.getElementById('startDate').value || 'Any'} to ${document.getElementById('endDate').value || 'Any'}`;
+                const statusText = `Status: ${document.getElementById('status').options[document.getElementById('status').selectedIndex].text}`;
+                const dateText = `Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+                
+                doc.text(filtersText, 105, 30, null, null, 'center');
+                doc.text(statusText, 105, 36, null, null, 'center');
+                doc.text(dateText, 105, 42, null, null, 'center');
+                
+                let yPos = 50;
+                
+                // Summary Section
+                doc.setFontSize(14);
+                doc.setTextColor(44, 62, 80);
+                doc.text('Summary', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(11);
+                doc.setTextColor(60, 60, 60);
+                
+                if (ejsData.dailySales.length > 0) {
+                    doc.text(`Total Sales: ₱${ejsData.summary.totalSales.toFixed(2)}`, 25, yPos);
+                    yPos += 7;
+                    doc.text(`Total Orders: ${ejsData.summary.totalOrders}`, 25, yPos);
+                    yPos += 7;
+                    doc.text(`Average Order Value: ₱${ejsData.summary.averageOrderValue.toFixed(2)}`, 25, yPos);
+                    yPos += 15;
+                } else {
+                    doc.text('No sales data found', 25, yPos);
+                    yPos += 15;
+                }
+                
+                // Daily Sales Table
+                doc.setFontSize(14);
+                doc.setTextColor(44, 62, 80);
+                doc.text('Daily Sales', 20, yPos);
+                yPos += 10;
+                
+                if (ejsData.dailySales.length > 0) {
+                    const tableData = [
+                        ['Date', 'Total Sales', 'Number of Orders']
+                    ];
+                    
+                    ejsData.dailySales.forEach(day => {
+                        tableData.push([
+                            day.date,
+                            `₱${Number(day.totalSales).toFixed(2)}`,
+                            day.orderCount.toString()
+                        ]);
+                    });
+                    
+                    doc.autoTable({
+                        head: [tableData[0]],
+                        body: tableData.slice(1),
+                        startY: yPos,
+                        headStyles: { 
+                            fillColor: [76, 201, 240],
+                            textColor: [255, 255, 255],
+                            fontSize: 11
+                        },
+                        bodyStyles: { fontSize: 10 },
+                        alternateRowStyles: { fillColor: [245, 245, 245] },
+                        margin: { left: 20, right: 20 }
+                    });
+                    
+                    yPos = doc.lastAutoTable.finalY + 10;
+                } else {
+                    doc.setFontSize(11);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('No daily sales data', 25, yPos);
+                    yPos += 15;
+                }
+                
+                // Status Distribution
+                doc.setFontSize(14);
+                doc.setTextColor(44, 62, 80);
+                doc.text('Status Distribution', 20, yPos);
+                yPos += 10;
+                
+                if (ejsData.statusDistribution && ejsData.statusDistribution.length > 0) {
+                    const statusData = [
+                        ['Status', 'Orders', 'Percentage']
+                    ];
+                    
+                    const totalOrders = ejsData.statusDistribution.reduce((sum, item) => sum + (item.count || 0), 0);
+                    
+                    ejsData.statusDistribution.forEach(item => {
+                        const count = item.count || 0;
+                        const percentage = totalOrders > 0 ? ((count / totalOrders) * 100).toFixed(1) : 0;
+                        const statusName = item._id ? 
+                            item._id.charAt(0).toUpperCase() + item._id.slice(1) : 
+                            'Unknown';
+                        
+                        statusData.push([
+                            statusName,
+                            count.toString(),
+                            `${percentage}%`
+                        ]);
+                    });
+                    
+                    doc.autoTable({
+                        head: [statusData[0]],
+                        body: statusData.slice(1),
+                        startY: yPos,
+                        headStyles: { 
+                            fillColor: [157, 78, 221],
+                            textColor: [255, 255, 255],
+                            fontSize: 11
+                        },
+                        bodyStyles: { fontSize: 10 },
+                        alternateRowStyles: { fillColor: [245, 245, 245] },
+                        margin: { left: 20, right: 20 }
+                    });
+                } else {
+                    doc.setFontSize(11);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('No status distribution data', 25, yPos);
+                }
+                
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for(let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Page ${i} of ${pageCount}`, 105, 285, null, null, 'center');
+                    doc.text('Sales Overview Report', 20, 285);
+                    doc.text('Generated by Admin', 190, 285, null, null, 'right');
+                }
+                
+                // Save the PDF
+                doc.save(`Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+                
+                showNotification('PDF exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                showNotification('Error exporting PDF: ' + error.message, 'error');
+            }
+        }
+
+        function exportToExcel() {
+            try {
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Summary sheet
+                const summaryData = [
+                    ['Sales Overview Report'],
+                    ['Generated:', new Date().toLocaleString()],
+                    ['Date Range:', `${document.getElementById('startDate').value || 'Any'} to ${document.getElementById('endDate').value || 'Any'}`],
+                    ['Status:', document.getElementById('status').options[document.getElementById('status').selectedIndex].text],
+                    [],
+                    ['SUMMARY'],
+                    ['Total Sales:', `₱${ejsData.summary.totalSales.toFixed(2)}`],
+                    ['Total Orders:', ejsData.summary.totalOrders],
+                    ['Average Order Value:', `₱${ejsData.summary.averageOrderValue.toFixed(2)}`],
+                    []
+                ];
+                
+                const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+                
+                // Daily Sales sheet
+                if (ejsData.dailySales.length > 0) {
+                    const dailySalesData = [
+                        ['Date', 'Total Sales', 'Number of Orders']
+                    ];
+                    
+                    ejsData.dailySales.forEach(day => {
+                        dailySalesData.push([
+                            day.date,
+                            Number(day.totalSales),
+                            Number(day.orderCount)
+                        ]);
+                    });
+                    
+                    const dailySalesWs = XLSX.utils.aoa_to_sheet(dailySalesData);
+                    XLSX.utils.book_append_sheet(wb, dailySalesWs, 'Daily Sales');
+                    
+                    // Add total row
+                    const lastRow = dailySalesData.length + 1;
+                    XLSX.utils.sheet_add_aoa(dailySalesWs, [
+                        [],
+                        ['TOTAL', { f: `SUM(B2:B${lastRow})` }, { f: `SUM(C2:C${lastRow})` }]
+                    ], { origin: -1 });
+                    
+                    // Format columns
+                    const wscols = [
+                        { wch: 15 }, // Date column width
+                        { wch: 15 }, // Sales column width
+                        { wch: 15 }  // Orders column width
+                    ];
+                    dailySalesWs['!cols'] = wscols;
+                }
+                
+                // Status Distribution sheet
+                if (ejsData.statusDistribution && ejsData.statusDistribution.length > 0) {
+                    const statusData = [
+                        ['Status', 'Orders', 'Percentage']
+                    ];
+                    
+                    const totalOrders = ejsData.statusDistribution.reduce((sum, item) => sum + (item.count || 0), 0);
+                    
+                    ejsData.statusDistribution.forEach(item => {
+                        const count = item.count || 0;
+                        const percentage = totalOrders > 0 ? ((count / totalOrders) * 100) : 0;
+                        const statusName = item._id ? 
+                            item._id.charAt(0).toUpperCase() + item._id.slice(1) : 
+                            'Unknown';
+                        
+                        statusData.push([
+                            statusName,
+                            Number(count),
+                            Number(percentage.toFixed(1))
+                        ]);
+                    });
+                    
+                    const statusWs = XLSX.utils.aoa_to_sheet(statusData);
+                    XLSX.utils.book_append_sheet(wb, statusWs, 'Status Distribution');
+                    
+                    // Add total row
+                    const lastStatusRow = statusData.length + 1;
+                    XLSX.utils.sheet_add_aoa(statusWs, [
+                        [],
+                        ['TOTAL', { f: `SUM(B2:B${lastStatusRow})` }, '']
+                    ], { origin: -1 });
+                }
+                
+                // Save the Excel file
+                XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+                
+                showNotification('Excel file exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting Excel:', error);
+                showNotification('Error exporting Excel: ' + error.message, 'error');
+            }
+        }
+
+        function copyTableData() {
+            try {
+                const table = document.getElementById('dailySalesTable');
+                if (!table) {
+                    showNotification('No table data to copy', 'warning');
+                    return;
+                }
+                
+                let csv = '';
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const rowData = [];
+                    row.querySelectorAll('th, td').forEach(cell => {
+                        rowData.push(cell.innerText);
+                    });
+                    csv += rowData.join('\t') + '\n';
+                });
+                
+                navigator.clipboard.writeText(csv).then(() => {
+                    showNotification('Table data copied to clipboard!', 'success');
+                }).catch(err => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = csv;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('Table data copied to clipboard!', 'success');
+                });
+                
+            } catch (error) {
+                console.error('Error copying table data:', error);
+                showNotification('Error copying data: ' + error.message, 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notification
+            const existingNotification = document.querySelector('.export-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `export-notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            if (type === 'success') {
+                notification.style.backgroundColor = 'var(--accent-green)';
+                notification.style.border = '1px solid rgba(79, 232, 176, 0.3)';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = 'var(--danger-red)';
+                notification.style.border = '1px solid rgba(255, 107, 107, 0.3)';
+            } else {
+                notification.style.backgroundColor = 'var(--warning-yellow)';
+                notification.style.border = '1px solid rgba(252, 163, 17, 0.3)';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS animation for notification
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ==============================================
+        // PIE CHART - Order Status Distribution
+        // ==============================================
+        const statusChartCanvas = document.getElementById('statusChart');
+        if (statusChartCanvas) {
+            try {
+                const statusDistribution = ejsData.statusDistribution;
+                
+                if (statusDistribution && statusDistribution.length > 0) {
+                    const statusLabels = statusDistribution.map(item => {
+                        const status = item._id || 'Unknown';
+                        return status.charAt(0).toUpperCase() + status.slice(1);
+                    });
+                    
+                    const statusData = statusDistribution.map(item => item.count || 0);
+                    
+                    // Create colors based on status
+                    const statusBackgroundColors = statusDistribution.map(item => {
+                        const status = (item._id || '').toLowerCase();
+                        return statusColors[status]?.bg || 'rgba(255, 255, 255, 0.2)';
+                    });
+                    
+                    const statusBorderColors = statusDistribution.map(item => {
+                        const status = (item._id || '').toLowerCase();
+                        return statusColors[status]?.border || 'rgba(255, 255, 255, 0.5)';
+                    });
+
+                    const statusHoverColors = statusDistribution.map(item => {
+                        const status = (item._id || '').toLowerCase();
+                        return statusColors[status]?.hover || 'rgba(255, 255, 255, 0.8)';
+                    });
+
+                    const statusCtx = statusChartCanvas.getContext('2d');
+                    const statusChart = new Chart(statusCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: statusLabels,
+                            datasets: [{
+                                data: statusData,
+                                backgroundColor: statusBackgroundColors,
+                                borderColor: statusBorderColors,
+                                borderWidth: 2,
+                                hoverBackgroundColor: statusHoverColors,
+                                hoverBorderColor: statusBorderColors,
+                                hoverBorderWidth: 3,
+                                hoverOffset: 20
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        color: '#e5e9f0',
+                                        font: {
+                                            size: 12,
+                                            family: "'Inter', Arial, sans-serif"
+                                        },
+                                        padding: 15,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(13, 27, 42, 0.95)',
+                                    titleColor: '#4cc9f0',
+                                    bodyColor: '#e5e9f0',
+                                    borderColor: '#4cc9f0',
+                                    borderWidth: 2,
+                                    cornerRadius: 8,
+                                    padding: 10,
+                                    displayColors: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                            return `${label}: ${value} orders (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true,
+                                duration: 800
+                            }
+                        }
+                    });
+
+                    // Highlight selected status if filtered
+                    const selectedStatus = ejsData.filters.status;
+                    if (selectedStatus && selectedStatus !== 'all') {
+                        const originalStatusData = statusDistribution.map(item => item._id || '');
+                        const statusIndex = originalStatusData.findIndex(status => 
+                            status.toLowerCase() === selectedStatus.toLowerCase()
+                        );
+                        
+                        if (statusIndex !== -1) {
+                            statusChart.setActiveElements([{
+                                datasetIndex: 0,
+                                index: statusIndex
+                            }]);
+                            statusChart.update();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("❌ Error initializing pie chart:", error);
+            }
+        }
+
+        // ==============================================
+        // LINE CHART - Sales Chart
+        // ==============================================
+        const salesChartCanvas = document.getElementById('salesChart');
+        if (salesChartCanvas) {
+            try {
+                const salesLabels = ejsData.salesLabels;
+                const salesValues = ejsData.salesValues;
+                
+                if (salesLabels && salesValues && 
+                    Array.isArray(salesLabels) && Array.isArray(salesValues) &&
+                    salesLabels.length > 0 && salesValues.length > 0) {
+                    
+                    // Format dates to be shorter
+                    const formattedLabels = salesLabels.map(label => {
+                        try {
+                            const date = new Date(label);
+                            return date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        } catch (e) {
+                            return label;
+                        }
+                    });
+                    
+                    const ctx = salesChartCanvas.getContext('2d');
+                    
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: formattedLabels,
+                            datasets: [{
+                                label: 'Total Sales per Day',
+                                data: salesValues,
+                                backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                                borderColor: 'rgba(76, 201, 240, 1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: 'rgba(76, 201, 240, 1)',
+                                pointBorderColor: '#0d1b2a',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 7
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    left: 10,
+                                    right: 10,
+                                    top: 10,
+                                    bottom: 30
+                                }
+                            },
+                            animation: {
+                                duration: 1000,
+                                easing: 'easeOutQuart'
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: '#e5e9f0',
+                                        font: {
+                                            size: 14,
+                                            family: "'Inter', Arial, sans-serif"
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(13, 27, 42, 0.9)',
+                                    titleColor: '#4cc9f0',
+                                    bodyColor: '#e5e9f0',
+                                    borderColor: '#4cc9f0',
+                                    borderWidth: 1,
+                                    cornerRadius: 8,
+                                    displayColors: false,
+                                    callbacks: {
+                                        title: function(context) {
+                                            const index = context[0].dataIndex;
+                                            return salesLabels[index] || 'Unknown date';
+                                        },
+                                        label: function(context) {
+                                            return '₱' + context.parsed.y.toLocaleString();
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#9aa3b2',
+                                        callback: function(value) {
+                                            return '₱' + value.toLocaleString();
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Total Sales (PHP)',
+                                        color: '#4cc9f0',
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#9aa3b2',
+                                        maxRotation: 0,
+                                        minRotation: 0,
+                                        fontSize: 11,
+                                        autoSkip: true,
+                                        maxTicksLimit: 15
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Date',
+                                        color: '#4cc9f0',
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("❌ Error initializing sales chart:", error);
+            }
+        }
+    </script>
+</body>
+</html>
