@@ -30,6 +30,9 @@
                 <button id="exportExcelBtn" class="export-btn excel-btn">
                     📊 Export as Excel
                 </button>
+                <button onclick="window.print()" class="export-btn print-btn">
+                    🖨️ Print Report
+                </button>
             </div>
         </div>
     </div>
@@ -68,6 +71,31 @@
                 </p>
             </form>
         </section>
+        <section class="filter-summary">
+    <h3>Current Filter Summary</h3>
+    <p>
+        <% if (!filters.startDate && !filters.endDate && filters.status === 'all') { %>
+            Showing all orders for all dates and all statuses.
+        <% } else { %>
+            Showing orders
+            <% if (filters.status === 'all') { %>
+                with all statuses
+            <% } else { %>
+                with status "<%= filters.status %>"
+            <% } %>
+            
+            <% if (filters.startDate && filters.endDate) { %>
+                from <%= filters.startDate %> to <%= filters.endDate %>.
+            <% } else if (filters.startDate && !filters.endDate) { %>
+                from <%= filters.startDate %> onwards.
+            <% } else if (!filters.startDate && filters.endDate) { %>
+                up to <%= filters.endDate %>.
+            <% } else { %>
+                for all dates.
+            <% } %>
+        <% } %>
+    </p>
+</section>
 
         <!-- Status Distribution Pie Chart -->
         <section class="status-chart">
