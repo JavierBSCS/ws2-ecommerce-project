@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Users - Admin Dashboard</title>
+        <link rel="stylesheet" href="/dashboard.css">
+        <link rel="stylesheet" href="/shared.css">
+        <link rel="stylesheet" href="/manageUsers.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (currentUser && currentUser.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users" class="active">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
+
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      <div class="manage-users-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-users"></i> Manage Users</h1>
+            <div class="header-actions">
+            <a href="/users/dashboard" class="btn btn-outline pulse">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <% if (message) { %>
+          <div class="message message-<%= message.type === 'success' ? 'success' : 'error' %>">
+            <i class="fas fa-<%= message.type === 'success' ? 'check-circle' : 'exclamation-circle' %>"></i>
+            <%= message.text %>
+          </div>
+        <% } %>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+          <div class="stat-card total">
+            <h3>Total Users</h3>
+            <div class="count"><%= stats.total %></div>
+          </div>
+          <div class="stat-card admin">
+            <h3>Admins</h3>
+            <div class="count"><%= stats.admin %></div>
+          </div>
+          <div class="stat-card customer">
+            <h3>Customers</h3>
+            <div class="count"><%= stats.customer %></div>
+          </div>
+          <div class="stat-card active">
+            <h3>Active</h3>
+            <div class="count"><%= stats.active %></div>
+          </div>
+          <div class="stat-card inactive">
+            <h3>Inactive</h3>
+            <div class="count"><%= stats.inactive %></div>
+          </div>
+          <div class="stat-card verified">
+            <h3>Verified</h3>
+            <div class="count"><%= stats.verified %></div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-container">
+          <form method="GET" class="filters-form">
+            <div class="filter-group">
+              <label for="searchName"><i class="fas fa-search"></i> Search</label>
+              <input 
+                type="text" 
+                id="searchName" 
+                name="searchName" 
+                placeholder="Search by name or email..." 
+                value="<%= searchName %>"
+              >
+            </div>
+            <div class="filter-group">
+              <label for="searchRole"><i class="fas fa-user-tag"></i> Role</label>
+              <select id="searchRole" name="searchRole">
+                <option value="">All Roles</option>
+                <option value="admin" <%= searchRole === 'admin' ? 'selected' : '' %>>Admin</option>
+                <option value="customer" <%= searchRole === 'customer' ? 'selected' : '' %>>Customer</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="searchStatus"><i class="fas fa-filter"></i> Status</label>
+              <select id="searchStatus" name="searchStatus">
+                <option value="">All Status</option>
+                <option value="active" <%= searchStatus === 'active' ? 'selected' : '' %>>Active Only</option>
+                <option value="inactive" <%= searchStatus === 'inactive' ? 'selected' : '' %>>Inactive Only</option>
+                <option value="verified" <%= searchStatus === 'verified' ? 'selected' : '' %>>Verified Only</option>
+                <option value="unverified" <%= searchStatus === 'unverified' ? 'selected' : '' %>>Unverified Only</option>
+              </select>
+            </div>
+<div class="filter-buttons">
+  <button type="submit" class="btn btn-primary">
+    <i class="fas fa-filter"></i> Apply Filters
+  </button>
+  <a href="/users/admin/users" class="btn btn-outline">
+    <i class="fas fa-redo"></i> Reset
+  </a>
+</div>
+          </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="users-table-container">
+          <div class="table-responsive">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>User <i class="fas fa-user"></i></th>
+                  <th>Role <i class="fas fa-tag"></i></th>
+                  <th>Status <i class="fas fa-signal"></i></th>
+                  <th>Verified <i class="fas fa-check-circle"></i></th>
+                  <th>Created <i class="fas fa-calendar-plus"></i></th>
+                  <th>Actions <i class="fas fa-cogs"></i></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (users && users.length > 0) { %>
+                  <% users.forEach(user => { %>
+                    <tr class="<%= highlightedUser === user.userId ? 'highlighted' : '' %>" id="user-<%= user.userId %>">
+                      <td>
+                        <div class="user-info">
+                          <% if (user.profileImage) { %>
+                            <img src="<%= user.profileImage %>" alt="Avatar" class="user-avatar">
+                          <% } else { %>
+                            <div class="user-avatar">
+                              <%= user.firstName?.charAt(0) || 'U' %>
+                            </div>
+                          <% } %>
+                          <div class="user-details">
+                            <h4><%= user.firstName %> <%= user.lastName %></h4>
+                            <p><i class="fas fa-envelope"></i> <%= user.email %></p>
+                            <% if (user.phone) { %>
+                              <p><i class="fas fa-phone"></i> <%= user.phone %></p>
+                            <% } %>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge badge-<%= user.role %>">
+                          <i class="fas fa-<%= user.role === 'admin' ? 'crown' : 'user' %>"></i>
+                          <%= user.role %>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge badge-<%= user.accountStatus %>">
+                          <i class="fas fa-<%= user.accountStatus === 'active' ? 'check-circle' : 'times-circle' %>"></i>
+                          <%= user.accountStatus %>
+                        </span>
+                        <br>
+                        <small>
+                          <label class="status-toggle">
+                            <input 
+                              type="checkbox" 
+                              class="toggle-status" 
+                              data-user-id="<%= user.userId %>"
+                              <%= user.accountStatus === 'active' ? 'checked' : '' %>
+                              <%= currentUser.userId === user.userId ? 'disabled' : '' %>
+                            >
+                            <span class="slider"></span>
+                          </label>
+                        </small>
+                      </td>
+                      <td>
+                        <span class="badge badge-<%= user.isEmailVerified ? 'verified' : 'unverified' %>">
+                          <i class="fas fa-<%= user.isEmailVerified ? 'check-circle' : 'times-circle' %>"></i>
+                          <%= user.isEmailVerified ? 'Verified' : 'Unverified' %>
+                        </span>
+                      </td>
+                      <td>
+                        <small>
+                          <i class="fas fa-calendar"></i> <%= new Date(user.createdAt).toLocaleDateString() %>
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                          <i class="fas fa-clock"></i> <%= new Date(user.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+                        </small>
+                      </td>
+                      <td>
+                        <div class="action-buttons">
+                        <a href="/users/admin/users/edit/<%= user.userId %>" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <% if (currentUser.userId !== user.userId) { %>
+                            <a 
+                            href="/users/admin/users/delete/<%= user.userId %>" 
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Are you sure you want to delete <%= user.firstName %> <%= user.lastName %>?')"
+                            >
+                            <i class="fas fa-trash"></i> Delete
+                            </a>
+                        <% } else { %>
+                            <span class="btn btn-secondary btn-sm disabled">
+                            <i class="fas fa-user-shield"></i> Current
+                            </span>
+                        <% } %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <!-- In your manageUsers.ejs file, update the no results section: -->
+                <% } else { %>
+                <tr>
+                    <td colspan="6">
+                    <div class="no-results">
+                        <i class="fas fa-users-slash"></i>
+                        <h3>No users found</h3>
+                        <p>Try adjusting your search filters or resetting to view all users.</p>
+                        <a href="/users/admin/users" class="btn">
+                        <i class="fas fa-redo"></i> Reset Filters
+                        </a>
+                    </div>
+                    </td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Add this JavaScript right before the closing </body> tag, after the sidebar script -->
+<script>
+  // Toggle user status functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get all status toggle switches
+    const statusToggles = document.querySelectorAll('.toggle-status');
+    
+    // Add change event listener to each toggle
+    statusToggles.forEach(toggle => {
+      toggle.addEventListener('change', function() {
+        const userId = this.getAttribute('data-user-id');
+        const newStatus = this.checked ? 'active' : 'inactive';
+        
+        // Show loading state
+        const originalState = this.checked;
+        this.disabled = true;
+        
+        // Send AJAX request to update status
+        updateUserStatus(userId, newStatus, this);
+      });
+    });
+    
+
+async function updateUserStatus(userId, newStatus, toggleElement) {
+  try {
+    const response = await fetch(`/users/admin/users/toggle-status/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+      // NO BODY - server toggles internally
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      // Success - update UI
+      showNotification(data.message || 'User status updated successfully!', 'success');
+      
+      // Update the status badge
+      const row = toggleElement.closest('tr');
+      const statusBadge = row.querySelector('.badge-active, .badge-inactive');
+      
+      if (statusBadge) {
+        // Use the newStatus returned from server (data.newStatus)
+        const updatedStatus = data.newStatus;
+        statusBadge.className = `badge badge-${updatedStatus}`;
+        statusBadge.innerHTML = `<i class="fas fa-${updatedStatus === 'active' ? 'check-circle' : 'times-circle'}"></i> ${updatedStatus}`;
+        
+        // Update the toggle to match the actual new status from server
+        toggleElement.checked = updatedStatus === 'active';
+      }
+      
+    } else {
+      // Error - revert toggle
+      toggleElement.checked = !toggleElement.checked;
+      showNotification(data.error || 'Failed to update status', 'error');
+    }
+    
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    // Revert toggle on error
+    toggleElement.checked = !toggleElement.checked;
+    showNotification('Network error. Please try again.', 'error');
+  } finally {
+    // Re-enable the toggle
+    toggleElement.disabled = false;
+  }
+}
+    // Function to show notification
+    function showNotification(message, type) {
+      // Remove existing notifications
+      const existingNotification = document.querySelector('.status-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `status-notification message message-${type}`;
+      notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        ${message}
+      `;
+      
+      // Add to page
+      const container = document.querySelector('.manage-users-container');
+      const pageHeader = document.querySelector('.page-header');
+      container.insertBefore(notification, pageHeader.nextSibling);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-10px)';
+        setTimeout(() => notification.remove(), 300);
+      }, 5000);
+    }
+    
+    // Function to update stats cards (optional - if you want real-time updates)
+    function updateStatsCards(status, isActive) {
+      // This function would update the stats cards without reloading
+      // You can implement this if you want real-time updates
+      console.log(`Status changed to ${status}, isActive: ${isActive}`);
+      // You could fetch updated stats via another AJAX call here
+    }
+    
+    // Optional: Add CSS for status notification
+    const style = document.createElement('style');
+    style.textContent = `
+      .status-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      }
+      
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  });
+</script>
+  <!-- Sidebar JavaScript -->
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    console.log('Sidebar elements check:', {
+      sidebar: sidebar ? 'Found' : 'Missing',
+      menuToggle: menuToggle ? 'Found' : 'Missing',
+      mainContent: mainContent ? 'Found' : 'Missing'
+    });
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
+      } else {
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
+      }
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+      
+      console.log('Menu toggled. Hidden:', isHidden);
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
+</body>
+</html>

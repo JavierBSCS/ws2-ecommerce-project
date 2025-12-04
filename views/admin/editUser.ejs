@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Admin Dashboard</title>
+        <link rel="stylesheet" href="/dashboard.css">
+        <link rel="stylesheet" href="/editUser.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (currentUser && currentUser.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
+
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="edit-user-container">
+        <a href="/users/admin/users" class="back-link">
+          <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
+
+        <div class="page-header">
+          <h1><i class="fas fa-user-edit"></i> <%= title %></h1>
+        </div>
+
+        <!-- User Info Header -->
+        <div class="user-info-header">
+          <% if (user.profileImage) { %>
+            <img src="<%= user.profileImage %>" alt="Avatar" class="user-avatar">
+          <% } else { %>
+            <div class="user-avatar">
+              <%= user.firstName?.charAt(0) || 'U' %><%= user.lastName?.charAt(0) || '' %>
+            </div>
+          <% } %>
+          <div class="user-header-info">
+            <h2><%= user.firstName %> <%= user.lastName %></h2>
+            <p><%= user.email %></p>
+            <div>
+              <span class="badge badge-<%= user.role %>">
+                <i class="fas fa-<%= user.role === 'admin' ? 'crown' : 'user' %>"></i>
+                <%= user.role %>
+              </span>
+              <span class="badge badge-<%= user.accountStatus %>">
+                <%= user.accountStatus %>
+              </span>
+              <span class="badge badge-<%= user.isEmailVerified ? 'verified' : 'unverified' %>">
+                <i class="fas fa-<%= user.isEmailVerified ? 'check-circle' : 'times-circle' %>"></i>
+                <%= user.isEmailVerified ? 'Verified' : 'Unverified' %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <% if (errors && errors.length > 0) { %>
+          <div class="alert alert-info">
+            <i class="fas fa-exclamation-circle"></i>
+            Please fix the following errors:
+            <ul style="margin: 5px 0 0 20px;">
+              <% errors.forEach(error => { %>
+                <li><%= error %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+
+        <form method="POST" class="edit-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName" class="required">First Name</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                name="firstName" 
+                value="<%= formData.firstName || user.firstName %>"
+                required
+              >
+              <% if (errors && errors.some(e => e.includes('First name'))) { %>
+                <div class="error-message">
+                  <i class="fas fa-exclamation-circle"></i>
+                  First name is required
+                </div>
+              <% } %>
+            </div>
+
+            <div class="form-group">
+              <label for="lastName" class="required">Last Name</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                name="lastName" 
+                value="<%= formData.lastName || user.lastName %>"
+                required
+              >
+              <% if (errors && errors.some(e => e.includes('Last name'))) { %>
+                <div class="error-message">
+                  <i class="fas fa-exclamation-circle"></i>
+                  Last name is required
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="required">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              value="<%= formData.email || user.email %>"
+              required
+            >
+            <% if (errors && errors.some(e => e.includes('Email'))) { %>
+              <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <%= errors.find(e => e.includes('Email')) %>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="role">Role</label>
+              <select id="role" name="role">
+                <% availableRoles.forEach(role => { %>
+                  <option value="<%= role %>" 
+                    <%= (formData.role || user.role) === role ? 'selected' : '' %>>
+                    <%= role.charAt(0).toUpperCase() + role.slice(1) %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="accountStatus">Account Status</label>
+              <select id="accountStatus" name="accountStatus">
+                <% accountStatuses.forEach(status => { %>
+                  <option value="<%= status %>" 
+                    <%= (formData.accountStatus || user.accountStatus) === status ? 'selected' : '' %>>
+                    <%= status.charAt(0).toUpperCase() + status.slice(1) %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Change Password (Optional)</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              placeholder="Leave blank to keep current password"
+            >
+            <p class="password-note">
+              <i class="fas fa-info-circle"></i>
+              Only enter a password if you want to change it
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              name="phone" 
+              value="<%= formData.phone || user.phone || '' %>"
+              placeholder="e.g., 0917 123 4567"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="address">Address</label>
+            <input 
+              type="text" 
+              id="address" 
+              name="address" 
+              value="<%= formData.address || user.address || '' %>"
+              placeholder="Street address"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input 
+                type="text" 
+                id="city" 
+                name="city" 
+                value="<%= formData.city || user.city || '' %>"
+                placeholder="City"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="province">Province</label>
+              <input 
+                type="text" 
+                id="province" 
+                name="province" 
+                value="<%= formData.province || user.province || '' %>"
+                placeholder="Province"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="zip">ZIP Code</label>
+            <input 
+              type="text" 
+              id="zip" 
+              name="zip" 
+              value="<%= formData.zip || user.zip || '' %>"
+              placeholder="ZIP code"
+            >
+          </div>
+
+          <div class="form-actions">
+            <a href="/users/admin/users" class="btn btn-secondary">
+              <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add confirmation for role change to admin
+      const roleSelect = document.getElementById('role');
+      if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+          if (this.value === 'admin') {
+            if (!confirm('Warning: Changing this user to admin will give them full access to the admin dashboard. Are you sure?')) {
+              this.value = '<%= user.role %>';
+            }
+          }
+        });
+      }
+    });
+  </script>
+  <!-- Sidebar JavaScript -->
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    console.log('Sidebar elements check:', {
+      sidebar: sidebar ? 'Found' : 'Missing',
+      menuToggle: menuToggle ? 'Found' : 'Missing',
+      mainContent: mainContent ? 'Found' : 'Missing'
+    });
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
+      } else {
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
+      }
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+      
+      console.log('Menu toggled. Hidden:', isHidden);
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
+</body>
+</html>

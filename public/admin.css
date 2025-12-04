@@ -226,7 +226,6 @@
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
-      margin-top: 20px;
       width: auto;
       align-self: center;
     }
@@ -607,6 +606,51 @@
   color: var(--accent-green);
   text-shadow: 0 0 15px rgba(79, 232, 176, 0.3);
 }
+/* ================================
+   TABLE HEADER WITH BUTTON STYLES - CENTERED
+   ================================ */
 
-/* ... rest of your CSS ... */
+.table-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 10px;
+  gap: 15px;
+  flex-wrap: wrap;
+}
 
+.table-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+  margin: 0;
+}
+
+.table-btn {
+  background: rgba(76, 201, 240, 0.2);
+  color: var(--text-light);
+  border: 1px solid var(--accent-blue);
+  padding: 8px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-btn:hover {
+  background: rgba(76, 201, 240, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+}
+
+.table-btn-icon {
+  font-size: 1.1rem;
+}

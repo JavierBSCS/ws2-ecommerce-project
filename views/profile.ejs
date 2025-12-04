@@ -4,106 +4,185 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Profile</title>
-    <link rel="stylesheet" href="/profile.css">
-
+  <link rel="stylesheet" href="/shared.css">
+  <link rel="stylesheet" href="/profile.css">
+  
 </head>
 
 <body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile" class="active">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (user && user.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
 
-<div class="profile-container">
-  <!-- Home button outside container -->
-  <div class="back-btn">
-    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
-  </div>
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
 
-  <div class="container">
-    <!-- Success Message for Profile Edit -->
-<% if (typeof editSuccess !== 'undefined' && editSuccess === '1') { %>
-  <div class="alert alert-success">
-    ✅ Profile updated successfully!
-  </div>
-<% } %>
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+      <div class="profile-container">
+        <div class="container">
+          <!-- Success Message for Profile Edit -->
+          <% if (typeof editSuccess !== 'undefined' && editSuccess === '1') { %>
+            <div class="alert alert-success">
+              ✅ Profile updated successfully!
+            </div>
+          <% } %>
 
-<!-- Success Message for Password Change -->
-<% if (typeof passwordChanged !== 'undefined' && passwordChanged === '1') { %>
-  <div class="alert alert-success">
-    ✅ Password changed successfully!
-  </div>
-<% } %>
-    <h2 class="title">👤 <%= user.firstName %> <%= user.lastName %>!</h2>
+          <!-- Success Message for Password Change -->
+          <% if (typeof passwordChanged !== 'undefined' && passwordChanged === '1') { %>
+            <div class="alert alert-success">
+              ✅ Password changed successfully!
+            </div>
+          <% } %>
 
-    <!-- Success Message for Password Change -->
-    <% if (typeof passwordChanged !== 'undefined' && passwordChanged === '1') { %>
-      <div class="alert alert-success">
-        ✅ Password changed successfully!
+          <div class="profile-header">
+            <a href="/users/dashboard" class="back">Go Back</a>
+            <h2 class="title">👤 <%= user.firstName %> <%= user.lastName %></h2>
+          </div>
+
+          <div class="profile-content">
+            <!-- LEFT COLUMN: Profile Info -->
+            <div class="left-column">
+              <div class="avatar-box">
+                <img 
+                  src="<%= user.profileImage || '/uploads/default-avatar.png' %>" 
+                  alt="Profile Picture"
+                  class="avatar-preview"
+                >
+              </div>
+
+              <!-- PROFILE DETAILS -->
+              <div class="profile-details">
+                <p><strong>User ID:</strong> <%= user.userId %></p>
+                <p><strong>Email:</strong> <%= user.email %></p>
+                <p><strong>Role:</strong> <%= user.role %></p>
+                <p><strong>Status:</strong> ✅ Active</p>
+                <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Address & Actions -->
+            <div class="right-column">
+              <!-- ADDRESS INFORMATION -->
+              <div class="address-section">
+                <h3 class="section-title">📍 Address Information</h3>
+                <div class="address-details">
+                  <% if (user.address || user.city || user.province || user.zip || user.phone) { %>
+                    <% if (user.address) { %>
+                      <div class="address-item">
+                        <strong>Address:</strong> <%= user.address %>
+                      </div>
+                    <% } %>
+                    
+                    <% if (user.city || user.province || user.zip) { %>
+                      <div class="address-item">
+                        <strong>Location:</strong> 
+                        <%= [user.city, user.province, user.zip].filter(Boolean).join(', ') %>
+                      </div>
+                    <% } %>
+                    
+                    <% if (user.phone) { %>
+                      <div class="address-item">
+                        <strong>Phone:</strong> <%= user.phone %>
+                      </div>
+                    <% } %>
+                  <% } else { %>
+                    <div class="no-address">
+                      <p>📝 No address information added yet</p>
+                      <small>Add your address in the edit profile section</small>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- ACTION BUTTONS -->
+              <div class="profile-actions">
+                <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
+
+                <% if (user.role === 'admin') { %>
+                  <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
+                <% } %>
+
+                <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    <% } %>
-
-    <a href="/users/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
-
-    <!-- PROFILE PICTURE -->
-    <div class="avatar-box">
-      <img 
-        src="<%= user.profileImage || '/uploads/default-avatar.png' %>" 
-        alt="Profile Picture"
-        class="avatar-preview"
-      >
     </div>
-
-    <!-- PROFILE DETAILS -->
-    <div class="profile-details">
-      <p><strong>User ID:</strong> <%= user.userId %></p>
-      <p><strong>Email:</strong> <%= user.email %></p>
-      <p><strong>Role:</strong> <%= user.role %></p>
-      <p><strong>Status:</strong> ✅ Active</p>
-      <p><strong>Email Verified:</strong> <%= user.isEmailVerified ? "✅ Yes" : "❌ No" %></p>
-    </div>
-
-    <!-- ADDRESS INFORMATION - ADD THIS SECTION -->
-<div class="address-section">
-  <h3 class="section-title">📍 Address Information</h3>
-  <div class="address-details">
-    <% if (user.address || user.city || user.province || user.zip || user.phone) { %>
-      <% if (user.address) { %>
-        <div class="address-item">
-          <strong>Address:</strong> <%= user.address %>
-        </div>
-      <% } %>
-      
-      <% if (user.city || user.province || user.zip) { %>
-        <div class="address-item">
-          <strong>Location:</strong> 
-          <%= [user.city, user.province, user.zip].filter(Boolean).join(', ') %>
-        </div>
-      <% } %>
-      
-      <% if (user.phone) { %>
-        <div class="address-item">
-          <strong>Phone:</strong> <%= user.phone %>
-        </div>
-      <% } %>
-    <% } else { %>
-      <div class="no-address">
-        <p>📝 No address information added yet</p>
-        <small>Add your address in the edit profile section</small>
-      </div>
-    <% } %>
   </div>
-</div>
 
-    <!-- ACTION BUTTONS -->
-    <div class="profile-actions">
-      <a href="/users/edit-user/<%= user.userId %>" class="btn btn-primary">✏️ Edit Profile</a>
+  <!-- Sidebar JavaScript -->
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
 
-      <% if (user.role === 'admin') { %>
-        <a href="/users/admin" class="btn btn-secondary">🛠 Admin Dashboard</a>
-      <% } %>
+    console.log('Sidebar elements check:', {
+      sidebar: sidebar ? 'Found' : 'Missing',
+      menuToggle: menuToggle ? 'Found' : 'Missing',
+      mainContent: mainContent ? 'Found' : 'Missing'
+    });
 
-      <a href="/users/logout" class="btn btn-danger">🚪 Logout</a>
-    </div>
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
+      } else {
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
+      }
+    }
 
-  </div>
-</div>
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+      
+      console.log('Menu toggled. Hidden:', isHidden);
+    }
 
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
 </body>
 </html>

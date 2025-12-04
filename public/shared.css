@@ -1,0 +1,353 @@
+/* ================================
+   SHARED CSS - SIDEBAR & LAYOUT ONLY
+   ================================ */
+
+:root {
+  --sidebar-width: 250px;
+  --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+  --glass-light: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --accent-blue: #4cc9f0;
+  --accent-green: #4fe8b0;
+  --accent-purple: #9d4edd;
+  --text-light: #e5e9f0;
+  --text-muted: #9aa3b2;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --danger-red: #ff6b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-gradient);
+  font-family: "Inter", Arial, sans-serif;
+  color: var(--text-light);
+  overflow-x: hidden;
+}
+
+/* ================================
+   CUSTOM SCROLLBAR
+   ================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(6px);
+  border-radius: 10px;
+}
+
+/* ================================
+   APP LAYOUT
+   ================================ */
+
+.app {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ================================
+   SIDEBAR - FROM DASHBOARD.CSS
+   ================================ */
+
+.sidebar {
+  width: 311px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid var(--glass-border);
+  padding: 30px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 30;
+  transition: transform 0.3s ease;
+  box-shadow: 4px 0 22px rgba(0, 0, 0, 0.45);
+}
+
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+.sidebar h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: var(--accent-blue);
+  text-shadow: 0 0 15px #4cc9f0aa;
+  text-align: center;
+}
+
+.sidebar h3 {
+  color: var(--accent-green);
+  margin: 25px 0 15px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sidebar a {
+  display: block;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.sidebar a:hover {
+  background: rgba(76, 201, 240, 0.2);
+  border-color: var(--accent-blue);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(76, 201, 240, 0.3);
+}
+
+/* ================================
+   MENU TOGGLE BUTTON - FIXED POSITION
+   ================================ */
+
+.menu-toggle {
+  position: fixed;
+  top: 20px;
+  left: 270px; /* 250px sidebar width + 20px margin */
+  z-index: 1000;
+  padding: 12px 16px;
+  background: rgba(76, 201, 240, 0.2);
+  color: white;
+  border: 1px solid var(--accent-blue);
+  border-radius: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+}
+
+.menu-toggle:hover {
+  background: rgba(76, 201, 240, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+}
+
+.menu-toggle.shift-left {
+  left: 20px;
+}
+/* ================================
+   MAIN CONTENT AREA
+   ================================ */
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 40px;
+  width: calc(100% - var(--sidebar-width));
+  min-height: 100vh;
+  position: relative;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.hidden + .main-content {
+  margin-left: 0;
+  width: 100%;
+}
+
+/* ================================
+   BASIC BUTTONS (for sidebar links)
+   ================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: rgba(76, 201, 240, 0.2);
+  color: var(--text-light);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+}
+
+.btn-primary:hover {
+  background: rgba(76, 201, 240, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(76, 201, 240, 0.5);
+}
+
+.btn-secondary {
+  background: rgba(157, 78, 221, 0.2);
+  color: var(--text-light);
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(157, 78, 221, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 250px;
+    padding: 20px;
+  }
+  
+  .main-content {
+    padding: 20px;
+  }
+  
+  .menu-toggle {
+    top: 15px;
+    left: calc(var(--sidebar-width) + 15px);
+  }
+  
+  .menu-toggle.shift-left {
+    left: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 220px;
+  }
+  
+  .main-content {
+    padding: 15px;
+  }
+}
+/* ================================
+   MAIN CONTENT AREA
+   ================================ */
+
+/* Update these styles to target the ID, not the class */
+#mainContent {
+  margin-left: var(--sidebar-width);
+  padding: 40px;
+  width: calc(100% - var(--sidebar-width));
+  min-height: 100vh;
+  position: relative;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.hidden ~ #mainContent {
+  margin-left: 0;
+  width: 100%;
+  padding: 40px; /* Keep consistent padding */
+}
+
+/* Also update the sibling selector to use ID */
+.sidebar.hidden + #mainContent {
+  margin-left: 0;
+  width: 100%;
+}
+/* ================================
+   DASHBOARD TITLE LINK
+   ================================ */
+.dashboard-title {
+  display: block;
+  text-decoration: none;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.dashboard-title h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--accent-blue);
+  text-shadow: 0 0 15px #4cc9f0aa;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.dashboard-title:hover {
+  transform: translateY(-2px);
+}
+
+.dashboard-title:hover h2 {
+  color: #fff;
+  text-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
+}
+/* ================================
+   ACTIVE MENU ITEM - HOVER EFFECT STAYS
+   ================================ */
+
+.sidebar a.active {
+  background: rgba(76, 201, 240, 0.25) !important;
+  border-color: var(--accent-blue) !important;
+  color: #fff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 0 20px rgba(76, 201, 240, 0.4) !important;
+  position: relative;
+}
+
+/* Optional: Add a subtle animation pulse for active items */
+.sidebar a.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
+  animation: pulseGlow 2s infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(76, 201, 240, 0.8);
+    opacity: 0.8;
+  }
+}
+
+/* Make sure the active state overrides hover */
+.sidebar a.active:hover {
+  background: rgba(76, 201, 240, 0.3) !important;
+  border-color: var(--accent-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 0 25px rgba(76, 201, 240, 0.5) !important;
+}

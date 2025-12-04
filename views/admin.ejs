@@ -16,7 +16,7 @@
     </div>
 
     <div class="admin-container">
-        <a href="/users/profile" class="btn btn-back">⬅ Back to Profile</a>
+         <a href="javascript:history.back()" class="btn btn-back">Go Back</a>
 
       <h1 class="admin-title">🛠 Admin Dashboard</h1>
       <p class="admin-welcome">Welcome, <strong><%= currentUser.firstName %></strong> 
@@ -57,7 +57,13 @@
 
       <!-- Users Table -->
       <div class="table-wrapper">
-        <h3 class="section-title">👥 User Management</h3>
+        <div class="table-header">
+          <h3 class="table-title">👥 User Management</h3>
+          <a href="/users/admin/users" class="table-btn">
+            Manage Users
+          </a>
+        </div>
+        
         <table class="admin-table">
           <thead>
             <tr>

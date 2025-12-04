@@ -140,6 +140,190 @@
   display: flex;
   justify-content: center; /* center horizontally */
 }
+/* Reactivation Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
 
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content h3 {
+    color: #e74c3c;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-content h3 i {
+    font-size: 1.5em;
+}
+
+.modal-content p {
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+/* Form actions in modal */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+/* Reactivation button in error message */
+.reactivation-btn {
+    background: var(--accent-blue, #3498db);
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 0.9em;
+}
+
+.reactivation-btn:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Better error message styling */
+.message.error {
+    background: #ffebee;
+    border-left: 4px solid #e74c3c;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.message.error .reactivation-btn {
+    margin-top: 10px;
+    display: inline-block;
+}
+/* Add to your existing login.css */
+
+/* Modal form styling */
+.modal-content .form-group {
+  margin-bottom: 20px;
+}
+
+.modal-content .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: bold;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: "Inter", Arial, sans-serif;
+  box-sizing: border-box;
+  resize: vertical;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group textarea:focus {
+  border-color: #4cc9f0;
+  box-shadow: 0 0 10px rgba(76, 201, 240, 0.6);
+  outline: none;
+}
+
+/* Modal buttons */
+.modal-content .btn-secondary {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.modal-content .btn-secondary:hover {
+  background: #7f8c8d;
+  transform: scale(1.05);
+}
+
+.modal-content .btn-primary {
+  background: #4cc9f0;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.modal-content .btn-primary:hover {
+  background: #72e0ff;
+  transform: scale(1.05);
+}
+
+/* Loading spinner */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
   

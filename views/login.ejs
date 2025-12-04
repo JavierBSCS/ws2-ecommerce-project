@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-<link rel="stylesheet" href="/login.css">
-  
+  <link rel="stylesheet" href="/login.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -16,6 +17,28 @@
   <div class="login-container">
 
     <h1 class="title">Login</h1>
+
+    <!-- Error Message Display -->
+    <% if (error) { %>
+      <div class="message error">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span style="flex: 1;"><%= error.replace(/<[^>]*>/g, '').replace(/⚠️\s*/, '') %></span>
+        </div>
+        
+        <% if (error.includes('inactive')) { %>
+          <div style="text-align: center; margin-top: 10px;">
+            <% const emailMatch = error.match(/showReactivationModal\('([^']+)'\)/); %>
+            <% if (emailMatch && emailMatch[1]) { %>
+              <button type="button" onclick="showReactivationModal('<%= emailMatch[1] %>')" 
+                      class="btn btn-secondary" style="margin-top: 10px; background: #4cc9f0; color: #000; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-user-check"></i> Request Reactivation
+              </button>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
 
     <% if (expired) { %>
       <div class="message expired">⚠️ Your session has expired. Please login again.</div>
@@ -58,5 +81,92 @@
   <!-- Turnstile Script -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
+  <!-- Reactivation Modal -->
+  <div id="reactivationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3><i class="fas fa-user-slash"></i> Account Inactive</h3>
+      <p>Your account has been deactivated. Would you like to request reactivation?</p>
+      
+      <form id="reactivationForm">
+        <div class="form-group">
+          <label for="reactivationEmail">Your Email</label>
+          <input type="email" id="reactivationEmail" name="email" required readonly>
+        </div>
+        
+        <div class="form-group">
+          <label for="reactivationReason">Reason for Reactivation (Optional)</label>
+          <textarea id="reactivationReason" name="reason" 
+                    placeholder="Please tell us why you'd like to reactivate your account..."
+                    rows="3"></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeReactivationModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Send Reactivation Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function showReactivationModal(email) {
+      document.getElementById('reactivationEmail').value = email;
+      document.getElementById('reactivationModal').style.display = 'flex';
+    }
+
+    function closeReactivationModal() {
+      document.getElementById('reactivationModal').style.display = 'none';
+      document.getElementById('reactivationForm').reset();
+    }
+
+    // Handle form submission
+    document.getElementById('reactivationForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('reactivationEmail').value;
+      const reason = document.getElementById('reactivationReason').value;
+      
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+      submitBtn.disabled = true;
+      
+      try {
+        const response = await fetch('/users/request-reactivation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, reason })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('✅ Reactivation request sent! Admin will review it shortly.');
+          closeReactivationModal();
+        } else {
+          alert('❌ ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Network error. Please try again.');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('reactivationModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeReactivationModal();
+      }
+    });
+  </script>
 </body>
 </html>

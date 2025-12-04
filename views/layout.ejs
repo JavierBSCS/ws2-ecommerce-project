@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title || 'Dashboard' %></title>
+  <link rel="stylesheet" href="/dashboard.css">
+  <link rel="stylesheet" href="/shared.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <h2>Dashboard</h2>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (currentUser && currentUser.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
+
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
+
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+      <!-- Page-specific content will go here -->
+      <%- body %>
+    </div>
+  </div>
+
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        mainContent.style.marginLeft = '0';
+        mainContent.style.width = '100%';
+      } else {
+        menuToggle.classList.remove('shift-left');
+        mainContent.style.marginLeft = '250px';
+        mainContent.style.width = 'calc(100% - 250px)';
+      }
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
+</body>
+</html>

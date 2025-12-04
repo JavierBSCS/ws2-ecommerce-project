@@ -5,180 +5,257 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Products</title>
   <link rel="stylesheet" href="/manageProducts.css">
-
+  <link rel="stylesheet" href="/shared.css">
 </head>
 
 <body>
-
-<div class="profile-container">
-  <!-- Home button outside container -->
-  <div class="back-btn">
-    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
-  </div>
-
-  <div class="container">
-    <a href="/users/admin" class="back">Go to Admin Dashboard</a>
-    <h2>
-      📦 Manage Products
-      <a href="/users/admin/products/add" class="add-btn">+ Add New Product</a>
-    </h2>
-    
-    <!-- Lesson 22: Success/Error Messages -->
-    <% if (message) { %>
-      <div style="padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid <%= message.type == 'success' ? 'green' : 'red' %>; background-color: <%= message.type == 'success' ? '#d4edda' : '#f8d7da' %>; color: <%= message.type == 'success' ? 'green' : 'red' %>;">
-        <%= message.text %>
-      </div>
-    <% } %>
-
-    <!-- Lesson 22: Search Form - Updated with Category Dropdown -->
-    <section class="filter-section">
-      <form class="filter-form" action="/users/admin/products" method="GET">
-        <div class="filter-group">
-          <label class="filter-label" for="searchName">Search by name</label>
-          <input 
-            class="filter-input"
-            type="text" 
-            id="searchName" 
-            name="searchName" 
-            value="<%= typeof searchName !== 'undefined' ? searchName : '' %>"
-            placeholder="Enter product name..."
-          >
-        </div>
-        
-        <div class="filter-group">
-          <label class="filter-label" for="searchCategory">Category</label>
-          <select 
-            class="filter-select"
-            id="searchCategory" 
-            name="searchCategory"
-          >
-            <option value="">All Categories</option>
-            <%
-              const categories = [
-                "Food", "Cars", "Electronics", "Clothes", "Accessories", "Home", "Sports", 
-                "Books", "Toys", "Beauty", "Fitness", "Health", "Office", "Pets", "Garden", 
-                "Music", "Jewelry", "Tools", "Appliances", "Gadgets", "Software", "Games", 
-                "Subscriptions", "Courses", "Services", "Beverages", "Snacks", "Fruits", 
-                "Vegetables", "Frozen", "Bakery"
-              ];
-              
-              const currentCategory = typeof searchCategory !== 'undefined' ? searchCategory : '';
-              
-              categories.forEach(cat => {
-                const isSelected = currentCategory === cat;
-            %>
-            <option value="<%= cat %>" <%= isSelected ? 'selected' : '' %>><%= cat %></option>
-            <% }); %>
-          </select>
-        </div>
-        
-        <div class="filter-actions">
-          <button type="submit" class="btn btn-primary">Search</button>
-          <a href="/users/admin/products" class="btn btn-secondary">Clear</a>
-        </div>
-      </form>
-    </section>
-
-    <div class="table-container">
-      <table>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th>Status</th>
-          <th>Description</th>
-          <th>Actions</th>
-        </tr>
-
-        <% products.forEach(p => { %>
-          <tr id="product-<%= p._id %>" class="<%= (highlightedProduct && highlightedProduct === p._id.toString()) ? 'highlighted-row' : '' %>">
-            <!-- Image -->
-            <td>
-              <% 
-                let img = (p.images && p.images.length > 0)
-                  ? p.images[0]
-                  : (p.imageUrl || "/placeholder.jpg");
-              %>
-              <img src="<%= img %>">
-            </td>
-
-            <!-- Name -->
-            <td><%= p.name %></td>
-
-            <!-- Category -->
-            <td><%= p.category || "General" %></td>
-
-            <!-- Price -->
-            <td>₱<%= p.price %></td>
-
-            <!-- Stock -->
-            <td><%= typeof p.stock === "number" ? p.stock : 0 %></td>
-
-            <!-- Status -->
-            <td>
-              <% if (p.status === "available") { %>
-                <span class="status-available">Available</span>
-              <% } else if (p.status === "unavailable") { %>
-                <span class="status-unavailable">Unavailable</span>
-              <% } else { %>
-                <span class="status-maintenance">Maintenance</span>
-              <% } %>
-            </td>
-
-            <!-- Description - SCROLLABLE -->
-            <td class="description-cell">
-              <div class="description-scroll">
-                <%= p.description || 'No description' %>
-              </div>
-            </td>
-
-            <!-- Actions -->
-            <td class="actions">
-              <a href="/users/admin/products/edit/<%= p._id %>" class="edit-btn">Edit</a>
-              <a href="/users/admin/products/delete/<%= p._id %>" class="delete-btn" onclick="return confirm('Delete this product?')">Delete</a>
-            </td>
-          </tr>
-        <% }) %>
-      </table>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (currentUser && currentUser.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products" class="active">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
     </div>
-  </div>
-</div>
+    
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
 
-<script>
-  // Auto-scroll to highlighted product and handle animation
-  document.addEventListener('DOMContentLoaded', function() {
-    <% if (typeof highlightedProduct !== 'undefined' && highlightedProduct) { %>
-      console.log('Looking for product:', '<%= highlightedProduct %>');
-      const highlightedRow = document.getElementById('product-<%= highlightedProduct %>');
-      if (highlightedRow) {
-        console.log('Found product row, scrolling and highlighting...');
+    <!-- MAIN CONTENT AREA - Everything goes INSIDE this div -->
+    <div class="profile-container" id="mainContent">
+      <div class="container">
+        <a href="javascript:history.back()" class="back">Go Back</a>
+        <h2 class="producth2">
+          📦 Manage Products
+          <a href="/users/admin/products/add" class="add-btn">+ Add New Product</a>
+        </h2>
         
-        // Scroll to the highlighted row
-        highlightedRow.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        });
+        <!-- Lesson 22: Success/Error Messages -->
+        <% if (message) { %>
+          <div style="padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid <%= message.type == 'success' ? 'green' : 'red' %>; background-color: <%= message.type == 'success' ? '#d4edda' : '#f8d7da' %>; color: <%= message.type == 'success' ? 'green' : 'red' %>;">
+            <%= message.text %>
+          </div>
+        <% } %>
 
-        // Remove highlight class after animation completes (2 seconds)
-        setTimeout(() => {
-          highlightedRow.classList.remove('highlighted-row');
-          console.log('Highlight removed');
+        <!-- Lesson 22: Search Form - Updated with Category Dropdown -->
+        <section class="filter-section">
+          <form class="filter-form" action="/users/admin/products" method="GET">
+            <div class="filter-group">
+              <label class="filter-label" for="searchName">Search by name</label>
+              <input 
+                class="filter-input"
+                type="text" 
+                id="searchName" 
+                name="searchName" 
+                value="<%= typeof searchName !== 'undefined' ? searchName : '' %>"
+                placeholder="Enter product name..."
+              >
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label" for="searchCategory">Category</label>
+              <select 
+                class="filter-select"
+                id="searchCategory" 
+                name="searchCategory"
+              >
+                <option value="">All Categories</option>
+                <%
+                  const categories = [
+                    "Food", "Cars", "Electronics", "Clothes", "Accessories", "Home", "Sports", 
+                    "Books", "Toys", "Beauty", "Fitness", "Health", "Office", "Pets", "Garden", 
+                    "Music", "Jewelry", "Tools", "Appliances", "Gadgets", "Software", "Games", 
+                    "Subscriptions", "Courses", "Services", "Beverages", "Snacks", "Fruits", 
+                    "Vegetables", "Frozen", "Bakery"
+                  ];
+                  
+                  const currentCategory = typeof searchCategory !== 'undefined' ? searchCategory : '';
+                  
+                  categories.forEach(cat => {
+                    const isSelected = currentCategory === cat;
+                %>
+                <option value="<%= cat %>" <%= isSelected ? 'selected' : '' %>><%= cat %></option>
+                <% }); %>
+              </select>
+            </div>
+            
+            <div class="filter-actions">
+              <button type="submit" class="btn btn-primary">Search</button>
+              <a href="/users/admin/products" class="btn btn-secondary">Clear</a>
+            </div>
+          </form>
+        </section>
+
+        <div class="table-container">
+          <table>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+
+            <% products.forEach(p => { %>
+              <tr id="product-<%= p._id %>" class="<%= (highlightedProduct && highlightedProduct === p._id.toString()) ? 'highlighted-row' : '' %>">
+                <!-- Image -->
+                <td>
+                  <% 
+                    let img = (p.images && p.images.length > 0)
+                      ? p.images[0]
+                      : (p.imageUrl || "/placeholder.jpg");
+                  %>
+                  <img src="<%= img %>">
+                </td>
+
+                <!-- Name -->
+                <td><%= p.name %></td>
+
+                <!-- Category -->
+                <td><%= p.category || "General" %></td>
+
+                <!-- Price -->
+                <td>₱<%= p.price %></td>
+
+                <!-- Stock -->
+                <td><%= typeof p.stock === "number" ? p.stock : 0 %></td>
+
+                <!-- Status -->
+                <td>
+                  <% if (p.status === "available") { %>
+                    <span class="status-available">Available</span>
+                  <% } else if (p.status === "unavailable") { %>
+                    <span class="status-unavailable">Unavailable</span>
+                  <% } else { %>
+                    <span class="status-maintenance">Maintenance</span>
+                  <% } %>
+                </td>
+
+                <!-- Description - SCROLLABLE -->
+                <td class="description-cell">
+                  <div class="description-scroll">
+                    <%= p.description || 'No description' %>
+                  </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="actions">
+                  <a href="/users/admin/products/edit/<%= p._id %>" class="edit-btn">Edit</a>
+                  <a href="/users/admin/products/delete/<%= p._id %>" class="delete-btn" onclick="return confirm('Delete this product?')">Delete</a>
+                </td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- END OF MAIN CONTENT -->
+  </div>
+
+  <script>
+    // Auto-scroll to highlighted product and handle animation
+    document.addEventListener('DOMContentLoaded', function() {
+      <% if (typeof highlightedProduct !== 'undefined' && highlightedProduct) { %>
+        console.log('Looking for product:', '<%= highlightedProduct %>');
+        const highlightedRow = document.getElementById('product-<%= highlightedProduct %>');
+        if (highlightedRow) {
+          console.log('Found product row, scrolling and highlighting...');
           
-          // Remove the highlight parameter from URL without reloading
-          const url = new URL(window.location);
-          url.searchParams.delete('highlight');
-          window.history.replaceState({}, '', url);
-        }, 2000);
+          // Scroll to the highlighted row
+          highlightedRow.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+
+          // Remove highlight class after animation completes (2 seconds)
+          setTimeout(() => {
+            highlightedRow.classList.remove('highlighted-row');
+            console.log('Highlight removed');
+            
+            // Remove the highlight parameter from URL without reloading
+            const url = new URL(window.location);
+            url.searchParams.delete('highlight');
+            window.history.replaceState({}, '', url);
+          }, 2000);
+        } else {
+          console.log('Product row not found with ID: product-<%= highlightedProduct %>');
+        }
+      <% } else { %>
+        console.log('No product to highlight');
+      <% } %>
+    });
+  </script>
+
+  <!-- Sidebar JavaScript -->
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    console.log('Sidebar elements check:', {
+      sidebar: sidebar ? 'Found' : 'Missing',
+      menuToggle: menuToggle ? 'Found' : 'Missing',
+      mainContent: mainContent ? 'Found' : 'Missing'
+    });
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
       } else {
-        console.log('Product row not found with ID: product-<%= highlightedProduct %>');
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
       }
-    <% } else { %>
-      console.log('No product to highlight');
-    <% } %>
-  });
-</script>
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+      
+      console.log('Menu toggled. Hidden:', isHidden);
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
 
 </body>
 </html>

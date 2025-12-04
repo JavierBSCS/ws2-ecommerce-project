@@ -4,195 +4,284 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
-    <link rel="stylesheet" href="/edit-user.css">
-
-
+  <link rel="stylesheet" href="/edit-user.css">
+  <link rel="stylesheet" href="/shared.css">
 </head>
 
 <body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (user && user.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
 
-<div class="profile-container">
-  <!-- Home button outside container -->
-  <div class="back-btn">
-    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
-  </div>
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
 
-  <div class="container">
-    <h2>📝 Edit Profile</h2>
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+      <div class="profile-container">
+        <div class="container">
+          <a href="/users/profile" class="btn btn-secondary">← Back to Profile</a>
+          <h2>📝 Edit Profile</h2>
 
-    <!-- Success/Error Messages -->
-    <% if (typeof alert !== 'undefined') { %>
-      <div class="alert alert-success">
-        <%= alert %>
-      </div>
-    <% } %>
+          <!-- Success/Error Messages -->
+          <% if (typeof alert !== 'undefined') { %>
+            <div class="alert alert-success">
+              <%= alert %>
+            </div>
+          <% } %>
 
-    <a href="/users/profile" class="btn btn-secondary">← Back to Profile</a>
+          <div class="edit-profile-content">
 
-    <!-- PROFILE UPDATE FORM -->
-    <form action="/users/edit-user/<%= user.userId %>" method="POST" enctype="multipart/form-data">
+            <!-- LEFT COLUMN: Profile Update Form -->
+            <div class="left-column">
+              <div class="form-section">
+                <!-- PROFILE UPDATE FORM -->
+                <form action="/users/edit-user/<%= user.userId %>" method="POST" enctype="multipart/form-data">
+                  
+                  <!-- AVATAR SECTION - NOW INSIDE THE FORM -->
+                  <div class="avatar-box">
+                    <% const avatar = user.profileImage || "/uploads/default-avatar.png"; %>
+                    <img src="<%= avatar %>" id="avatarPreview" class="avatar-preview" />
+                    <div>
+                      <input type="file" name="avatar" id="avatarInput" accept="image/*" class="file-input" />
+                      <p class="file-info">Max 5MB • JPG / PNG / GIF</p>
+                    </div>
+                  </div>
 
-      <!-- AVATAR -->
-      <div class="avatar-box">
-        <% const avatar = user.profileImage || "/uploads/default-avatar.png"; %>
-        <img src="<%= avatar %>" id="avatarPreview" class="avatar-preview" />
-        <div>
-          <input type="file" name="avatar" id="avatarInput" accept="image/*" class="file-input" />
-          <p class="file-info">Max 5MB • JPG / PNG / GIF</p>
+                  <!-- PERSONAL INFO -->
+                  <h3 class="sub-section-title">👤 Personal Information</h3>
+                  
+                  <label>First Name</label>
+                  <input type="text" name="firstName" value="<%= user.firstName %>" placeholder="Enter first name" required>
+
+                  <label>Last Name</label>
+                  <input type="text" name="lastName" value="<%= user.lastName %>" placeholder="Enter last name" required>
+
+                  <label>Email</label>
+                  <input type="email" value="<%= user.email %>" readonly placeholder="Email address">
+
+                  <!-- ADDRESS -->
+                  <h3 class="sub-section-title">📍 Address Information</h3>
+
+                  <label>Full Address</label>
+                  <input type="text" name="address" value="<%= user.address || '' %>" placeholder="Street address">
+
+                  <label>Province</label>
+                  <input type="text" name="province" value="<%= user.province || '' %>" placeholder="Province/State">
+
+                  <label>City</label>
+                  <input type="text" name="city" value="<%= user.city || '' %>" placeholder="City">
+
+                  <label>ZIP Code</label>
+                  <input type="text" name="zip" value="<%= user.zip || '' %>" placeholder="Postal/ZIP code">
+
+                  <label>Phone Number</label>
+                  <input type="text" name="phone" value="<%= user.phone || '' %>" placeholder="Phone number">
+
+                  <button type="submit">💾 Save Profile</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Password Change -->
+            <div class="right-column">
+              <div class="form-section">
+                <!-- PASSWORD SECTION -->
+                <h3 class="sub-section-title">🔐 Change Password</h3>
+
+                <form action="/users/change-password/<%= user.userId %>" method="POST" id="passwordForm">
+                  <label>Old Password</label>
+                  <input type="password" name="oldPassword" id="oldPassword" placeholder="Enter current password" required>
+
+                  <label>New Password</label>
+                  <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
+                  <div class="password-strength" id="passwordStrength">
+                    Password must be at least 8 characters long
+                  </div>
+
+                  <label>Confirm New Password</label>
+                  <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
+                  <div class="password-match" id="passwordMatch"></div>
+
+                  <button type="submit" class="btn-secondary" style="width: 100%; margin-top: 10px;">
+                    🔑 Update Password
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- PERSONAL INFO -->
-      <label>First Name</label>
-      <input type="text" name="firstName" value="<%= user.firstName %>" placeholder="Enter first name" required>
-
-      <label>Last Name</label>
-      <input type="text" name="lastName" value="<%= user.lastName %>" placeholder="Enter last name" required>
-
-      <label>Email</label>
-      <input type="email" value="<%= user.email %>" readonly placeholder="Email address">
-
-      <!-- ADDRESS -->
-      <h3 class="sub-section-title">📍 Address Information</h3>
-
-      <label>Full Address</label>
-      <input type="text" name="address" value="<%= user.address || '' %>" placeholder="Street address">
-
-      <label>Province</label>
-      <input type="text" name="province" value="<%= user.province || '' %>" placeholder="Province/State">
-
-      <label>City</label>
-      <input type="text" name="city" value="<%= user.city || '' %>" placeholder="City">
-
-      <label>ZIP Code</label>
-      <input type="text" name="zip" value="<%= user.zip || '' %>" placeholder="Postal/ZIP code">
-
-      <label>Phone Number</label>
-      <input type="text" name="phone" value="<%= user.phone || '' %>" placeholder="Phone number">
-
-      <button type="submit">Save Profile</button>
-    </form>
-
-      <!-- PASSWORD SECTION -->
-      <h3 class="sub-section-title">🔐 Change Password</h3>
-
-      <form action="/users/change-password/<%= user.userId %>" method="POST" id="passwordForm">
-
-        <label>Old Password</label>
-        <input type="password" name="oldPassword" id="oldPassword" placeholder="Enter current password" required>
-
-        <label>New Password</label>
-        <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
-        <div class="password-strength" id="passwordStrength">
-          Password must be at least 8 characters long
-        </div>
-
-        <label>Confirm New Password</label>
-        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
-        <div class="password-match" id="passwordMatch"></div>
-
-        <button type="submit" class="btn-secondary" style="width: 100%; margin-top: 10px;">
-          Update Password
-        </button>
-      </form>
+    </div>
   </div>
-</div>
 
-<script>
-  // Avatar preview
-  const fileInput = document.getElementById("avatarInput");
-  const preview = document.getElementById("avatarPreview");
+  <script>
+    // Avatar preview
+    const fileInput = document.getElementById("avatarInput");
+    const preview = document.getElementById("avatarPreview");
 
-  fileInput?.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    
-    // Check file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
-      fileInput.value = '';
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = e => preview.src = e.target.result;
-    reader.readAsDataURL(file);
-  });
+    fileInput?.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        fileInput.value = '';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = e => preview.src = e.target.result;
+      reader.readAsDataURL(file);
+    });
 
-  // Password validation
-  const passwordForm = document.getElementById('passwordForm');
-  const newPassword = document.getElementById('newPassword');
-  const confirmPassword = document.getElementById('confirmPassword');
-  const passwordStrength = document.getElementById('passwordStrength');
-  const passwordMatch = document.getElementById('passwordMatch');
+    // Password validation
+    const passwordForm = document.getElementById('passwordForm');
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const passwordMatch = document.getElementById('passwordMatch');
 
-  function validatePassword() {
-    const password = newPassword.value;
-    
-    // Check length
-    if (password.length >= 8) {
-      passwordStrength.textContent = '✓ Password length is good';
-      passwordStrength.className = 'password-strength valid';
-    } else {
-      passwordStrength.textContent = 'Password must be at least 8 characters long';
-      passwordStrength.className = 'password-strength invalid';
+    function validatePassword() {
+      const password = newPassword.value;
+      
+      // Check length
+      if (password.length >= 8) {
+        passwordStrength.textContent = '✓ Password length is good';
+        passwordStrength.className = 'password-strength valid';
+      } else {
+        passwordStrength.textContent = 'Password must be at least 8 characters long';
+        passwordStrength.className = 'password-strength invalid';
+      }
+      
+      validatePasswordMatch();
     }
-    
-    validatePasswordMatch();
-  }
 
-  function validatePasswordMatch() {
-    const confirm = confirmPassword.value;
-    const password = newPassword.value;
-    
-    if (confirm === '') {
-      passwordMatch.textContent = '';
-      passwordMatch.className = 'password-match';
-      return;
+    function validatePasswordMatch() {
+      const confirm = confirmPassword.value;
+      const password = newPassword.value;
+      
+      if (confirm === '') {
+        passwordMatch.textContent = '';
+        passwordMatch.className = 'password-match';
+        return;
+      }
+      
+      if (confirm === password) {
+        passwordMatch.textContent = '✓ Passwords match';
+        passwordMatch.className = 'password-match valid';
+      } else {
+        passwordMatch.textContent = '✗ Passwords do not match';
+        passwordMatch.className = 'password-match invalid';
+      }
     }
-    
-    if (confirm === password) {
-      passwordMatch.textContent = '✓ Passwords match';
-      passwordMatch.className = 'password-match valid';
-    } else {
-      passwordMatch.textContent = '✗ Passwords do not match';
-      passwordMatch.className = 'password-match invalid';
-    }
-  }
 
-  function validateForm() {
-    const password = newPassword.value;
-    const confirm = confirmPassword.value;
-    const oldPass = document.getElementById('oldPassword').value;
-    
-    if (!oldPass) {
-      alert('Please enter your current password');
-      return false;
+    function validateForm() {
+      const password = newPassword.value;
+      const confirm = confirmPassword.value;
+      const oldPass = document.getElementById('oldPassword').value;
+      
+      if (!oldPass) {
+        alert('Please enter your current password');
+        return false;
+      }
+      
+      if (password.length < 8) {
+        alert('Password must be at least 8 characters long');
+        return false;
+      }
+      
+      if (password !== confirm) {
+        alert('Passwords do not match');
+        return false;
+      }
+      
+      return true;
     }
-    
-    if (password.length < 8) {
-      alert('Password must be at least 8 characters long');
-      return false;
-    }
-    
-    if (password !== confirm) {
-      alert('Passwords do not match');
-      return false;
-    }
-    
-    return true;
-  }
 
-  // Event listeners
-  newPassword.addEventListener('input', validatePassword);
-  confirmPassword.addEventListener('input', validatePasswordMatch);
-  
-  passwordForm.addEventListener('submit', function(e) {
-    if (!validateForm()) {
-      e.preventDefault();
-    }
-  });
-</script>
+    // Event listeners
+    newPassword.addEventListener('input', validatePassword);
+    confirmPassword.addEventListener('input', validatePasswordMatch);
+    
+    passwordForm.addEventListener('submit', function(e) {
+      if (!validateForm()) {
+        e.preventDefault();
+      }
+    });
+  </script>
 
+  <!-- Sidebar JavaScript -->
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    console.log('Sidebar elements check:', {
+      sidebar: sidebar ? 'Found' : 'Missing',
+      menuToggle: menuToggle ? 'Found' : 'Missing',
+      mainContent: mainContent ? 'Found' : 'Missing'
+    });
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
+      } else {
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
+      }
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+      
+      console.log('Menu toggled. Hidden:', isHidden);
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
 </body>
 </html>

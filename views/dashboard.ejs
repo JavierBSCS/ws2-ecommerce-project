@@ -11,7 +11,8 @@
   <div class="app">
     <!-- Sidebar Menu -->
     <div class="sidebar" id="sidebar">
-      <h2>Dashboard</h2>
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
       <a href="/users/profile">👤 Profile</a>
       <a href="/users/orders/history">🛒 My Orders</a>
       <% if (currentUser && currentUser.role === "admin") { %>
@@ -19,6 +20,8 @@
         <a href="/users/admin/products/add">➕ Add Product</a>
         <a href="/users/admin/products">📦 Manage Products</a>
         <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
         <a href="/admin/reports/sales">📊 Sales Reports</a>
       <% } %>
       <a href="/users/logout">🚪 Logout</a>
@@ -66,12 +69,6 @@
         <h3>Cancelled</h3>
         <div class="count"><%= statusCounts.cancelled %></div>
       </div>
-    </div>
-
-    <!-- Quick Links -->
-    <div class="quick-links">
-      <a href="/users/profile" class="btn btn-primary">👤 Edit Profile</a>
-      <a href="/users/orders/history" class="btn btn-secondary">📦 View Purchase History</a>
     </div>
   </section>
 <% } %>
@@ -168,56 +165,62 @@
     </div>
   </div>
 
-  <script>
-    // Your existing JavaScript code...
-    const sidebar = document.getElementById('sidebar');
-    const menuToggle = document.getElementById('menuToggle');
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const menuToggle = document.getElementById('menuToggle');
+  const mainContent = document.getElementById('mainContent');
 
-    function updateTogglePosition() {
-      if (sidebar.classList.contains('hidden')) {
-        menuToggle.classList.add('shift-left');
-      } else {
-        menuToggle.classList.remove('shift-left');
-      }
+  function updateTogglePosition() {
+    if (sidebar.classList.contains('hidden')) {
+      menuToggle.classList.add('shift-left');
+      mainContent.style.marginLeft = '0';
+      mainContent.style.width = '100%';
+    } else {
+      menuToggle.classList.remove('shift-left');
+      mainContent.style.marginLeft = '250px';
+      mainContent.style.width = 'calc(100% - 250px)';
     }
+  }
 
-    function toggleMenu() {
-      sidebar.classList.toggle('hidden');
-      updateTogglePosition();
-    }
-
-    menuToggle.addEventListener('click', toggleMenu);
+  function toggleMenu() {
+    sidebar.classList.toggle('hidden');
     updateTogglePosition();
+  }
 
-    // Filter functionality
-    const searchInput = document.getElementById("searchInput");
-    const categoryFilter = document.getElementById("categoryFilter");
-    const statusFilter = document.getElementById("statusFilter");
-    const cards = document.querySelectorAll(".product-card");
+  menuToggle.addEventListener('click', toggleMenu);
+  
+  // Initialize positions
+  updateTogglePosition();
 
-    function applyFilters() {
-      const search = searchInput.value.toLowerCase();
-      const category = categoryFilter.value;
-      const status = statusFilter.value.toLowerCase();
+  // Filter functionality
+  const searchInput = document.getElementById("searchInput");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const statusFilter = document.getElementById("statusFilter");
+  const cards = document.querySelectorAll(".product-card");
 
-      cards.forEach(card => {
-        const name = card.querySelector("h3").innerText.toLowerCase();
-        const cat = card.querySelector(".category-text").innerText.trim();
-        const stat = card.querySelector(".status-badge")?.innerText.trim().toLowerCase();
+  function applyFilters() {
+    const search = searchInput.value.toLowerCase();
+    const category = categoryFilter.value;
+    const status = statusFilter.value.toLowerCase();
 
-        let match = true;
+    cards.forEach(card => {
+      const name = card.querySelector("h3").innerText.toLowerCase();
+      const cat = card.querySelector(".category-text").innerText.trim();
+      const stat = card.querySelector(".status-badge")?.innerText.trim().toLowerCase();
 
-        if (search && !name.includes(search)) match = false;
-        if (category && category !== cat) match = false;
-        if (status && status !== stat) match = false;
+      let match = true;
 
-        card.style.display = match ? "" : "none";
-      });
-    }
+      if (search && !name.includes(search)) match = false;
+      if (category && category !== cat) match = false;
+      if (status && status !== stat) match = false;
 
-    searchInput.addEventListener("input", applyFilters);
-    categoryFilter.addEventListener("change", applyFilters);
-    statusFilter.addEventListener("change", applyFilters);
-  </script>
+      card.style.display = match ? "" : "none";
+    });
+  }
+
+  searchInput.addEventListener("input", applyFilters);
+  categoryFilter.addEventListener("change", applyFilters);
+  statusFilter.addEventListener("change", applyFilters);
+</script>
 </body>
 </html>

@@ -179,6 +179,282 @@ router.post(
 );
 
 // =======================================================================
+//  ADMIN: MANAGE USERS (GET)
+// =======================================================================
+router.get("/admin/users", requireLogin, async (req, res) => {
+    if (req.session.user.role !== "admin")
+        return res.status(403).send("Access denied.");
+
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const usersCollection = db.collection("users");
+        
+        // Search filters
+        const searchName = (req.query.searchName || "").trim();
+        const searchRole = (req.query.searchRole || "").trim();
+        const searchStatus = (req.query.searchStatus || "").trim();
+        
+        const query = {};
+        
+        // Name search (search in firstName and lastName)
+        if (searchName) {
+            query.$or = [
+                { firstName: { $regex: searchName, $options: "i" } },
+                { lastName: { $regex: searchName, $options: "i" } },
+                { email: { $regex: searchName, $options: "i" } }
+            ];
+        }
+        
+        // Role filter
+        if (searchRole) {
+            query.role = searchRole;
+        }
+        
+        // Status filter
+        if (searchStatus) {
+            if (searchStatus === "active") {
+                query.accountStatus = "active";
+            } else if (searchStatus === "inactive") {
+                query.accountStatus = "inactive";
+            } else if (searchStatus === "verified") {
+                query.isEmailVerified = true;
+            } else if (searchStatus === "unverified") {
+                query.isEmailVerified = false;
+            }
+        }
+
+        const users = await usersCollection
+            .find(query)
+            .sort({ createdAt: -1 })
+            .toArray();
+
+        // Calculate stats
+        const stats = {
+            total: users.length,
+            admin: users.filter(u => u.role === "admin").length,
+            customer: users.filter(u => u.role === "customer").length,
+            active: users.filter(u => u.accountStatus === "active").length,
+            inactive: users.filter(u => u.accountStatus === "inactive").length,
+            verified: users.filter(u => u.isEmailVerified).length,
+            unverified: users.filter(u => !u.isEmailVerified).length
+        };
+
+        // Success messages
+        const success = req.query.success;
+        const action = req.query.action;
+        let message = null;
+        
+        if (success == "1" && action == "updated") {
+            message = {
+                type: "success",
+                text: "User updated successfully."
+            };
+        } else if (success == "1" && action == "deleted") {
+            message = {
+                type: "success",
+                text: "User deleted successfully."
+            };
+        } else if (success == "1" && action == "status") {
+            message = {
+                type: "success",
+                text: "User status updated successfully."
+            };
+        }
+
+        res.render("admin/manageUsers", {
+            title: "Manage Users",
+            users,
+            currentUser: req.session.user,
+            stats,
+            message,
+            searchName,
+            searchRole,
+            searchStatus,
+            highlightedUser: req.query.highlight || null
+        });
+
+    } catch (err) {
+        console.error("❌ Manage users error:", err);
+        res.status(500).send("Error loading users.");
+    }
+});
+
+// =======================================================================
+//  ADMIN: EDIT USER (GET)
+// =======================================================================
+router.get("/admin/users/edit/:userId", requireLogin, async (req, res) => {
+    if (req.session.user.role !== "admin")
+        return res.status(403).send("Access denied.");
+
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const usersCollection = db.collection("users");
+
+        const user = await usersCollection.findOne({ 
+            userId: req.params.userId 
+        });
+
+        if (!user) return res.status(404).send("User not found.");
+
+        // List of available roles
+        const availableRoles = ["customer", "admin"];
+        
+        // List of account statuses
+        const accountStatuses = ["active", "inactive"];
+
+        res.render("admin/editUser", {
+            title: "Edit User",
+            user,
+            currentUser: req.session.user,
+            availableRoles,
+            accountStatuses,
+            errors: [],
+            formData: {}
+        });
+
+    } catch (err) {
+        console.error("❌ Edit user error:", err);
+        res.status(500).send("Error loading user.");
+    }
+});
+
+// =======================================================================
+//  ADMIN: EDIT USER (POST)
+// =======================================================================
+router.post("/admin/users/edit/:userId", requireLogin, async (req, res) => {
+    if (req.session.user.role !== "admin")
+        return res.status(403).send("Access denied.");
+
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const usersCollection = db.collection("users");
+
+        const { 
+            firstName, 
+            lastName, 
+            email, 
+            role, 
+            accountStatus,
+            phone,
+            address,
+            city,
+            province,
+            zip 
+        } = req.body;
+
+        // Validation
+        const errors = [];
+        
+        if (!firstName?.trim()) errors.push("First name is required.");
+        if (!lastName?.trim()) errors.push("Last name is required.");
+        if (!email?.trim()) errors.push("Email is required.");
+        
+        // Check if email is already taken by another user
+        const existingUser = await usersCollection.findOne({ 
+            email: email.trim(),
+            userId: { $ne: req.params.userId }
+        });
+        
+        if (existingUser) {
+            errors.push("Email is already in use by another account.");
+        }
+
+        if (errors.length > 0) {
+            const user = await usersCollection.findOne({ 
+                userId: req.params.userId 
+            });
+            
+            return res.render("admin/editUser", {
+                title: "Edit User",
+                user,
+                currentUser: req.session.user,
+                availableRoles: ["customer", "admin"],
+                accountStatuses: ["active", "inactive"],
+                errors,
+                formData: req.body
+            });
+        }
+
+        // Update user
+        const updateData = {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            role: role || "customer",
+            accountStatus: accountStatus || "active",
+            phone: phone?.trim() || "",
+            address: address?.trim() || "",
+            city: city?.trim() || "",
+            province: province?.trim() || "",
+            zip: zip?.trim() || "",
+            updatedAt: new Date()
+        };
+
+        // Update password only if provided
+        if (req.body.password && req.body.password.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(req.body.password.trim(), saltRounds);
+            updateData.passwordHash = hashedPassword;
+        }
+
+        await usersCollection.updateOne(
+            { userId: req.params.userId },
+            { $set: updateData }
+        );
+
+        // Redirect with success message
+        res.redirect(`/users/admin/users?success=1&action=updated&highlight=${req.params.userId}`);
+
+    } catch (err) {
+        console.error("❌ Update user error:", err);
+        res.status(500).send("Error updating user.");
+    }
+});
+
+// =======================================================================
+//  ADMIN: DELETE USER (GET)
+// =======================================================================
+router.get("/admin/users/delete/:userId", requireLogin, async (req, res) => {
+    if (req.session.user.role !== "admin")
+        return res.status(403).send("Access denied.");
+
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const usersCollection = db.collection("users");
+        const ordersCollection = db.collection("orders");
+
+        const userId = req.params.userId;
+
+        // Prevent admin from deleting themselves
+        if (userId === req.session.user.userId) {
+            return res.redirect("/users/admin/users?error=cannot_delete_self");
+        }
+
+        // Check if user has orders
+        const userOrders = await ordersCollection.findOne({ userId });
+        
+        if (userOrders) {
+            // User has orders, we'll just deactivate instead of delete
+            await usersCollection.updateOne(
+                { userId },
+                { $set: { accountStatus: "inactive", updatedAt: new Date() } }
+            );
+            
+            return res.redirect("/users/admin/users?success=1&action=status&highlight=" + userId);
+        } else {
+            // User has no orders, safe to delete
+            await usersCollection.deleteOne({ userId });
+            return res.redirect("/users/admin/users?success=1&action=deleted");
+        }
+
+    } catch (err) {
+        console.error("❌ Delete user error:", err);
+        res.status(500).send("Error deleting user.");
+    }
+});
+
+
+
+// =======================================================================
 //  CHANGE PASSWORD (POST)
 // =======================================================================
 router.post("/change-password/:userId", requireLogin, async (req, res) => {
@@ -369,7 +645,7 @@ router.get("/login", (req, res) => {
 
 
 // =======================================================================
-//  LOGIN (POST)
+//  LOGIN (POST) - UPDATED WITH REACTIVATION
 // =======================================================================
 router.post("/login", async (req, res) => {
   try {
@@ -395,8 +671,32 @@ router.post("/login", async (req, res) => {
 
     if (!user) return res.send("❌ User not found.");
     if (!user.isEmailVerified) return res.send("📧 Verify email first.");
-    if (user.accountStatus !== "active")
-      return res.send("⚠️ Account inactive.");
+    
+    // CHECK IF ACCOUNT IS INACTIVE
+    if (user.accountStatus !== "active") {
+      // Return JSON for AJAX handling or render page with modal trigger
+      if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+        return res.json({ 
+          inactive: true, 
+          message: "Account inactive. Would you like to request reactivation?",
+          email: user.email 
+        });
+      }
+      
+      // Regular form submission - show reactivation option
+      return res.render("login", {
+        title: "Login",
+        error: `⚠️ Account inactive. <button type="button" onclick="showReactivationModal('${user.email}')" 
+                style="background: var(--accent-blue); color: white; border: none; padding: 5px 15px; 
+                border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                Request Reactivation</button>`,
+        expired: false,
+        logout: false,
+        reset: false,
+        verified: false,
+        registered: false,
+      });
+    }
 
     const isValid = await bcrypt.compare(
       req.body.password,
@@ -420,6 +720,786 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("❌ Login error:", err);
     res.send("Something went wrong.");
+  }
+});
+
+// =======================================================================
+//  REQUEST REACTIVATION (POST) - User requests account reactivation
+// =======================================================================
+router.post("/request-reactivation", async (req, res) => {
+  try {
+    const { email, reason } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Email is required." 
+      });
+    }
+
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const usersCollection = db.collection("users");
+    const reactivationCollection = db.collection("reactivation_requests");
+
+    // Check if user exists
+    const user = await usersCollection.findOne({ email });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found." 
+      });
+    }
+
+    // Check if account is already active
+    if (user.accountStatus === "active") {
+      return res.json({ 
+        success: false, 
+        message: "Account is already active." 
+      });
+    }
+
+    // Check for recent request (prevent spam)
+    const recentRequest = await reactivationCollection.findOne({
+      userId: user.userId,
+      createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Last 24 hours
+    });
+
+    if (recentRequest) {
+      return res.json({ 
+        success: false, 
+        message: "You already requested reactivation recently. Please wait 24 hours." 
+      });
+    }
+
+    // Create reactivation request
+    const requestId = uuidv4();
+    const reactivationRequest = {
+      requestId,
+      userId: user.userId,
+      userEmail: user.email,
+      userName: `${user.firstName} ${user.lastName}`,
+      reason: reason || "No reason provided",
+      status: "pending",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    await reactivationCollection.insertOne(reactivationRequest);
+
+    // Send email to admin
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+    const approveUrl = `${baseUrl}/users/admin/reactivation/approve/${requestId}`;
+    const rejectUrl = `${baseUrl}/users/admin/reactivation/reject/${requestId}`;
+
+    await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: process.env.ADMIN_EMAIL || "admin@yourstore.com", // Set this in .env
+      subject: `🔔 Reactivation Request: ${user.firstName} ${user.lastName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>📋 Reactivation Request</h2>
+          
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <p><strong>User:</strong> ${user.firstName} ${user.lastName}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Requested:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>Reason:</strong> ${reason || "No reason provided"}</p>
+          </div>
+          
+          <div style="margin: 30px 0;">
+            <a href="${approveUrl}" 
+               style="background: #4CAF50; color: white; padding: 12px 24px; 
+                      text-decoration: none; border-radius: 5px; margin-right: 10px;">
+              ✅ Approve & Activate
+            </a>
+            
+            <a href="${rejectUrl}" 
+               style="background: #f44336; color: white; padding: 12px 24px; 
+                      text-decoration: none; border-radius: 5px;">
+              ❌ Reject
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px;">
+            Or manage all requests at: ${baseUrl}/users/admin/reactivation-requests
+          </p>
+        </div>
+      `,
+    });
+
+    // Send confirmation email to user
+    await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: user.email,
+      subject: "✅ Reactivation Request Received",
+      html: `
+        <h2>Hello ${user.firstName},</h2>
+        <p>Your account reactivation request has been received.</p>
+        <p>Our admin team will review it shortly. You'll receive another email once a decision is made.</p>
+        <p><strong>Request ID:</strong> ${requestId}</p>
+        <p><strong>Request Time:</strong> ${new Date().toLocaleString()}</p>
+        ${reason ? `<p><strong>Your Reason:</strong> ${reason}</p>` : ''}
+        <p>Thank you for your patience.</p>
+      `,
+    });
+
+    res.json({ 
+      success: true, 
+      message: "Reactivation request sent! Check your email for confirmation." 
+    });
+
+  } catch (err) {
+    console.error("❌ Reactivation request error:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error. Please try again later." 
+    });
+  }
+});
+
+
+// =======================================================================
+//  ADMIN: APPROVE REACTIVATION (GET) - WITH REDIRECT
+// =======================================================================
+router.get("/admin/reactivation/approve/:requestId", async (req, res) => {
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const reactivationCollection = db.collection("reactivation_requests");
+    const usersCollection = db.collection("users");
+
+    const request = await reactivationCollection.findOne({ 
+      requestId: req.params.requestId 
+    });
+
+    if (!request) {
+      // Show error page if request not found
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Request Not Found</title>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin: 0;
+              padding: 20px;
+            }
+            .container {
+              background: white;
+              padding: 40px;
+              border-radius: 15px;
+              box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+              text-align: center;
+              max-width: 500px;
+              width: 100%;
+            }
+            .icon {
+              font-size: 80px;
+              margin-bottom: 20px;
+            }
+            .error { color: #f44336; }
+            h1 {
+              color: #333;
+              margin-bottom: 20px;
+            }
+            p {
+              color: #666;
+              line-height: 1.6;
+              margin-bottom: 30px;
+            }
+            .btn {
+              display: inline-block;
+              padding: 12px 30px;
+              background: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: bold;
+              transition: 0.3s;
+              border: none;
+              cursor: pointer;
+              font-size: 16px;
+            }
+            .btn:hover {
+              background: #5a67d8;
+              transform: translateY(-2px);
+            }
+            .btn-home {
+              background: #6c757d;
+              margin-left: 10px;
+            }
+            .btn-home:hover {
+              background: #5a6268;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon error">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1>Request Not Found</h1>
+            <p>The reactivation request you're trying to approve could not be found.</p>
+            <p>It may have already been processed or expired.</p>
+            <div style="margin-top: 30px;">
+              <a href="/users/login" class="btn">Go to Login</a>
+              <a href="/" class="btn btn-home">Go to Homepage</a>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    // Check if already processed
+    if (request.status !== "pending") {
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Already Processed</title>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin: 0;
+              padding: 20px;
+            }
+            .container {
+              background: white;
+              padding: 40px;
+              border-radius: 15px;
+              box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+              text-align: center;
+              max-width: 500px;
+              width: 100%;
+            }
+            .icon {
+              font-size: 80px;
+              margin-bottom: 20px;
+            }
+            .info { color: #2196F3; }
+            h1 {
+              color: #333;
+              margin-bottom: 20px;
+            }
+            p {
+              color: #666;
+              line-height: 1.6;
+              margin-bottom: 30px;
+            }
+            .user-info {
+              background: #f5f5f5;
+              padding: 20px;
+              border-radius: 10px;
+              margin: 20px 0;
+              text-align: left;
+            }
+            .btn {
+              display: inline-block;
+              padding: 12px 30px;
+              background: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: bold;
+              transition: 0.3s;
+              border: none;
+              cursor: pointer;
+              font-size: 16px;
+            }
+            .btn:hover {
+              background: #5a67d8;
+              transform: translateY(-2px);
+            }
+            .btn-success {
+              background: #4CAF50;
+            }
+            .btn-success:hover {
+              background: #45a049;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon info">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <h1>Already Processed</h1>
+            <p>This reactivation request has already been <strong>${request.status}</strong>.</p>
+            <div class="user-info">
+              <p><strong>User:</strong> ${request.userName}</p>
+              <p><strong>Email:</strong> ${request.userEmail}</p>
+              <p><strong>Status:</strong> ${request.status}</p>
+              <p><strong>Processed:</strong> ${new Date(request.updatedAt).toLocaleString()}</p>
+            </div>
+            <div style="margin-top: 30px;">
+              <a href="/users/login" class="btn">Go to Login</a>
+              <a href="/users/admin/reactivation-requests" class="btn btn-success">View All Requests</a>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    // Update user status to active
+    await usersCollection.updateOne(
+      { userId: request.userId },
+      { $set: { accountStatus: "active", updatedAt: new Date() } }
+    );
+
+    // Update request status
+    await reactivationCollection.updateOne(
+      { requestId: req.params.requestId },
+      { $set: { status: "approved", updatedAt: new Date() } }
+    );
+
+    // Send email to user
+    await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: request.userEmail,
+      subject: "🎉 Your Account Has Been Reactivated!",
+      html: `
+        <h2>Hello ${request.userName},</h2>
+        <p>Great news! Your account has been reactivated.</p>
+        <p>You can now log in and access all features:</p>
+        <p><a href="${process.env.BASE_URL || 'http://localhost:3000'}/users/login" 
+              style="background: #4cc9f0; color: white; padding: 12px 24px; 
+                     text-decoration: none; border-radius: 5px; display: inline-block;">
+          Login Now
+        </a></p>
+        <p>Welcome back! 😊</p>
+      `,
+    });
+
+    // REDIRECT to requests page with success message
+    res.redirect("/users/admin/reactivation-requests?approved=1");
+
+  } catch (err) {
+    console.error("❌ Approve reactivation error:", err);
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Error</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+          }
+          .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+          }
+          .error { color: #f44336; }
+          h1 {
+            color: #333;
+            margin-bottom: 20px;
+          }
+          p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+          }
+          .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+          }
+          .btn:hover {
+            background: #5a67d8;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="icon error">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <h1>Error Processing Request</h1>
+          <p>There was an error processing the reactivation request. Please try again later.</p>
+          <p>Error: ${err.message}</p>
+          <div style="margin-top: 30px;">
+            <a href="/" class="btn">Go to Homepage</a>
+            <a href="/users/admin/reactivation-requests" class="btn" style="background: #6c757d; margin-left: 10px;">View Requests</a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+});
+// =======================================================================
+//  ADMIN: REJECT REACTIVATION (GET) - WITH REDIRECT
+// =======================================================================
+router.get("/admin/reactivation/reject/:requestId", async (req, res) => {
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const reactivationCollection = db.collection("reactivation_requests");
+
+    const request = await reactivationCollection.findOne({ 
+      requestId: req.params.requestId 
+    });
+
+    if (!request) {
+      // Show error page if request not found (same as approve route)
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Request Not Found</title>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin: 0;
+              padding: 20px;
+            }
+            .container {
+              background: white;
+              padding: 40px;
+              border-radius: 15px;
+              box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+              text-align: center;
+              max-width: 500px;
+              width: 100%;
+            }
+            .icon {
+              font-size: 80px;
+              margin-bottom: 20px;
+            }
+            .error { color: #f44336; }
+            h1 {
+              color: #333;
+              margin-bottom: 20px;
+            }
+            p {
+              color: #666;
+              line-height: 1.6;
+              margin-bottom: 30px;
+            }
+            .btn {
+              display: inline-block;
+              padding: 12px 30px;
+              background: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: bold;
+              transition: 0.3s;
+              border: none;
+              cursor: pointer;
+              font-size: 16px;
+            }
+            .btn:hover {
+              background: #5a67d8;
+              transform: translateY(-2px);
+            }
+            .btn-home {
+              background: #6c757d;
+              margin-left: 10px;
+            }
+            .btn-home:hover {
+              background: #5a6268;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon error">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1>Request Not Found</h1>
+            <p>The reactivation request you're trying to reject could not be found.</p>
+            <p>It may have already been processed or expired.</p>
+            <div style="margin-top: 30px;">
+              <a href="/users/login" class="btn">Go to Login</a>
+              <a href="/" class="btn btn-home">Go to Homepage</a>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    // Check if already processed
+    if (request.status !== "pending") {
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Already Processed</title>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              min-height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin: 0;
+              padding: 20px;
+            }
+            .container {
+              background: white;
+              padding: 40px;
+              border-radius: 15px;
+              box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+              text-align: center;
+              max-width: 500px;
+              width: 100%;
+            }
+            .icon {
+              font-size: 80px;
+              margin-bottom: 20px;
+            }
+            .info { color: #2196F3; }
+            h1 {
+              color: #333;
+              margin-bottom: 20px;
+            }
+            p {
+              color: #666;
+              line-height: 1.6;
+              margin-bottom: 30px;
+            }
+            .user-info {
+              background: #f5f5f5;
+              padding: 20px;
+              border-radius: 10px;
+              margin: 20px 0;
+              text-align: left;
+            }
+            .btn {
+              display: inline-block;
+              padding: 12px 30px;
+              background: #667eea;
+              color: white;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: bold;
+              transition: 0.3s;
+              border: none;
+              cursor: pointer;
+              font-size: 16px;
+            }
+            .btn:hover {
+              background: #5a67d8;
+              transform: translateY(-2px);
+            }
+            .btn-success {
+              background: #4CAF50;
+            }
+            .btn-success:hover {
+              background: #45a049;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon info">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <h1>Already Processed</h1>
+            <p>This reactivation request has already been <strong>${request.status}</strong>.</p>
+            <div class="user-info">
+              <p><strong>User:</strong> ${request.userName}</p>
+              <p><strong>Email:</strong> ${request.userEmail}</p>
+              <p><strong>Status:</strong> ${request.status}</p>
+              <p><strong>Processed:</strong> ${new Date(request.updatedAt).toLocaleString()}</p>
+            </div>
+            <div style="margin-top: 30px;">
+              <a href="/users/login" class="btn">Go to Login</a>
+              <a href="/users/admin/reactivation-requests" class="btn btn-success">View All Requests</a>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    // Update request status
+    await reactivationCollection.updateOne(
+      { requestId: req.params.requestId },
+      { $set: { status: "rejected", updatedAt: new Date() } }
+    );
+
+    // Send email to user
+    await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: request.userEmail,
+      subject: "📝 About Your Reactivation Request",
+      html: `
+        <h2>Hello ${request.userName},</h2>
+        <p>Thank you for your reactivation request.</p>
+        <p>After review, we're unable to reactivate your account at this time.</p>
+        <p>If you have questions or would like to appeal this decision, 
+           please contact our support team.</p>
+        <p>Best regards,<br>The Support Team</p>
+      `,
+    });
+
+    // REDIRECT to requests page with success message
+    res.redirect("/users/admin/reactivation-requests?rejected=1");
+
+  } catch (err) {
+    console.error("❌ Reject reactivation error:", err);
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Error</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+          }
+          .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+          }
+          .error { color: #f44336; }
+          h1 {
+            color: #333;
+            margin-bottom: 20px;
+          }
+          p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+          }
+          .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+          }
+          .btn:hover {
+            background: #5a67d8;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="icon error">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <h1>Error Processing Request</h1>
+          <p>There was an error processing the reactivation request. Please try again later.</p>
+          <p>Error: ${err.message}</p>
+          <div style="margin-top: 30px;">
+            <a href="/" class="btn">Go to Homepage</a>
+            <a href="/users/admin/reactivation-requests" class="btn" style="background: #6c757d; margin-left: 10px;">View Requests</a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+});
+
+// =======================================================================
+//  ADMIN: VIEW REACTIVATION REQUESTS (GET)
+// =======================================================================
+router.get("/admin/reactivation-requests", requireLogin, async (req, res) => {
+  if (req.session.user.role !== "admin")
+    return res.status(403).send("Access denied.");
+
+  try {
+    const db = req.app.locals.client.db(req.app.locals.dbName);
+    const reactivationCollection = db.collection("reactivation_requests");
+
+    const requests = await reactivationCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Calculate stats
+    const stats = {
+      total: requests.length,
+      pending: requests.filter(r => r.status === "pending").length,
+      approved: requests.filter(r => r.status === "approved").length,
+      rejected: requests.filter(r => r.status === "rejected").length
+    };
+
+    res.render("admin/reactivationRequests", {
+      title: "Reactivation Requests",
+      currentUser: req.session.user,
+      requests,
+      stats,
+      approved: req.query.approved === "1",
+      rejected: req.query.rejected === "1"
+    });
+
+  } catch (err) {
+    console.error("❌ Reactivation requests error:", err);
+    res.status(500).send("Error loading requests.");
   }
 });
 
@@ -1016,7 +2096,54 @@ router.post("/admin/qr-codes/delete", requireLogin, async (req, res) => {
     res.send("Something went wrong.");
   }
 });
+// =======================================================================
+//  ADMIN: TOGGLE USER STATUS (AJAX)
+// =======================================================================
+router.post("/admin/users/toggle-status/:userId", requireLogin, async (req, res) => {
+    if (req.session.user.role !== "admin")
+        return res.status(403).json({ error: "Access denied." });
 
+    try {
+        const db = req.app.locals.client.db(req.app.locals.dbName);
+        const usersCollection = db.collection("users");
+
+        const userId = req.params.userId;
+
+        // Prevent admin from deactivating themselves
+        if (userId === req.session.user.userId) {
+            return res.status(400).json({ error: "You cannot deactivate your own account." });
+        }
+
+        const user = await usersCollection.findOne({ userId });
+        
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        // Toggle the status (active ↔ inactive)
+        const newStatus = user.accountStatus === "active" ? "inactive" : "active";
+        
+        await usersCollection.updateOne(
+            { userId },
+            { 
+                $set: { 
+                    accountStatus: newStatus,
+                    updatedAt: new Date() 
+                } 
+            }
+        );
+
+        res.json({ 
+            success: true, 
+            newStatus,
+            message: `User ${newStatus === "active" ? "activated" : "deactivated"} successfully` 
+        });
+
+    } catch (err) {
+        console.error("❌ Toggle status error:", err);
+        res.status(500).json({ error: "Error updating user status." });
+    }
+});
 // =======================================================================
 //  SAVE GCASH DETAILS - Admin only
 // =======================================================================

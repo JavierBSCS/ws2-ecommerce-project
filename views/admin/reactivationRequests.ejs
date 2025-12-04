@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reactivation Requests - Admin Dashboard</title>
+  <link rel="stylesheet" href="/reactivationRequests.css">
+  <link rel="stylesheet" href="/shared.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (currentUser && currentUser.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests" class="active">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+        
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
+
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      <div class="reactivation-requests-container">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-bell"></i> Reactivation Requests</h1>
+          <div class="header-actions">
+            <a href="/users/dashboard" class="back">Go Back</a>
+          </div>
+        </div>
+
+        <!-- Success/Info Messages -->
+        <% if (approved) { %>
+          <div class="message message-success">
+            <i class="fas fa-check-circle"></i>
+            Reactivation request approved successfully.
+          </div>
+        <% } %>
+        
+        <% if (rejected) { %>
+          <div class="message message-info">
+            <i class="fas fa-info-circle"></i>
+            Reactivation request rejected successfully.
+          </div>
+        <% } %>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+          <div class="stat-card total">
+            <h3>Total Requests</h3>
+            <div class="count"><%= stats ? stats.total : 0 %></div>
+          </div>
+          <div class="stat-card pending">
+            <h3>Pending</h3>
+            <div class="count"><%= stats ? stats.pending : 0 %></div>
+          </div>
+          <div class="stat-card approved">
+            <h3>Approved</h3>
+            <div class="count"><%= stats ? stats.approved : 0 %></div>
+          </div>
+          <div class="stat-card rejected">
+            <h3>Rejected</h3>
+            <div class="count"><%= stats ? stats.rejected : 0 %></div>
+          </div>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="requests-table-container">
+          <div class="table-responsive">
+            <table class="requests-table">
+              <thead>
+                <tr>
+                  <th>User <i class="fas fa-user"></i></th>
+                  <th>Request Date <i class="fas fa-calendar"></i></th>
+                  <th>Status <i class="fas fa-tag"></i></th>
+                  <th>Reason <i class="fas fa-comment"></i></th>
+                  <th>Actions <i class="fas fa-cogs"></i></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (requests && requests.length > 0) { %>
+                  <% requests.forEach(request => { 
+                    const safeUserName = request.userName ? request.userName.replace(/'/g, "&#39;").replace(/"/g, "&quot;") : '';
+                    const safeUserEmail = request.userEmail ? request.userEmail.replace(/'/g, "&#39;").replace(/"/g, "&quot;") : '';
+                    const safeReason = request.reason ? request.reason.replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/\n/g, ' ') : '';
+                    const shortReason = safeReason && safeReason.length > 100 ? safeReason.substring(0, 100) + '...' : safeReason;
+                  %>
+                    <tr>
+                      <td>
+                        <div class="user-info">
+                          <div class="user-avatar">
+                            <%= request.userName ? request.userName.charAt(0).toUpperCase() : 'U' %>
+                          </div>
+                          <div class="user-details">
+                            <h4><%= request.userName || 'Unknown User' %></h4>
+                            <p><i class="fas fa-envelope"></i> <%= request.userEmail || 'No email' %></p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <small>
+                          <i class="fas fa-calendar"></i> <%= request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A' %>
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                          <i class="fas fa-clock"></i> <%= request.createdAt ? new Date(request.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '' %>
+                        </small>
+                      </td>
+                      <td>
+                        <span class="badge badge-<%= request.status || 'pending' %>">
+                          <i class="fas fa-<%= 
+                            request.status === 'pending' ? 'clock' : 
+                            request.status === 'approved' ? 'check-circle' : 
+                            'times-circle' 
+                          %>"></i>
+                          <%= request.status || 'pending' %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="reason-text" id="reason-<%= request.requestId %>">
+                          <% if (safeReason && safeReason.trim() !== '') { %>
+                            <%= shortReason %>
+                          <% } else { %>
+                            <span class="empty-reason">No reason provided</span>
+                          <% } %>
+                        </div>
+                        <% if (safeReason && safeReason.length > 100) { %>
+                          <button class="view-reason-btn" onclick="showFullReason('<%= request.requestId %>', '<%= safeUserName %>', '<%= safeReason %>')">
+                            View Full Reason
+                          </button>
+                        <% } %>
+                      </td>
+                      <td>
+                        <div class="status-actions">
+                          <% if (request.status === 'pending') { %>
+                            <div class="action-buttons">
+                              <a href="/users/admin/reactivation/approve/<%= request.requestId %>" 
+                                 class="btn btn-success btn-sm"
+                                 onclick="return confirm('Approve reactivation for <%= safeUserName %>?')">
+                                <i class="fas fa-check"></i> Approve
+                              </a>
+                              <a href="/users/admin/reactivation/reject/<%= request.requestId %>" 
+                                 class="btn btn-danger btn-sm"
+                                 onclick="return confirm('Reject reactivation for <%= safeUserName %>?')">
+                                <i class="fas fa-times"></i> Reject
+                              </a>
+                            </div>
+                          <% } else { %>
+                            <span class="text-muted">
+                              Processed: <%= request.updatedAt ? new Date(request.updatedAt).toLocaleDateString() : 'N/A' %>
+                            </span>
+                            <% if (request.status === 'approved') { %>
+                              <span class="btn btn-success btn-sm disabled">
+                                <i class="fas fa-check"></i> Approved
+                              </span>
+                            <% } else if (request.status === 'rejected') { %>
+                              <span class="btn btn-danger btn-sm disabled">
+                                <i class="fas fa-times"></i> Rejected
+                              </span>
+                            <% } %>
+                          <% } %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5">
+                      <div class="no-results">
+                        <i class="fas fa-bell-slash"></i>
+                        <h3>No Reactivation Requests</h3>
+                        <p>There are no pending reactivation requests at this time.</p>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reason Modal -->
+  <div id="reasonModal" class="reason-modal">
+    <div class="reason-modal-content">
+      <h3 id="modalUserName"></h3>
+      <h4>Reactivation Reason:</h4>
+      <div id="modalReasonText" class="reason-text-full"></div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button onclick="closeReasonModal()" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modal functions
+    function showFullReason(requestId, userName, reason) {
+      document.getElementById('modalUserName').textContent = 'Reactivation Request: ' + decodeHtmlEntities(userName);
+      
+      // Decode HTML entities
+      const decodedReason = decodeHtmlEntities(reason || 'No reason provided');
+      document.getElementById('modalReasonText').textContent = decodedReason;
+      document.getElementById('reasonModal').style.display = 'flex';
+    }
+
+    function decodeHtmlEntities(text) {
+      const textArea = document.createElement('textarea');
+      textArea.innerHTML = text;
+      return textArea.value;
+    }
+
+    function closeReasonModal() {
+      document.getElementById('reasonModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('reasonModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeReasonModal();
+      }
+    });
+
+    // Sidebar functionality (same as other pages)
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
+      } else {
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
+      }
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      localStorage.setItem('sidebarHidden', sidebar.classList.contains('hidden'));
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize sidebar
+    const savedState = localStorage.getItem('sidebarHidden');
+    if (savedState === 'true') {
+      sidebar.classList.add('hidden');
+    }
+    updateTogglePosition();
+  </script>
+</body>
+</html>

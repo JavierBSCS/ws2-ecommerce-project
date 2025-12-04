@@ -1,50 +1,4 @@
-/* ================================
-   MODERN GLASS NEON DASHBOARD THEME
-   ================================ */
 
-:root {
-  --sidebar-width: 250px;
-  --bg-gradient: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
-  --glass-light: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.22);
-  --accent-blue: #4cc9f0;
-  --accent-green: #4fe8b0;
-  --accent-purple: #9d4edd;
-  --text-light: #e5e5e5;
-  --text-muted: #9aa3b2;
-  --card-bg: rgba(255, 255, 255, 0.06);
-  --danger-red: #ff6b6b;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: var(--bg-gradient);
-  font-family: "Inter", Arial, sans-serif;
-  color: var(--text-light);
-  overflow-x: hidden;
-}
-
-/* ================================
-   CUSTOM SCROLLBAR
-   ================================ */
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(8px);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(6px);
-  border-radius: 10px;
-}
 
 /* ================================
    PROFILE CONTAINER
@@ -53,26 +7,24 @@ html, body {
 .profile-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 40px 20px;
-  position: relative;
+  align-items: flex-start;
+  width: 100%;
+  padding: 20px;
+  min-height: calc(100vh - 80px);
 }
 
-.back-btn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-}
 
 /* ================================
    CONTAINER
    ================================ */
 
+/* ================================
+   CONTAINER - WIDER
+   ================================ */
+
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* CHANGED from 1200px to 1400px */
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
@@ -256,11 +208,11 @@ tr:hover {
 
 .payment-method {
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 6px 15px;
   border-radius: 8px;
   font-size: 0.9rem;
   display: inline-block;
-  width: 90px;
+  width: 125px;
 }
 
 .payment-method.gcash {
@@ -364,7 +316,6 @@ tr:hover {
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
-  margin-bottom: 20px;
   width: auto;
   align-self: center;
 }
@@ -488,4 +439,191 @@ td:last-child {
   width: 180px;
   min-width: 180px;
 }
+/* ================================
+   TABLE COLUMN WIDTHS - FIXED
+   ================================ */
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  table-layout: fixed; /* Keep this for consistent widths */
+}
+
+th, td {
+  padding: 16px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--glass-border);
+  vertical-align: top;
+}
+
+/* Specific column widths */
+th:nth-child(1), /* Customer (admin only) or Order ID */
+td:nth-child(1) {
+  width: 200px; /* Wider for customer info or order ID */
+  min-width: 200px;
+  max-width: 200px;
+}
+
+th:nth-child(2), /* Order ID or Order Name */
+td:nth-child(2) {
+  width: 180px; /* Order ID column */
+  min-width: 180px;
+  max-width: 180px;
+}
+
+th:nth-child(3), /* Order Name or Total */
+td:nth-child(3) {
+  width: 200px; /* Order Name column */
+  min-width: 200px;
+  max-width: 200px;
+}
+
+th:nth-child(4), /* Total or Payment Method */
+td:nth-child(4) {
+  width: 120px; /* Total column */
+  min-width: 120px;
+  max-width: 120px;
+}
+
+th:nth-child(5), /* Payment Method or Status */
+td:nth-child(5) {
+  width: 140px; /* Payment Method column */
+  min-width: 140px;
+  max-width: 140px;
+}
+
+th:nth-child(6), /* Status or Date */
+td:nth-child(6) {
+  width: 140px; /* Status column */
+  min-width: 140px;
+  max-width: 140px;
+}
+
+th:nth-child(7), /* Date or Actions */
+td:nth-child(7) {
+  width: 180px; /* Date column - WIDER for date/time */
+  min-width: 180px;
+  max-width: 180px;
+}
+
+th:nth-child(8), /* Actions (when admin view) */
+td:nth-child(8) {
+  width: 150px; /* Actions column */
+  min-width: 150px;
+  max-width: 150px;
+}
+
+/* For admin view (more columns) adjust widths */
+/* When admin view has 8 columns */
+table thead tr th:nth-child(8):last-child,
+table tbody tr td:nth-child(8):last-child {
+  width: 180px; /* Slightly wider for actions in admin view */
+  min-width: 180px;
+  max-width: 180px;
+}
+
+/* Date styling to fit better */
+.order-date {
+  color: var(--text-light);
+  font-size: 0.85rem;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Make table scrollable on small screens */
+@media (max-width: 1024px) {
+  .container {
+    overflow-x: auto;
+  }
+  
+  table {
+    min-width: 1000px; /* Ensure table is wide enough */
+  }
+}
+
+/* Adjust for admin view which has more columns */
+@media (max-width: 1200px) {
+  table {
+    min-width: 1100px; /* Even wider for admin view */
+  }
+}
+
+/* Customer info adjustments */
+.customer-info {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  min-width: 180px;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: var(--accent-green);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-email {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-id {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Order ID adjustments */
+.order-id {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: var(--accent-blue);
+  word-break: break-all;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Order name adjustments */
+.order-name {
+  font-weight: 500;
+  display: block;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Ensure no text overflow */
+th, td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  th, td {
+    padding: 12px 8px;
+    font-size: 0.9rem;
+  }
+  
+  .order-date {
+    font-size: 0.8rem;
+  }
+  
+  .customer-info {
+    font-size: 0.85rem;
+  }
+}

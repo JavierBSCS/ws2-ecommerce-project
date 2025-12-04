@@ -5,248 +5,326 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add Product</title>
   <link rel="stylesheet" href="/addproduct.css">
+  <link rel="stylesheet" href="/shared.css">
 </head>
 
 <body>
+  <div class="app">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+      <a href="/users/dashboard" class="dashboard-title">
+        <h2>Dashboard</h2>
+      </a>
+      <a href="/users/profile">👤 Profile</a>
+      <a href="/users/orders/history">🛒 My Orders</a>
+      <% if (currentUser && currentUser.role === "admin") { %>
+        <h3>Admin Tools</h3>
+        <a href="/users/admin/products/add" class="active">➕ Add Product</a>
+        <a href="/users/admin/products">📦 Manage Products</a>
+        <a href="/users/admin/users">👥 Manage Users</a>
+        <a href="/users/admin/reactivation-requests">🔔 Reactivation Requests</a>
+        <a href="/users/admin/qr-codes">📱 Manage QR Codes</a>
+        <a href="/admin/reports/sales">📊 Sales Reports</a>
+      <% } %>
+      <a href="/users/logout">🚪 Logout</a>
+    </div>
 
-<div class="profile-container">
-  <!-- Home button outside container -->
-  <div class="back-btn">
-    <a href="/users/dashboard" class="btn btn-primary">🏠 Home</a>
+    <!-- Menu Toggle Button -->
+    <button id="menuToggle" class="menu-toggle">☰ Menu</button>
+
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+      <div class="profile-container">
+        <div class="container">
+          <a href="javascript:history.back()" class="back">Go Back</a>
+          <h2>➕ Add New Product</h2>
+          
+          <!-- Lesson 22: Validation Errors -->
+          <% if (errors && errors.length > 0) { %>
+            <div style="color: red; background: #ffe6e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid red;">
+              <p style="margin: 0 0 10px 0; font-weight: bold;">Please fix the following errors:</p>
+              <ul style="margin: 0;">
+                <% errors.forEach(function(err) { %>
+                  <li><%= err %></li>
+                <% }) %>
+              </ul>
+            </div>
+          <% } %>
+
+          <form action="/users/admin/products/add" method="POST" enctype="multipart/form-data" id="productForm">
+            <label>Name</label>
+            <input type="text" name="name" value="<%= formData && formData.name ? formData.name : '' %>" required>
+
+            <label>Price</label>
+            <input type="number" step="0.01" name="price" value="<%= formData && formData.price ? formData.price : '' %>" required>
+
+            <label>Description</label>
+            <textarea name="description" rows="4" required><%= formData && formData.description ? formData.description : '' %></textarea>
+
+            <label>Upload Images</label>
+            <div id="dropZone" class="drop-zone">
+              <span class="drop-zone-icon">📁</span>
+              <p class="drop-zone-text">Click to select images or drag & drop here</p>
+              <p class="drop-zone-subtext">You can select multiple files one by one</p>
+              <input type="file" name="images" accept="image/*" multiple required id="imageInput" style="display: none;">
+            </div>
+            
+            <!-- Image Preview Container -->
+            <div class="image-preview-container" id="imagePreview"></div>
+
+            <label>Category</label>
+            <select name="category" required>
+              <option value="">Select category</option>
+              <option value="Food" <%= formData && formData.category === "Food" ? "selected" : "" %>>Food</option>
+              <option value="Cars" <%= formData && formData.category === "Cars" ? "selected" : "" %>>Cars</option>
+              <option value="Electronics" <%= formData && formData.category === "Electronics" ? "selected" : "" %>>Electronics</option>
+              <option value="Clothes" <%= formData && formData.category === "Clothes" ? "selected" : "" %>>Clothes</option>
+              <option value="Accessories" <%= formData && formData.category === "Accessories" ? "selected" : "" %>>Accessories</option>
+              <option value="Home" <%= formData && formData.category === "Home" ? "selected" : "" %>>Home</option>
+              <option value="Sports" <%= formData && formData.category === "Sports" ? "selected" : "" %>>Sports</option>
+              <option value="Books" <%= formData && formData.category === "Books" ? "selected" : "" %>>Books</option>
+              <option value="Toys" <%= formData && formData.category === "Toys" ? "selected" : "" %>>Toys</option>
+              <option value="Beauty" <%= formData && formData.category === "Beauty" ? "selected" : "" %>>Beauty</option>
+              <option value="Fitness" <%= formData && formData.category === "Fitness" ? "selected" : "" %>>Fitness</option>
+              <option value="Health" <%= formData && formData.category === "Health" ? "selected" : "" %>>Health</option>
+              <option value="Office" <%= formData && formData.category === "Office" ? "selected" : "" %>>Office Supplies</option>
+              <option value="Pets" <%= formData && formData.category === "Pets" ? "selected" : "" %>>Pet Supplies</option>
+              <option value="Garden" <%= formData && formData.category === "Garden" ? "selected" : "" %>>Garden</option>
+              <option value="Music" <%= formData && formData.category === "Music" ? "selected" : "" %>>Music</option>
+              <option value="Jewelry" <%= formData && formData.category === "Jewelry" ? "selected" : "" %>>Jewelry</option>
+              <option value="Tools" <%= formData && formData.category === "Tools" ? "selected" : "" %>>Tools</option>
+              <option value="Appliances" <%= formData && formData.category === "Appliances" ? "selected" : "" %>>Appliances</option>
+              <option value="Gadgets" <%= formData && formData.category === "Gadgets" ? "selected" : "" %>>Gadgets</option>
+              <option value="Software" <%= formData && formData.category === "Software" ? "selected" : "" %>>Software</option>
+              <option value="Games" <%= formData && formData.category === "Games" ? "selected" : "" %>>Games</option>
+              <option value="Subscriptions" <%= formData && formData.category === "Subscriptions" ? "selected" : "" %>>Subscriptions</option>
+              <option value="Courses" <%= formData && formData.category === "Courses" ? "selected" : "" %>>Online Courses</option>
+              <option value="Services" <%= formData && formData.category === "Services" ? "selected" : "" %>>Services</option>
+              <option value="Beverages" <%= formData && formData.category === "Beverages" ? "selected" : "" %>>Beverages</option>
+              <option value="Snacks" <%= formData && formData.category === "Snacks" ? "selected" : "" %>>Snacks</option>
+              <option value="Fruits" <%= formData && formData.category === "Fruits" ? "selected" : "" %>>Fruits</option>
+              <option value="Vegetables" <%= formData && formData.category === "Vegetables" ? "selected" : "" %>>Vegetables</option>
+              <option value="Frozen" <%= formData && formData.category === "Frozen" ? "selected" : "" %>>Frozen Food</option>
+              <option value="Bakery" <%= formData && formData.category === "Bakery" ? "selected" : "" %>>Bakery</option>
+            </select>
+
+            <label>Status</label>
+            <select name="status" required>
+              <option value="available" <%= formData && formData.status === "available" ? "selected" : "" %>>Available</option>
+              <option value="unavailable" <%= formData && formData.status === "unavailable" ? "selected" : "" %>>Unavailable</option>
+              <option value="maintenance" <%= formData && formData.status === "maintenance" ? "selected" : "" %>>Under Maintenance</option>
+            </select>
+            
+            <label>Stock</label>
+            <input type="number" name="stock" min="0" value="<%= formData && formData.stock ? formData.stock : '10' %>" required>
+
+            <button type="submit">Add Product</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="container">
-    <a href="/users/admin" class="back">Go to Admin Dashboard</a>
-    <h2>➕ Add New Product</h2>
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imageInput');
+    const previewContainer = document.getElementById('imagePreview');
+    const fileCountText = document.createElement('div');
     
-    <!-- Lesson 22: Validation Errors -->
-    <% if (errors && errors.length > 0) { %>
-      <div style="color: red; background: #ffe6e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid red;">
-        <p style="margin: 0 0 10px 0; font-weight: bold;">Please fix the following errors:</p>
-        <ul style="margin: 0;">
-          <% errors.forEach(function(err) { %>
-            <li><%= err %></li>
-          <% }) %>
-        </ul>
-      </div>
-    <% } %>
+    // Add file count display
+    fileCountText.style.cssText = 'color: var(--accent-green); font-weight: 600; margin-top: 10px;';
+    dropZone.appendChild(fileCountText);
 
-    <form action="/users/admin/products/add" method="POST" enctype="multipart/form-data" id="productForm">
-      <label>Name</label>
-      <input type="text" name="name" value="<%= formData && formData.name ? formData.name : '' %>" required>
+    let uploadedFiles = [];
 
-      <label>Price</label>
-      <input type="number" step="0.01" name="price" value="<%= formData && formData.price ? formData.price : '' %>" required>
+    // Click on drop zone to trigger file input
+    dropZone.addEventListener('click', () => {
+      fileInput.click();
+    });
 
-      <label>Description</label>
-      <textarea name="description" rows="4" required><%= formData && formData.description ? formData.description : '' %></textarea>
+    // Handle file selection
+    fileInput.addEventListener('change', function(e) {
+      handleFiles(this.files);
+    });
 
-      <label>Upload Images</label>
-      <div id="dropZone" class="drop-zone">
-        <span class="drop-zone-icon">📁</span>
-        <p class="drop-zone-text">Click to select images or drag & drop here</p>
-        <p class="drop-zone-subtext">You can select multiple files one by one</p>
-        <input type="file" name="images" accept="image/*" multiple required id="imageInput" style="display: none;">
-      </div>
+    // Drag and drop functionality
+    dropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
       
-      <!-- Image Preview Container -->
-      <div class="image-preview-container" id="imagePreview"></div>
-
-      <label>Category</label>
-      <select name="category" required>
-        <option value="">Select category</option>
-        <option value="Food" <%= formData && formData.category === "Food" ? "selected" : "" %>>Food</option>
-        <option value="Cars" <%= formData && formData.category === "Cars" ? "selected" : "" %>>Cars</option>
-        <option value="Electronics" <%= formData && formData.category === "Electronics" ? "selected" : "" %>>Electronics</option>
-        <option value="Clothes" <%= formData && formData.category === "Clothes" ? "selected" : "" %>>Clothes</option>
-        <option value="Accessories" <%= formData && formData.category === "Accessories" ? "selected" : "" %>>Accessories</option>
-        <option value="Home" <%= formData && formData.category === "Home" ? "selected" : "" %>>Home</option>
-        <option value="Sports" <%= formData && formData.category === "Sports" ? "selected" : "" %>>Sports</option>
-        <option value="Books" <%= formData && formData.category === "Books" ? "selected" : "" %>>Books</option>
-        <option value="Toys" <%= formData && formData.category === "Toys" ? "selected" : "" %>>Toys</option>
-        <option value="Beauty" <%= formData && formData.category === "Beauty" ? "selected" : "" %>>Beauty</option>
-        <option value="Fitness" <%= formData && formData.category === "Fitness" ? "selected" : "" %>>Fitness</option>
-        <option value="Health" <%= formData && formData.category === "Health" ? "selected" : "" %>>Health</option>
-        <option value="Office" <%= formData && formData.category === "Office" ? "selected" : "" %>>Office Supplies</option>
-        <option value="Pets" <%= formData && formData.category === "Pets" ? "selected" : "" %>>Pet Supplies</option>
-        <option value="Garden" <%= formData && formData.category === "Garden" ? "selected" : "" %>>Garden</option>
-        <option value="Music" <%= formData && formData.category === "Music" ? "selected" : "" %>>Music</option>
-        <option value="Jewelry" <%= formData && formData.category === "Jewelry" ? "selected" : "" %>>Jewelry</option>
-        <option value="Tools" <%= formData && formData.category === "Tools" ? "selected" : "" %>>Tools</option>
-        <option value="Appliances" <%= formData && formData.category === "Appliances" ? "selected" : "" %>>Appliances</option>
-        <option value="Gadgets" <%= formData && formData.category === "Gadgets" ? "selected" : "" %>>Gadgets</option>
-        <option value="Software" <%= formData && formData.category === "Software" ? "selected" : "" %>>Software</option>
-        <option value="Games" <%= formData && formData.category === "Games" ? "selected" : "" %>>Games</option>
-        <option value="Subscriptions" <%= formData && formData.category === "Subscriptions" ? "selected" : "" %>>Subscriptions</option>
-        <option value="Courses" <%= formData && formData.category === "Courses" ? "selected" : "" %>>Online Courses</option>
-        <option value="Services" <%= formData && formData.category === "Services" ? "selected" : "" %>>Services</option>
-        <option value="Beverages" <%= formData && formData.category === "Beverages" ? "selected" : "" %>>Beverages</option>
-        <option value="Snacks" <%= formData && formData.category === "Snacks" ? "selected" : "" %>>Snacks</option>
-        <option value="Fruits" <%= formData && formData.category === "Fruits" ? "selected" : "" %>>Fruits</option>
-        <option value="Vegetables" <%= formData && formData.category === "Vegetables" ? "selected" : "" %>>Vegetables</option>
-        <option value="Frozen" <%= formData && formData.category === "Frozen" ? "selected" : "" %>>Frozen Food</option>
-        <option value="Bakery" <%= formData && formData.category === "Bakery" ? "selected" : "" %>>Bakery</option>
-      </select>
-
-      <label>Status</label>
-      <select name="status" required>
-        <option value="available" <%= formData && formData.status === "available" ? "selected" : "" %>>Available</option>
-        <option value="unavailable" <%= formData && formData.status === "unavailable" ? "selected" : "" %>>Unavailable</option>
-        <option value="maintenance" <%= formData && formData.status === "maintenance" ? "selected" : "" %>>Under Maintenance</option>
-      </select>
-      
-      <label>Stock</label>
-      <input type="number" name="stock" min="0" value="<%= formData && formData.stock ? formData.stock : '10' %>" required>
-
-      <button type="submit">Add Product</button>
-    </form>
-  </div>
-</div>
-
-<script>
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('imageInput');
-  const previewContainer = document.getElementById('imagePreview');
-  const fileCountText = document.createElement('div');
-  
-  // Add file count display
-  fileCountText.style.cssText = 'color: var(--accent-green); font-weight: 600; margin-top: 10px;';
-  dropZone.appendChild(fileCountText);
-
-  let uploadedFiles = [];
-
-  // Click on drop zone to trigger file input
-  dropZone.addEventListener('click', () => {
-    fileInput.click();
-  });
-
-  // Handle file selection
-  fileInput.addEventListener('change', function(e) {
-    handleFiles(this.files);
-  });
-
-  // Drag and drop functionality
-  dropZone.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    this.classList.add('dragover');
-  });
-
-  dropZone.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-  });
-
-  dropZone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-    
-    if (e.dataTransfer.files.length) {
-      handleFiles(e.dataTransfer.files);
-    }
-  });
-
-  function handleFiles(files) {
-    console.log('Files selected:', files.length);
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      // Check if file is an image
-      if (!file.type.startsWith('image/')) {
-        alert('Please select only image files.');
-        continue;
+      if (e.dataTransfer.files.length) {
+        handleFiles(e.dataTransfer.files);
       }
+    });
+
+    function handleFiles(files) {
+      console.log('Files selected:', files.length);
       
-      // Check if file is already uploaded
-      if (uploadedFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) {
-        console.log('File already uploaded:', file.name);
-        continue;
-      }
-      
-      uploadedFiles.push(file);
-      
-      const reader = new FileReader();
-      
-      reader.onload = function(e) {
-        const previewDiv = document.createElement('div');
-        previewDiv.className = 'image-preview';
-        previewDiv.setAttribute('data-filename', file.name);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.alt = 'Preview image ' + (i + 1);
+        // Check if file is an image
+        if (!file.type.startsWith('image/')) {
+          alert('Please select only image files.');
+          continue;
+        }
         
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'remove-image';
-        removeBtn.innerHTML = '×';
-        removeBtn.title = 'Remove image';
-        removeBtn.onclick = function() {
-          // Remove from preview
-          previewDiv.remove();
+        // Check if file is already uploaded
+        if (uploadedFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) {
+          console.log('File already uploaded:', file.name);
+          continue;
+        }
+        
+        uploadedFiles.push(file);
+        
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const previewDiv = document.createElement('div');
+          previewDiv.className = 'image-preview';
+          previewDiv.setAttribute('data-filename', file.name);
           
-          // Remove from uploaded files array
-          const index = uploadedFiles.findIndex(f => f.name === file.name);
-          if (index > -1) {
-            uploadedFiles.splice(index, 1);
-          }
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.alt = 'Preview image ' + (i + 1);
           
-          // Update file input and display
-          updateFileInput();
-          updateFileCount();
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'remove-image';
+          removeBtn.innerHTML = '×';
+          removeBtn.title = 'Remove image';
+          removeBtn.onclick = function() {
+            // Remove from preview
+            previewDiv.remove();
+            
+            // Remove from uploaded files array
+            const index = uploadedFiles.findIndex(f => f.name === file.name);
+            if (index > -1) {
+              uploadedFiles.splice(index, 1);
+            }
+            
+            // Update file input and display
+            updateFileInput();
+            updateFileCount();
+          };
+          
+          previewDiv.appendChild(img);
+          previewDiv.appendChild(removeBtn);
+          previewContainer.appendChild(previewDiv);
         };
         
-        previewDiv.appendChild(img);
-        previewDiv.appendChild(removeBtn);
-        previewContainer.appendChild(previewDiv);
-      };
+        reader.readAsDataURL(file);
+      }
       
-      reader.readAsDataURL(file);
+      updateFileInput();
+      updateFileCount();
     }
-    
-    updateFileInput();
-    updateFileCount();
-  }
 
-  function updateFileInput() {
-    // Update the actual file input with all uploaded files
-    const dt = new DataTransfer();
-    uploadedFiles.forEach(file => dt.items.add(file));
-    fileInput.files = dt.files;
-  }
-
-  function updateFileCount() {
-    const totalFiles = uploadedFiles.length;
-    fileCountText.textContent = totalFiles > 0 ? `${totalFiles} image(s) selected` : '';
-  }
-
-  // Form validation
-  document.getElementById('productForm').addEventListener('submit', function(e) {
-    const files = fileInput.files;
-    
-    if (files.length === 0) {
-      e.preventDefault();
-      alert('Please select at least one image.');
-      return false;
+    function updateFileInput() {
+      // Update the actual file input with all uploaded files
+      const dt = new DataTransfer();
+      uploadedFiles.forEach(file => dt.items.add(file));
+      fileInput.files = dt.files;
     }
-    
-    const price = document.querySelector('input[name="price"]').value;
-    if (parseFloat(price) <= 0) {
-      e.preventDefault();
-      alert('Please enter a valid price greater than 0.');
-      return false;
-    }
-    
-    const stock = document.querySelector('input[name="stock"]').value;
-    if (parseInt(stock) < 0) {
-      e.preventDefault();
-      alert('Stock cannot be negative.');
-      return false;
-    }
-    
-    return true;
-  });
-</script>
 
+    function updateFileCount() {
+      const totalFiles = uploadedFiles.length;
+      fileCountText.textContent = totalFiles > 0 ? `${totalFiles} image(s) selected` : '';
+    }
+
+    // Form validation
+    document.getElementById('productForm').addEventListener('submit', function(e) {
+      const files = fileInput.files;
+      
+      if (files.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one image.');
+        return false;
+      }
+      
+      const price = document.querySelector('input[name="price"]').value;
+      if (parseFloat(price) <= 0) {
+        e.preventDefault();
+        alert('Please enter a valid price greater than 0.');
+        return false;
+      }
+      
+      const stock = document.querySelector('input[name="stock"]').value;
+      if (parseInt(stock) < 0) {
+        e.preventDefault();
+        alert('Stock cannot be negative.');
+        return false;
+      }
+      
+      return true;
+    });
+  </script>
+
+  <!-- Sidebar JavaScript -->
+  <script>
+    // Shared sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    console.log('Sidebar elements check:', {
+      sidebar: sidebar ? 'Found' : 'Missing',
+      menuToggle: menuToggle ? 'Found' : 'Missing',
+      mainContent: mainContent ? 'Found' : 'Missing'
+    });
+
+    function updateTogglePosition() {
+      if (sidebar.classList.contains('hidden')) {
+        menuToggle.classList.add('shift-left');
+        menuToggle.textContent = '☰ Show Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+          mainContent.style.width = '100%';
+        }
+      } else {
+        menuToggle.classList.remove('shift-left');
+        menuToggle.textContent = '☰ Hide Menu';
+        if (mainContent) {
+          mainContent.style.marginLeft = '250px';
+          mainContent.style.width = 'calc(100% - 250px)';
+        }
+      }
+    }
+
+    function toggleMenu() {
+      sidebar.classList.toggle('hidden');
+      updateTogglePosition();
+      
+      // Save sidebar state in localStorage
+      const isHidden = sidebar.classList.contains('hidden');
+      localStorage.setItem('sidebarHidden', isHidden);
+      
+      console.log('Menu toggled. Hidden:', isHidden);
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    
+    // Initialize positions and load saved state
+    function initializeSidebar() {
+      const savedState = localStorage.getItem('sidebarHidden');
+      if (savedState === 'true') {
+        sidebar.classList.add('hidden');
+      }
+      updateTogglePosition();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+  </script>
 </body>
 </html>
