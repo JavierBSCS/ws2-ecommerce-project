@@ -149,3 +149,133 @@
     #confirmStatus.invalid {
       color: #ff6b6b;
     }
+/* Password Input with Icon Inside - Add this to register.css */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.2);
+  color: #fff;
+  font-size: 15px;
+  transition: 0.2s ease;
+  padding-right: 45px; /* Space for eye icon */
+  box-sizing: border-box;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: calc(50% + 3px); /* Adjust for margin-top */
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #a9bcd0;
+  padding: 5px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  user-select: none;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.password-toggle:hover {
+  color: #4cc9f0;
+  background-color: rgba(76, 201, 240, 0.1);
+}
+
+.password-toggle i {
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.password-toggle:hover i {
+  transform: scale(1.1);
+}
+
+/* When password is visible */
+.input-with-icon input[type="text"] ~ .password-toggle {
+  color: #4cc9f0;
+}
+
+/* Ensure password toggle is clickable */
+.password-toggle {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.password-toggle i {
+  pointer-events: none; /* Prevent icon from interfering with clicks */
+}
+
+/* Make sure the toggle is above the input */
+.password-toggle {
+  z-index: 10;
+}
+
+/* Remove any styles that might make it unclickable */
+.password-toggle {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Tooltip */
+.password-toggle::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  z-index: 100;
+  pointer-events: none;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.password-toggle:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .password-toggle {
+    right: 10px;
+    height: 28px;
+    width: 28px;
+    font-size: 15px;
+  }
+  
+  .input-with-icon input {
+    padding-right: 40px;
+  }
+}
+
+/* Remove old show-hide-toggle styles if they exist */
+.show-hide-toggle {
+  display: none !important;
+}

@@ -513,15 +513,19 @@ router.post("/change-password/:userId", requireLogin, async (req, res) => {
 });
 
 // =======================================================================
-//  REGISTER (GET)
+//  REGISTER (GET) - UPDATED
 // =======================================================================
 router.get("/register", (req, res) => {
-  res.render("register", { title: "Register", error: null });
+  res.render("register", { 
+    title: "Register", 
+    formData: {},  // Add this
+    message: null  // Add this
+  });
 });
 
 
 // =======================================================================
-//  REGISTER (POST)
+//  REGISTER (POST) - UPDATED WITH TERMS VALIDATION
 // =======================================================================
 router.post("/register", async (req, res) => {
   try {
@@ -531,7 +535,23 @@ router.post("/register", async (req, res) => {
     if (!result.success) {
       return res.status(400).render("register", {
         title: "Register",
-        error: "⚠️ Verification failed. Please try again.",
+        message: {
+          type: "error",
+          text: "⚠️ Verification failed. Please try again.",
+        },
+        formData: req.body  // Pass the form data back
+      });
+    }
+
+    // Check if terms were accepted
+    if (!req.body.terms || req.body.terms !== 'on') {
+      return res.status(400).render("register", {
+        title: "Register",
+        message: {
+          type: "error",
+          text: "⚠️ You must accept the terms and conditions.",
+        },
+        formData: req.body  // Pass the form data back
       });
     }
 
@@ -541,9 +561,40 @@ router.post("/register", async (req, res) => {
     const existingUser = await usersCollection.findOne({
       email: req.body.email,
     });
-    if (existingUser) return res.send("❌ Email already registered.");
+    
+    if (existingUser) {
+      return res.status(400).render("register", {
+        title: "Register",
+        message: {
+          type: "error",
+          text: "❌ Email already registered.",
+        },
+        formData: req.body  // Pass the form data back
+      });
+    }
 
-    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+    // Additional password validation (server-side)
+    const password = req.body.password;
+    const passwordErrors = [];
+    
+    if (password.length < 8) passwordErrors.push("Password must be at least 8 characters");
+    if (!/[A-Z]/.test(password)) passwordErrors.push("Password must contain at least one uppercase letter");
+    if (!/[a-z]/.test(password)) passwordErrors.push("Password must contain at least one lowercase letter");
+    if (!/[0-9]/.test(password)) passwordErrors.push("Password must contain at least one number");
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) passwordErrors.push("Password must contain at least one special character");
+    
+    if (passwordErrors.length > 0) {
+      return res.status(400).render("register", {
+        title: "Register",
+        message: {
+          type: "error",
+          text: `Password validation failed: ${passwordErrors.join(", ")}`,
+        },
+        formData: req.body
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const verificationToken = uuidv4();
     const now = new Date();
@@ -575,24 +626,38 @@ router.post("/register", async (req, res) => {
     await usersCollection.insertOne(newUser);
 
     // send verification email
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL,
-      to: newUser.email,
-      subject: "Verify Your Email",
-      html: `
-        <h2>Hello ${newUser.firstName},</h2>
-        <p>Please verify your email:</p>
-        <a href="${verifyURL}">${verifyURL}</a>
-      `,
-    });
+    try {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL,
+        to: newUser.email,
+        subject: "Verify Your Email",
+        html: `
+          <h2>Hello ${newUser.firstName},</h2>
+          <p>Please verify your email:</p>
+          <a href="${verifyURL}">${verifyURL}</a>
+          <p>Click the link above or copy and paste it into your browser.</p>
+          <p>This link will expire in 1 hour.</p>
+        `,
+      });
+    } catch (emailError) {
+      console.error("❌ Email sending error:", emailError);
+      // Continue even if email fails
+    }
 
     res.redirect("/users/login?registered=1");
+    
   } catch (err) {
     console.error("❌ Register error:", err);
-    res.send("Something went wrong.");
+    res.status(500).render("register", {
+      title: "Register",
+      message: {
+        type: "error",
+        text: "❌ An error occurred during registration. Please try again.",
+      },
+      formData: req.body  // Pass the form data back
+    });
   }
 });
-
 
 // =======================================================================
 //  VERIFY EMAIL

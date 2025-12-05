@@ -466,3 +466,258 @@ button[type="submit"].success {
     font-size: 0.95rem;
   }
 }
+/* Password Input with Icon Inside */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding-right: 40px; /* Space for eye icon */
+  box-sizing: border-box;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: calc(50% - 10px);
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #d8d8d8;
+  padding: 5px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  user-select: none;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.password-toggle:hover {
+  color: #4CAF50;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.password-toggle i {
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.password-toggle:hover i {
+  transform: scale(1.1);
+}
+
+/* When password is visible */
+.input-with-icon input[type="text"] ~ .password-toggle {
+  color: #4CAF50;
+}
+
+/* Ensure password toggle is clickable */
+.password-toggle {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.password-toggle i {
+  pointer-events: none;
+}
+
+/* Make sure the toggle is above the input */
+.password-toggle {
+  z-index: 10;
+}
+
+/* Tooltip */
+.password-toggle::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.password-toggle:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .password-toggle {
+    right: 10px;
+    height: 28px;
+    width: 28px;
+    font-size: 15px;
+  }
+  
+  .input-with-icon input {
+    padding-right: 35px;
+  }
+}
+/* Password Criteria Styles (Same as Register) */
+.password-criteria {
+  margin: 8px 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.password-criteria p {
+  margin: 3px 0;
+  font-size: 13px;
+  color: #ff6b6b;
+}
+
+.password-criteria p.valid {
+  color: #4fe8b0;
+}
+
+/* Password Match Message */
+.password-match {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.password-match.valid {
+  color: #4fe8b0;
+}
+
+.password-match.invalid {
+  color: #ff6b6b;
+}
+
+/* Password Input with Icon Inside */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  height: 46px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.2);
+  color: #fff;
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #a9bcd0;
+  padding: 5px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  user-select: none;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.password-toggle:hover {
+  color: #4cc9f0;
+  background-color: rgba(76, 201, 240, 0.1);
+}
+
+.password-toggle i {
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.password-toggle:hover i {
+  transform: scale(1.1);
+}
+
+/* When password is visible */
+.input-with-icon input[type="text"] ~ .password-toggle {
+  color: #4cc9f0;
+}
+
+/* Ensure password toggle is clickable */
+.password-toggle {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.password-toggle i {
+  pointer-events: none;
+}
+
+/* Tooltip */
+.password-toggle::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  z-index: 100;
+  pointer-events: none;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.password-toggle:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .password-toggle {
+    right: 10px;
+    height: 28px;
+    width: 28px;
+    font-size: 15px;
+  }
+  
+  .input-with-icon input {
+    padding-right: 35px;
+  }
+  
+  .password-criteria {
+    font-size: 12px;
+  }
+}

@@ -6,6 +6,8 @@
   <title><%= title %></title>
   <link rel="stylesheet" href="/edit-user.css">
   <link rel="stylesheet" href="/shared.css">
+  <!-- Add Font Awesome for eye icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -107,16 +109,37 @@
 
                 <form action="/users/change-password/<%= user.userId %>" method="POST" id="passwordForm">
                   <label>Old Password</label>
-                  <input type="password" name="oldPassword" id="oldPassword" placeholder="Enter current password" required>
+                  <div class="input-with-icon">
+                    <input type="password" name="oldPassword" id="oldPassword" placeholder="Enter current password" required>
+                    <span class="password-toggle" id="toggleOldPassword" title="Show password">
+                      <i class="fas fa-eye"></i>
+                    </span>
+                  </div>
 
                   <label>New Password</label>
-                  <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
-                  <div class="password-strength" id="passwordStrength">
-                    Password must be at least 8 characters long
+                  <div class="input-with-icon">
+                    <input type="password" name="newPassword" id="newPassword" placeholder="Enter new password" required>
+                    <span class="password-toggle" id="toggleNewPassword" title="Show password">
+                      <i class="fas fa-eye"></i>
+                    </span>
+                  </div>
+                  
+                  <!-- Password Criteria (Same as Register) -->
+                  <div class="password-criteria">
+                    <p id="length">● At least 8 characters</p>
+                    <p id="uppercase">● Uppercase letter</p>
+                    <p id="lowercase">● Lowercase letter</p>
+                    <p id="number">● Number</p>
+                    <p id="special">● Special character (!@#$%^&*)</p>
                   </div>
 
                   <label>Confirm New Password</label>
-                  <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
+                  <div class="input-with-icon">
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm new password" required>
+                    <span class="password-toggle" id="toggleConfirmPassword" title="Show password">
+                      <i class="fas fa-eye"></i>
+                    </span>
+                  </div>
                   <div class="password-match" id="passwordMatch"></div>
 
                   <button type="submit" class="btn-secondary" style="width: 100%; margin-top: 10px;">
@@ -152,31 +175,107 @@
       reader.readAsDataURL(file);
     });
 
-    // Password validation
+    // Password toggle functionality
+    const toggleOldPassword = document.getElementById('toggleOldPassword');
+    const toggleNewPassword = document.getElementById('toggleNewPassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const oldPasswordInput = document.getElementById('oldPassword');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+
+    // Password criteria elements
+    const lengthC = document.getElementById("length");
+    const upperC = document.getElementById("uppercase");
+    const lowerC = document.getElementById("lowercase");
+    const numberC = document.getElementById("number");
+    const specialC = document.getElementById("special");
+
+    function togglePasswordVisibility(inputField, toggleBtn) {
+      const type = inputField.getAttribute('type') === 'password' ? 'text' : 'password';
+      inputField.setAttribute('type', type);
+      
+      // Toggle icon and title
+      const icon = toggleBtn.querySelector('i');
+      if (type === 'text') {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        toggleBtn.setAttribute('title', 'Hide password');
+      } else {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        toggleBtn.setAttribute('title', 'Show password');
+      }
+    }
+
+    // Event listeners for show/hide password
+    toggleOldPassword.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePasswordVisibility(oldPasswordInput, toggleOldPassword);
+    });
+
+    toggleNewPassword.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePasswordVisibility(newPasswordInput, toggleNewPassword);
+    });
+
+    toggleConfirmPassword.addEventListener('click', (e) => {
+      e.preventDefault();
+      togglePasswordVisibility(confirmPasswordInput, toggleConfirmPassword);
+    });
+
+    // Optional: Hide passwords when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.password-toggle') && !e.target.closest('.password-toggle i')) {
+        // Hide all passwords if they're visible
+        if (oldPasswordInput.type === 'text') {
+          oldPasswordInput.type = 'password';
+          toggleOldPassword.querySelector('i').classList.remove('fa-eye-slash');
+          toggleOldPassword.querySelector('i').classList.add('fa-eye');
+          toggleOldPassword.setAttribute('title', 'Show password');
+        }
+        
+        if (newPasswordInput.type === 'text') {
+          newPasswordInput.type = 'password';
+          toggleNewPassword.querySelector('i').classList.remove('fa-eye-slash');
+          toggleNewPassword.querySelector('i').classList.add('fa-eye');
+          toggleNewPassword.setAttribute('title', 'Show password');
+        }
+        
+        if (confirmPasswordInput.type === 'text') {
+          confirmPasswordInput.type = 'password';
+          toggleConfirmPassword.querySelector('i').classList.remove('fa-eye-slash');
+          toggleConfirmPassword.querySelector('i').classList.add('fa-eye');
+          toggleConfirmPassword.setAttribute('title', 'Show password');
+        }
+      }
+    });
+
+    // Ensure toggle buttons are clickable
+    document.addEventListener('DOMContentLoaded', () => {
+      toggleOldPassword.style.pointerEvents = 'auto';
+      toggleNewPassword.style.pointerEvents = 'auto';
+      toggleConfirmPassword.style.pointerEvents = 'auto';
+    });
+
+    // Password validation (Same as Register)
     const passwordForm = document.getElementById('passwordForm');
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const passwordStrength = document.getElementById('passwordStrength');
     const passwordMatch = document.getElementById('passwordMatch');
 
     function validatePassword() {
-      const password = newPassword.value;
-      
-      // Check length
-      if (password.length >= 8) {
-        passwordStrength.textContent = '✓ Password length is good';
-        passwordStrength.className = 'password-strength valid';
-      } else {
-        passwordStrength.textContent = 'Password must be at least 8 characters long';
-        passwordStrength.className = 'password-strength invalid';
-      }
+      const v = newPasswordInput.value;
+
+      lengthC.classList.toggle("valid", v.length >= 8);
+      upperC.classList.toggle("valid", /[A-Z]/.test(v));
+      lowerC.classList.toggle("valid", /[a-z]/.test(v));
+      numberC.classList.toggle("valid", /[0-9]/.test(v));
+      specialC.classList.toggle("valid", /[!@#$%^&*(),.?":{}|<>]/.test(v));
       
       validatePasswordMatch();
     }
 
     function validatePasswordMatch() {
-      const confirm = confirmPassword.value;
-      const password = newPassword.value;
+      const confirm = confirmPasswordInput.value;
+      const password = newPasswordInput.value;
       
       if (confirm === '') {
         passwordMatch.textContent = '';
@@ -185,26 +284,39 @@
       }
       
       if (confirm === password) {
-        passwordMatch.textContent = '✓ Passwords match';
+        passwordMatch.textContent = '✓ Passwords match ✔';
         passwordMatch.className = 'password-match valid';
       } else {
-        passwordMatch.textContent = '✗ Passwords do not match';
+        passwordMatch.textContent = '✗ Passwords do not match ✖';
         passwordMatch.className = 'password-match invalid';
       }
     }
 
     function validateForm() {
-      const password = newPassword.value;
-      const confirm = confirmPassword.value;
-      const oldPass = document.getElementById('oldPassword').value;
+      const password = newPasswordInput.value;
+      const confirm = confirmPasswordInput.value;
+      const oldPass = oldPasswordInput.value;
       
       if (!oldPass) {
         alert('Please enter your current password');
         return false;
       }
       
-      if (password.length < 8) {
-        alert('Password must be at least 8 characters long');
+      // Check all password requirements (Same as Register)
+      const isPasswordValid =
+        password.length >= 8 &&
+        /[A-Z]/.test(password) &&
+        /[a-z]/.test(password) &&
+        /[0-9]/.test(password) &&
+        /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      if (!isPasswordValid) {
+        alert('Password does not meet the requirements:\n' +
+              '• At least 8 characters\n' +
+              '• At least one uppercase letter\n' +
+              '• At least one lowercase letter\n' +
+              '• At least one number\n' +
+              '• At least one special character (!@#$%^&*)');
         return false;
       }
       
@@ -217,13 +329,19 @@
     }
 
     // Event listeners
-    newPassword.addEventListener('input', validatePassword);
-    confirmPassword.addEventListener('input', validatePasswordMatch);
+    newPasswordInput.addEventListener('input', validatePassword);
+    confirmPasswordInput.addEventListener('input', validatePasswordMatch);
     
     passwordForm.addEventListener('submit', function(e) {
       if (!validateForm()) {
         e.preventDefault();
       }
+    });
+
+    // Initialize validation on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      validatePassword();
+      validatePasswordMatch();
     });
   </script>
 
